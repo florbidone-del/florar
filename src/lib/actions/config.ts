@@ -1,14 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/session";
+import { requireProfe, requireMainProfe } from "@/lib/authz";
 import type { ActionResult } from "@/lib/actions/auth";
-
-async function requireProfe() {
-  const session = await requireAdmin();
-  if (!session || session.role !== "profe") return null;
-  return session;
-}
 
 export async function saveConfigAction(input: {
   capacity: number;
@@ -22,7 +16,7 @@ export async function saveConfigAction(input: {
   profeWhatsapp: string;
   mpLink: string;
 }): Promise<ActionResult> {
-  const session = await requireProfe();
+  const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
   await prisma.config.update({
     where: { id: 1 },

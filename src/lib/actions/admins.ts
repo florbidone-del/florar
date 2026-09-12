@@ -15,6 +15,7 @@ async function requireOwner() {
 export async function createProfeAction(input: {
   username: string;
   password: string;
+  isMainProfe: boolean;
 }): Promise<ActionResult> {
   const session = await requireOwner();
   if (!session) return { error: "No autorizado." };
@@ -25,7 +26,23 @@ export async function createProfeAction(input: {
   const issue = passwordIssues(input.password);
   if (issue) return { error: issue };
   const passwordHash = await bcrypt.hash(input.password, 12);
-  await prisma.admin.create({ data: { username, passwordHash, role: "profe" } });
+  const noProfesYet = (await prisma.admin.count({ where: { role: "profe" } })) === 0;
+  await prisma.admin.create({
+    data: { username, passwordHash, role: "profe", isMainProfe: noProfesYet || input.isMainProfe },
+  });
+  return { ok: true };
+}
+
+export async function setMainProfeAction(input: {
+  username: string;
+  isMainProfe: boolean;
+}): Promise<ActionResult> {
+  const session = await requireOwner();
+  if (!session) return { error: "No autorizado." };
+  await prisma.admin.updateMany({
+    where: { username: input.username, role: "profe" },
+    data: { isMainProfe: input.isMainProfe },
+  });
   return { ok: true };
 }
 

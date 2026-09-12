@@ -75,6 +75,7 @@ model Admin {
   username     String    @id
   passwordHash String
   role         AdminRole
+  isMainProfe  Boolean   @default(false)
   createdAt    DateTime  @default(now())
 
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")

@@ -15,7 +15,7 @@ import {
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
 
-export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
+export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMainProfe: boolean }) {
   const router = useRouter();
   const snap = bundle.snapshot;
   const c = snap.config;
@@ -87,38 +87,41 @@ export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
         <SlotEditor type="saturday" slots={c.slotsSaturday} onChanged={() => router.refresh()} />
       </Collapsible>
 
-      <Collapsible title="Profe a cargo de cada turno">
-        <p className="muted">
-          Así los alumnos ven quién les da clase, y cada profe ve solo sus alumnos en la pestaña Alumnos.
-          Opcional.
-        </p>
-        {profes.length === 0 ? (
+      {isMainProfe && (
+        <Collapsible title="Profe a cargo de cada turno">
           <p className="muted">
-            Todavía no hay cuentas de profe creadas — pedile al dueño/a que cree una en su panel.
+            Así los alumnos ven quién les da clase, y cada profe ve solo sus alumnos en la pestaña Alumnos.
+            Opcional.
           </p>
-        ) : (
-          <>
-            <SlotAssignmentGrid
-              weekdays={[1, 2, 3, 4, 5]}
-              slots={c.slotsWeekday}
-              snap={snap}
-              profes={profes}
-              onChanged={() => router.refresh()}
-            />
-            <div style={{ marginTop: 14 }}>
+          {profes.length === 0 ? (
+            <p className="muted">
+              Todavía no hay cuentas de profe creadas — pedile al dueño/a que cree una en su panel.
+            </p>
+          ) : (
+            <>
               <SlotAssignmentGrid
-                weekdays={[6]}
-                slots={c.slotsSaturday}
+                weekdays={[1, 2, 3, 4, 5]}
+                slots={c.slotsWeekday}
                 snap={snap}
                 profes={profes}
                 onChanged={() => router.refresh()}
               />
-            </div>
-          </>
-        )}
-      </Collapsible>
+              <div style={{ marginTop: 14 }}>
+                <SlotAssignmentGrid
+                  weekdays={[6]}
+                  slots={c.slotsSaturday}
+                  snap={snap}
+                  profes={profes}
+                  onChanged={() => router.refresh()}
+                />
+              </div>
+            </>
+          )}
+        </Collapsible>
+      )}
 
-      <Collapsible title="Reglas y cuota">
+      {isMainProfe && (
+        <Collapsible title="Reglas y cuota">
         <label>Cupo por turno</label>
         <input type="number" value={capacity} onChange={(e) => setCapacity(Number(e.target.value))} />
         <label>Clases por ciclo (informativo)</label>
@@ -172,7 +175,8 @@ export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
         <button className="primary block" style={{ marginTop: 14 }} disabled={savingRules} onClick={saveRules}>
           Guardar configuración
         </button>
-      </Collapsible>
+        </Collapsible>
+      )}
     </>
   );
 }

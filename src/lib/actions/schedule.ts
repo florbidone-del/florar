@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireStudent } from "@/lib/session";
+import { requireStudent } from "@/lib/session";
+import { requireProfe, requireMainProfe } from "@/lib/authz";
 import {
   currentMonthKey,
   dayAvailability,
@@ -116,8 +117,8 @@ export async function setSubstitutionAction(input: {
   slotId: string;
   newProfe: string | null;
 }): Promise<ActionResult> {
-  const session = await requireAdmin();
-  if (!session || session.role !== "profe") return { error: "No autorizado." };
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
   const snap = await loadWorkshopSnapshot();
   const weekday = parseISO(input.date).getDay();
   const regularProfe = profeForSlot(snap, weekday, input.slotId);
@@ -160,8 +161,8 @@ export async function setSlotAssignmentAction(input: {
   slotId: string;
   profeUsername: string | null;
 }): Promise<ActionResult> {
-  const session = await requireAdmin();
-  if (!session || session.role !== "profe") return { error: "No autorizado." };
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
   if (input.profeUsername) {
     await prisma.slotAssignment.upsert({
       where: { weekday_slotId: { weekday: input.weekday, slotId: input.slotId } },

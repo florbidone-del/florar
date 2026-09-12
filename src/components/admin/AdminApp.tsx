@@ -26,6 +26,7 @@ const TAB_LABELS: Record<string, string> = {
 export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: AdminSession }) {
   const router = useRouter();
   const isOwner = session.role === "owner";
+  const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
   const tabs = isOwner
     ? ["profes"]
     : ["semana", "alumnos", "avisos", "actividades", "feriados", "config"];
@@ -76,7 +77,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
             announcements={bundle.announcements}
           />
         )}
-        {!isOwner && tab === "config" && <ConfigTab bundle={bundle} />}
+        {!isOwner && tab === "config" && <ConfigTab bundle={bundle} isMainProfe={isMainProfe} />}
       </div>
     </>
   );

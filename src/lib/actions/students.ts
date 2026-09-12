@@ -2,15 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
+import { requireProfe } from "@/lib/authz";
 import { slugify, currentMonthKey, studentFee } from "@/lib/domain";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
 import type { ActionResult } from "@/lib/actions/auth";
-
-async function requireProfe() {
-  const session = await requireAdmin();
-  if (!session || session.role !== "profe") return null;
-  return session;
-}
 
 export async function createStudentAction(input: {
   name: string;

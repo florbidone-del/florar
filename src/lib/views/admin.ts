@@ -3,7 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
 import type { WorkshopSnapshot } from "@/lib/domain";
 
-export type AdminDTO = { username: string; role: "owner" | "profe"; createdAt: string };
+export type AdminDTO = {
+  username: string;
+  role: "owner" | "profe";
+  isMainProfe: boolean;
+  createdAt: string;
+};
 export type NotificationDTO = {
   id: string;
   forProfe: string | null;
@@ -43,6 +48,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     admins: admins.map((a) => ({
       username: a.username,
       role: a.role,
+      isMainProfe: a.isMainProfe,
       createdAt: a.createdAt.toISOString().slice(0, 10),
     })),
     notifications: notifications.map((n) => ({
