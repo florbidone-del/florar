@@ -63,15 +63,12 @@ sin confirmación automática.
 
 ## Desplegar a producción (GitHub + Vercel + Postgres)
 
-1. **Repo en GitHub**: este proyecto ya está inicializado con git localmente. Creá un repositorio
-   vacío en GitHub y conectalo:
-   ```bash
-   git remote add origin https://github.com/TU-USUARIO/florar.git
-   git push -u origin main
-   ```
+1. **Repo en GitHub**: ya está creado y con el código pusheado en
+   [github.com/jsantiago00/florar](https://github.com/jsantiago00/florar) (privado). Cada
+   `git push` a `main` desde acá en adelante actualiza ese repo.
 2. **Importar en Vercel**: entrá a [vercel.com/new](https://vercel.com/new), elegí "Import Git
-   Repository" y seleccioná el repo. Framework Preset: Next.js (lo detecta solo). Con esto queda
-   el deploy automático en cada push.
+   Repository" y seleccioná `jsantiago00/florar`. Framework Preset: Next.js (lo detecta solo). Con
+   esto queda el deploy automático en cada push.
 3. **Crear la base de datos**: en el dashboard del proyecto en Vercel, pestaña **Storage** → **Create
    Database** → **Postgres** (Neon). Al crearla, Vercel agrega sola la variable `DATABASE_URL` (y
    alguna variante como `POSTGRES_URL`) a las Environment Variables del proyecto — si usa un
