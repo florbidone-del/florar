@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { logoutAction } from "@/lib/actions/auth";
+import { capitalize } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import type { AdminSession } from "@/lib/session";
 import { WeekTab } from "@/components/admin/WeekTab";
@@ -44,7 +45,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         <div>
           <h1>Panel</h1>
           <div className="sub">
-            {session.username}
+            {capitalize(session.username)}
             <span className="badge-role">{isOwner ? "dueño/a" : "profe"}</span>
           </div>
         </div>

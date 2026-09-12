@@ -77,6 +77,11 @@ export function addDays(dateISO: string, n: number) {
 export function money(n: number | null | undefined) {
   return "$" + Number(n || 0).toLocaleString("es-AR");
 }
+/** Solo para mostrar: la cuenta se guarda y se compara siempre en minúscula. */
+export function capitalize(s: string | null | undefined) {
+  if (!s) return s ?? "";
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 export function slugify(name: string) {
   return name
     .trim()

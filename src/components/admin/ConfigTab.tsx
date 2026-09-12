@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DIAS_CORTO } from "@/lib/domain";
+import { DIAS_CORTO, capitalize } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
@@ -230,7 +230,7 @@ function SlotAssignmentGrid({
                       <option value="">—</option>
                       {profes.map((p) => (
                         <option value={p} key={p}>
-                          {p}
+                          {capitalize(p)}
                         </option>
                       ))}
                     </select>

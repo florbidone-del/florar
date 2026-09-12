@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminDTO } from "@/lib/views/admin";
+import { capitalize } from "@/lib/domain";
 import {
   createProfeAction,
   deleteProfeAction,
@@ -79,7 +80,7 @@ export function ProfesTab({ admins, me }: { admins: AdminDTO[]; me: string }) {
           <div className="list-item" key={a.username}>
             <div>
               <div style={{ fontWeight: 600 }}>
-                {a.username}{" "}
+                {capitalize(a.username)}{" "}
                 <span className="badge-role">{a.role === "owner" ? "dueño/a" : "profe"}</span>
                 {a.role === "profe" && a.isMainProfe && <span className="badge-role">principal</span>}
               </div>
@@ -135,7 +136,7 @@ function ResetPasswordModal({ username, onClose }: { username: string; onClose: 
 
   return (
     <Modal onClose={onClose}>
-      <h3>Resetear contraseña de {username}</h3>
+      <h3>Resetear contraseña de {capitalize(username)}</h3>
       <label>Contraseña nueva</label>
       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       <p className="hint">Mínimo 6 caracteres, combinando letras y números.</p>

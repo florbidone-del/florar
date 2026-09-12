@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  capitalize,
   currentMonthKey,
   fmtLong,
   money,
@@ -126,7 +127,7 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
                   </div>
                   <div className="muted">
                     {DIAS[s.defaultWeekday]} {slot ? `${slot.start}–${slot.end}` : ""}
-                    {profe ? ` · profe: ${profe}` : ""}
+                    {profe ? ` · profe: ${capitalize(profe)}` : ""}
                   </div>
                   <div className={`tag ${paid ? "ok" : "warn"}`} style={{ marginTop: 4 }}>
                     {paid ? `pagó ${money(fee)}` : `debe ${money(fee)}`}

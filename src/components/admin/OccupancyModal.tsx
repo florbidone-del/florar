@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/shared/Modal";
 import {
+  capitalize,
   fmtLong,
   parseISO,
   profeAccountsUsernames,
@@ -68,11 +69,11 @@ export function OccupancyModal({
             onChange={(e) => handleChange(e.target.value)}
           >
             <option value="">
-              — usar el profe habitual{regularProfe ? ` (${regularProfe})` : " (sin asignar)"} —
+              — usar el profe habitual{regularProfe ? ` (${capitalize(regularProfe)})` : " (sin asignar)"} —
             </option>
             {profes.map((p) => (
               <option value={p} key={p}>
-                {p}
+                {capitalize(p)}
               </option>
             ))}
           </select>

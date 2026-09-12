@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import {
   DIAS,
   activityForDate,
+  capitalize,
   currentMonthKey,
   daysSince,
   dayAvailability,
@@ -79,7 +80,7 @@ export async function buildStudentPanelData(
   const swapsLeft = snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId);
   const defaultSlotList = student.defaultWeekday === 6 ? snap.config.slotsSaturday : snap.config.slotsWeekday;
   const defaultSlot = defaultSlotList.find((s) => s.id === student.defaultSlotId) || null;
-  const profeName = profeForSlot(snap, student.defaultWeekday, student.defaultSlotId);
+  const profeName = capitalize(profeForSlot(snap, student.defaultWeekday, student.defaultSlotId));
 
   const today = todayISO();
   const mk = currentMonthKey();
@@ -113,7 +114,7 @@ export async function buildStudentPanelData(
         ...own,
         start: slot?.start || "",
         end: slot?.end || "",
-        profeName: profeForDateSlot(snap, date, own.slotId),
+        profeName: capitalize(profeForDateSlot(snap, date, own.slotId)),
       };
     }
 
