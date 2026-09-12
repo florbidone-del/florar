@@ -1,0 +1,139 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/session";
+import { slugify, currentMonthKey, studentFee } from "@/lib/domain";
+import { loadWorkshopSnapshot } from "@/lib/snapshot";
+import type { ActionResult } from "@/lib/actions/auth";
+
+async function requireProfe() {
+  const session = await requireAdmin();
+  if (!session || session.role !== "profe") return null;
+  return session;
+}
+
+export async function createStudentAction(input: {
+  name: string;
+  pin: string;
+  defaultWeekday: number;
+  defaultSlotId: string;
+  feeOverride?: number | null;
+  mpLink?: string | null;
+}): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const name = input.name.trim();
+  if (name.length < 2) return { error: "Ingresá el nombre." };
+  if (!input.pin.trim()) return { error: "Ingresá un PIN." };
+  if (input.defaultWeekday === null || !input.defaultSlotId)
+    return { error: "Elegí día y horario." };
+  const id = slugify(name);
+  const existing = await prisma.student.findUnique({ where: { id } });
+  if (existing) {
+    return {
+      error:
+        'Ya existe un alumno con ese nombre/usuario. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").',
+    };
+  }
+  await prisma.student.create({
+    data: {
+      id,
+      name,
+      pin: input.pin.trim(),
+      defaultWeekday: input.defaultWeekday,
+      defaultSlotId: input.defaultSlotId,
+      feeOverride: input.feeOverride ?? null,
+      mpLink: input.mpLink?.trim() || null,
+    },
+  });
+  return { ok: true };
+}
+
+export async function updateStudentAction(
+  id: string,
+  input: {
+    pin: string;
+    defaultWeekday: number;
+    defaultSlotId: string;
+    feeOverride?: number | null;
+    mpLink?: string | null;
+  }
+): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  if (!input.pin.trim()) return { error: "Ingresá un PIN." };
+  if (input.defaultWeekday === null || !input.defaultSlotId)
+    return { error: "Elegí día y horario." };
+  await prisma.student.update({
+    where: { id },
+    data: {
+      pin: input.pin.trim(),
+      defaultWeekday: input.defaultWeekday,
+      defaultSlotId: input.defaultSlotId,
+      feeOverride: input.feeOverride ?? null,
+      mpLink: input.mpLink?.trim() || null,
+    },
+  });
+  return { ok: true };
+}
+
+export async function deleteStudentAction(id: string): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.student.deleteMany({ where: { id } });
+  return { ok: true };
+}
+
+/** Marcar pagado / quitar pago (a mano, por la profe) para el mes actual. */
+export async function toggleManualPaymentAction(
+  studentId: string
+): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const mk = currentMonthKey();
+  const existing = await prisma.payment.findUnique({
+    where: { studentId_monthKey: { studentId, monthKey: mk } },
+  });
+  if (existing && existing.status === "approved") {
+    await prisma.payment.delete({
+      where: { studentId_monthKey: { studentId, monthKey: mk } },
+    });
+  } else {
+    const snap = await loadWorkshopSnapshot();
+    const amount = studentFee(snap, studentId);
+    await prisma.payment.upsert({
+      where: { studentId_monthKey: { studentId, monthKey: mk } },
+      create: { studentId, monthKey: mk, amount, status: "approved", source: "manual" },
+      update: { status: "approved", source: "manual", amount },
+    });
+  }
+  return { ok: true };
+}
+
+export async function resolvePinResetAction(
+  requestId: string
+): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const req = await prisma.pinResetRequest.findUnique({
+    where: { id: requestId },
+  });
+  if (req) {
+    const config = await prisma.config.findUniqueOrThrow({ where: { id: 1 } });
+    await prisma.student.update({
+      where: { id: req.studentId },
+      data: { pin: config.defaultStudentPin },
+    });
+    await prisma.pinResetRequest.delete({ where: { id: requestId } });
+  }
+  return { ok: true };
+}
+
+export async function dismissNotificationAction(
+  id: string
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+  if (!session) return { error: "No autorizado." };
+  await prisma.notification.deleteMany({ where: { id } });
+  return { ok: true };
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Florar — Taller de Cerámica",
+  "short_name": "Florar",
+  "description": "Gestión de turnos, pagos y avisos del taller de cerámica Florar.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#EEE9F2",
+  "theme_color": "#4B3B63",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-190.jpg",
+      "sizes": "190x190",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-190.jpg",
+      "sizes": "190x190",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SlotType {
+  weekday
+  saturday
+}
+
+enum AdminRole {
+  owner
+  profe
+}
+
+enum ChangeReason {
+  cambio
+  feriado
+}
+
+enum PaymentStatus {
+  pending
+  approved
+  rejected
+}
+
+enum PaymentSource {
+  manual
+  mercadopago
+}
+
+// Fila única (id fijo = 1) con la configuración general del taller.
+model Config {
+  id                     Int      @id @default(1)
+  studioName             String   @default("Taller de Cerámica")
+  capacity               Int      @default(8)
+  classesPerCycle        Int      @default(4)
+  swapsPerMonth          Int      @default(1)
+  paymentWindowStart     Int      @default(1)
+  paymentWindowEnd       Int      @default(10)
+  monthlyFee             Int      @default(15000)
+  mpLink                 String?
+  theme                  String   @default("florar")
+  defaultStudentPin      String   @default("0000")
+  profeWhatsapp          String?
+  announcementVisibleDays Int     @default(7)
+  studentInfo            String   @default("")
+  updatedAt              DateTime @updatedAt
+}
+
+model Slot {
+  id    String   @id
+  type  SlotType
+  start String
+  end   String
+  order Int      @default(0)
+
+  students         Student[]
+  slotAssignments  SlotAssignment[]
+  substitutions    Substitution[]
+  fromChanges      ScheduleChange[] @relation("FromSlot")
+  toChanges        ScheduleChange[] @relation("ToSlot")
+}
+
+model Holiday {
+  date  DateTime @id @db.Date
+  label String?
+}
+
+model Admin {
+  username     String    @id
+  passwordHash String
+  role         AdminRole
+  createdAt    DateTime  @default(now())
+
+  slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
+  substitutions   Substitution[]   @relation("AdminSubstitutions")
+  notifications   Notification[]
+}
+
+model Student {
+  id              String   @id
+  name            String
+  pin             String
+  defaultWeekday  Int
+  defaultSlotId   String
+  defaultSlot     Slot     @relation(fields: [defaultSlotId], references: [id])
+  feeOverride     Int?
+  mpLink          String?
+  createdAt       DateTime @default(now())
+
+  scheduleChanges ScheduleChange[]
+  payments        Payment[]
+  pinResets       PinResetRequest[]
+
+  @@index([defaultWeekday, defaultSlotId])
+}
+
+model SlotAssignment {
+  weekday      Int
+  slotId       String
+  slot         Slot   @relation(fields: [slotId], references: [id])
+  profeUsername String
+  profe        Admin  @relation("AdminSlotAssignments", fields: [profeUsername], references: [username])
+
+  @@id([weekday, slotId])
+}
+
+model Substitution {
+  date          DateTime @db.Date
+  slotId        String
+  slot          Slot     @relation(fields: [slotId], references: [id])
+  profeUsername String
+  profe         Admin    @relation("AdminSubstitutions", fields: [profeUsername], references: [username])
+
+  @@id([date, slotId])
+}
+
+// Un cambio de turno puntual: reemplaza a los antiguos "overrides" + "extraBookings",
+// que siempre se escribían juntos para representar el mismo hecho.
+model ScheduleChange {
+  id         String       @id @default(cuid())
+  studentId  String
+  student    Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fromDate   DateTime     @db.Date
+  fromSlotId String
+  fromSlot   Slot         @relation("FromSlot", fields: [fromSlotId], references: [id])
+  toDate     DateTime     @db.Date
+  toSlotId   String
+  toSlot     Slot         @relation("ToSlot", fields: [toSlotId], references: [id])
+  reason     ChangeReason
+  monthKey   String
+  createdAt  DateTime     @default(now())
+
+  @@unique([studentId, fromDate])
+  @@index([toDate, toSlotId])
+  @@index([studentId, monthKey])
+}
+
+// Reemplaza "paidMonths" (en el alumno) y la base separada del backend de Mercado Pago:
+// una sola fila por alumno+mes es la fuente de verdad de si está pagado.
+model Payment {
+  id           String        @id @default(cuid())
+  studentId    String
+  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  monthKey     String
+  amount       Int
+  status       PaymentStatus @default(pending)
+  source       PaymentSource
+  mpPaymentId  String?
+  mpPreferenceId String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([studentId, monthKey])
+}
+
+model PinResetRequest {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  requestedAt DateTime @default(now())
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  startDate   DateTime @db.Date
+  endDate     DateTime @db.Date
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id            String   @id @default(cuid())
+  forProfe      String?
+  profe         Admin?   @relation(fields: [forProfe], references: [username], onDelete: Cascade)
+  message       String
+  createdAt     DateTime @default(now())
+}

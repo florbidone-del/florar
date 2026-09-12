@@ -1,0 +1,82 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/session";
+import type { ActionResult } from "@/lib/actions/auth";
+
+async function requireProfe() {
+  const session = await requireAdmin();
+  if (!session || session.role !== "profe") return null;
+  return session;
+}
+
+export async function saveConfigAction(input: {
+  capacity: number;
+  classesPerCycle: number;
+  swapsPerMonth: number;
+  paymentWindowStart: number;
+  paymentWindowEnd: number;
+  monthlyFee: number;
+  announcementVisibleDays: number;
+  defaultStudentPin: string;
+  profeWhatsapp: string;
+  mpLink: string;
+}): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.config.update({
+    where: { id: 1 },
+    data: {
+      capacity: input.capacity,
+      classesPerCycle: input.classesPerCycle,
+      swapsPerMonth: input.swapsPerMonth,
+      paymentWindowStart: input.paymentWindowStart,
+      paymentWindowEnd: input.paymentWindowEnd,
+      monthlyFee: input.monthlyFee,
+      announcementVisibleDays: input.announcementVisibleDays,
+      defaultStudentPin: input.defaultStudentPin.trim() || "0000",
+      profeWhatsapp: input.profeWhatsapp.trim().replace(/[^0-9]/g, "") || null,
+      mpLink: input.mpLink.trim() || null,
+    },
+  });
+  return { ok: true };
+}
+
+export async function setThemeAction(theme: string): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.config.update({ where: { id: 1 }, data: { theme } });
+  return { ok: true };
+}
+
+export async function addSlotAction(type: "weekday" | "saturday"): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const count = await prisma.slot.count({ where: { type } });
+  const id = (type === "weekday" ? "w" : "s") + Date.now().toString().slice(-6);
+  await prisma.slot.create({
+    data: { id, type, start: "09:00", end: "11:00", order: count },
+  });
+  return { ok: true };
+}
+
+export async function updateSlotAction(input: {
+  id: string;
+  start: string;
+  end: string;
+}): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.slot.update({
+    where: { id: input.id },
+    data: { start: input.start, end: input.end },
+  });
+  return { ok: true };
+}
+
+export async function removeSlotAction(id: string): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.slot.deleteMany({ where: { id } });
+  return { ok: true };
+}

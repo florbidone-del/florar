@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller de Cerámica — Turnos</title>
+<link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EDE7DA;
+    --surface: #F7F2E9;
+    --surface-2: #FBF8F2;
+    --ink: #2E2A22;
+    --ink-soft: #6B6355;
+    --line: #D8CFBD;
+    --glaze: #4F6B58;
+    --glaze-dark: #3B5142;
+    --oxide: #B5602F;
+    --oxide-soft: #F1DFCF;
+    --ok-bg: #E4EBE3;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight:600;
+    margin:0 0 4px 0;
+    letter-spacing:-0.01em;
+  }
+  #app{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 16px 60px 16px;
+    min-height:100vh;
+  }
+  .topbar{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:22px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--ink);
+  }
+  .topbar h1{font-size:1.35rem;}
+  .topbar .sub{color:var(--ink-soft); font-size:0.85rem;}
+  button{
+    font-family:'Work Sans', sans-serif;
+    font-size:0.95rem;
+    cursor:pointer;
+    border-radius:8px;
+    border:1.5px solid var(--ink);
+    background:var(--surface-2);
+    color:var(--ink);
+    padding:10px 16px;
+    transition:transform .08s ease;
+  }
+  button:active{transform:scale(0.98);}
+  button.primary{
+    background:var(--glaze);
+    border-color:var(--glaze-dark);
+    color:#fff;
+  }
+  button.primary:hover{background:var(--glaze-dark);}
+  button.ghost{
+    background:transparent;
+    border-color:var(--line);
+    color:var(--ink-soft);
+    padding:6px 12px;
+    font-size:0.85rem;
+  }
+  button.danger{
+    border-color:var(--oxide);
+    color:var(--oxide);
+    background:transparent;
+  }
+  button.small{padding:5px 10px; font-size:0.78rem;}
+  button:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+  button.block{width:100%;}
+  input, select, textarea{
+    font-family:'Work Sans', sans-serif;
+    font-size:1rem;
+    padding:10px 12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:var(--surface-2);
+    color:var(--ink);
+    width:100%;
+  }
+  label{
+    display:block;
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+    margin-top:14px;
+  }
+  label:first-child{margin-top:0;}
+  .field{margin-bottom:4px;}
+  .hint{font-size:0.78rem; color:var(--ink-soft); margin-top:4px;}
+  .card{
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card h3{font-size:1rem;}
+  .row{display:flex; gap:10px;}
+  .row > *{flex:1;}
+  .center-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:70vh;
+    text-align:center;
+    gap:18px;
+  }
+  .center-stage h1{font-size:1.8rem;}
+  .center-stage p{color:var(--ink-soft); max-width:32ch;}
+  .landing-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+    max-width:280px;
+  }
+  .stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .stat{
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px;
+  }
+  .stat .num{font-family:'Fraunces', serif; font-size:1.7rem; line-height:1;}
+  .stat .label{font-size:0.78rem; color:var(--ink-soft); margin-top:4px;}
+  .banner{
+    background:var(--oxide-soft);
+    border:1.5px solid var(--oxide);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    margin-bottom:14px;
+    font-size:0.9rem;
+  }
+  .banner strong{display:block; margin-bottom:2px;}
+  .banner .mp-btn{margin-top:10px;}
+  .session-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+    gap:10px;
+  }
+  .session-row:last-child{border-bottom:none;}
+  .session-date{font-weight:600; text-transform:capitalize;}
+  .session-time{color:var(--ink-soft); font-size:0.85rem;}
+  .tag{
+    display:inline-block;
+    font-size:0.72rem;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-top:3px;
+  }
+  .tag.ok{background:var(--ok-bg); color:var(--glaze-dark);}
+  .tag.warn{background:var(--oxide-soft); color:var(--oxide);}
+  .tag.moved{background:#E6E1F0; color:#584A7A;}
+  .tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    margin-bottom:16px;
+    padding-bottom:2px;
+    border-bottom:1.5px solid var(--line);
+  }
+  .tab{
+    padding:8px 12px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+    cursor:pointer;
+  }
+  .tab.active{color:var(--ink); border-bottom-color:var(--glaze); font-weight:600;}
+  table{width:100%; border-collapse:collapse; font-size:0.82rem;}
+  th,td{
+    border:1px solid var(--line);
+    padding:6px 4px;
+    text-align:center;
+    vertical-align:top;
+  }
+  th{background:var(--surface); font-weight:600; font-size:0.75rem;}
+  td.holiday{background:var(--oxide-soft);}
+  .occ-count{font-family:'Fraunces', serif; font-size:1.1rem;}
+  .names{font-size:0.62rem; color:var(--ink-soft); margin-top:2px; word-break:break-word;}
+  .occ-cell{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-family:'Fraunces', serif;
+    font-size:1.05rem;
+    color:var(--ink-soft);
+    padding:10px 2px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .occ-cell.has-people{
+    color:var(--ink);
+    background:var(--ok-bg);
+    cursor:pointer;
+  }
+  .occ-cell.full{
+    color:var(--oxide);
+    font-weight:600;
+  }
+  .occ-cell.has-people:active{transform:scale(0.97);}
+  .list-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    gap:8px;
+  }
+  .list-item:last-child{border-bottom:none;}
+  .muted{color:var(--ink-soft); font-size:0.85rem;}
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(46,42,34,0.4);
+    display:flex; align-items:flex-end; justify-content:center;
+    z-index:50;
+  }
+  .modal{
+    background:var(--surface-2);
+    border-radius:16px 16px 0 0;
+    padding:20px 16px 28px 16px;
+    width:100%;
+    max-width:640px;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .modal h3{margin-bottom:10px;}
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .chip{
+    padding:9px 14px;
+    border:1.5px solid var(--line);
+    border-radius:20px;
+    cursor:pointer;
+    font-size:0.85rem;
+    background:var(--surface);
+  }
+  .chip.selected{border-color:var(--glaze); background:var(--ok-bg); font-weight:600;}
+  .chip.full{opacity:0.35; cursor:not-allowed;}
+  .slot-option{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    margin-bottom:8px;
+    cursor:pointer;
+  }
+  .slot-option:hover, .slot-option.selected{border-color:var(--glaze); background:var(--ok-bg);}
+  .slot-option.full{opacity:0.4; cursor:not-allowed;}
+  .step-label{font-size:0.78rem; color:var(--ink-soft); margin-bottom:8px; text-transform:none;}
+  .footer-note{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:0.75rem;
+    margin-top:30px;
+  }
+  .err{color:var(--oxide); font-size:0.85rem; margin-top:6px;}
+  .announcement{
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .announcement:last-child{border-bottom:none;}
+  .announcement .date{font-size:0.72rem; color:var(--ink-soft);}
+  .theme-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .theme-card{
+    border:2px solid var(--line);
+    border-radius:10px;
+    padding:10px;
+    cursor:pointer;
+  }
+  .theme-card.selected{border-color:var(--glaze);}
+  .theme-swatch{
+    display:flex;
+    height:28px;
+    border-radius:6px;
+    overflow:hidden;
+    margin-bottom:6px;
+  }
+  .theme-swatch span{flex:1;}
+  .theme-name{font-size:0.85rem; font-weight:600;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cal-header{margin-bottom:4px;}
+  .cal-h{text-align:center; font-size:0.68rem; color:var(--ink-soft); font-weight:600;}
+  .cal-cell{
+    aspect-ratio:1;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:8px; font-size:0.85rem;
+    background:transparent; border:1.5px solid transparent;
+    position:relative;
+  }
+  .cal-cell.empty{border:none;}
+  .cal-cell.closed{color:var(--ink-soft); opacity:0.3;}
+  .cal-cell.past{color:var(--ink-soft); opacity:0.3;}
+  .cal-cell.holiday{background:var(--oxide-soft); border-color:var(--oxide); color:var(--oxide); cursor:pointer;}
+  .cal-cell.available{background:var(--ok-bg); border-color:var(--glaze); cursor:pointer; font-weight:600;}
+  .cal-cell.full{background:var(--surface); border-color:var(--line); color:var(--ink-soft); cursor:pointer;}
+  .cal-cell.moved{background:#E6E1F0; border-color:#584A7A; color:#584A7A; cursor:pointer;}
+  .cal-cell.attended{background:var(--surface); border-color:var(--line); color:var(--ink-soft); opacity:0.65; cursor:pointer;}
+  .cal-cell.selected{outline:2px solid var(--ink); outline-offset:1px;}
+  .own-dot{
+    position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+    width:5px; height:5px; border-radius:50%; background:var(--ink);
+  }
+  .activity-dot{
+    position:absolute; top:3px; right:3px;
+    width:6px; height:6px; border-radius:50%;
+    background:#C9962E;
+    box-shadow:0 0 0 1.5px var(--surface-2);
+  }
+  .cal-legend{display:flex; gap:14px; font-size:0.72rem; color:var(--ink-soft); flex-wrap:wrap; margin-top:10px;}
+  .dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; vertical-align:middle;}
+  .dot.available{background:var(--glaze);}
+  .dot.full{background:var(--surface); border:1.5px solid var(--line);}
+  .dot.holiday{background:var(--oxide);}
+  .badge-role{
+    font-size:0.68rem;
+    padding:2px 7px;
+    border-radius:10px;
+    background:var(--ok-bg);
+    color:var(--glaze-dark);
+    margin-left:6px;
+  }
+  @media (min-width:520px){
+    .landing-buttons{flex-direction:row; max-width:420px;}
+  }
+</style>
+</head>
+<body>
+<div id="app"><p style="padding:40px; text-align:center; color:#6B6355;">Cargando…</p></div>
+
+<script>
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+const THEMES = {
+  arcilla: {
+    name: 'Arcilla', bg:'#EDE7DA', surface:'#F7F2E9', surface2:'#FBF8F2',
+    ink:'#2E2A22', inkSoft:'#6B6355', line:'#D8CFBD',
+    glaze:'#4F6B58', glazeDark:'#3B5142', oxide:'#B5602F', oxideSoft:'#F1DFCF', okBg:'#E4EBE3'
+  },
+  terracota: {
+    name: 'Terracota', bg:'#F2E4D8', surface:'#FAF1E7', surface2:'#FFF8F0',
+    ink:'#3A2A1E', inkSoft:'#8A6F5C', line:'#E0C7AE',
+    glaze:'#A8552E', glazeDark:'#7E3D1E', oxide:'#5C6B4F', oxideSoft:'#E9EDE0', okBg:'#EFE6D6'
+  },
+  piedra: {
+    name: 'Piedra', bg:'#E8E6E1', surface:'#F3F1EC', surface2:'#FAF9F6',
+    ink:'#23262B', inkSoft:'#6B6F76', line:'#D3D0C9',
+    glaze:'#3D5A73', glazeDark:'#2A4054', oxide:'#A6462F', oxideSoft:'#EFDCD3', okBg:'#E1E7E2'
+  },
+  musgo: {
+    name: 'Musgo', bg:'#E4E3D3', surface:'#EFEEDF', surface2:'#F7F6EC',
+    ink:'#23281D', inkSoft:'#6E7259', line:'#CFCDB4',
+    glaze:'#566B3D', glazeDark:'#3E4E2C', oxide:'#B4622E', oxideSoft:'#F1DFC9', okBg:'#DEE6D2'
+  },
+  florar: {
+    name: 'Florar', bg:'#EEE9F2', surface:'#F7F4FA', surface2:'#FCFAFD',
+    ink:'#2B2233', inkSoft:'#6E5F7A', line:'#DCD2E6',
+    glaze:'#4B3B63', glazeDark:'#352748', oxide:'#A6446B', oxideSoft:'#F1DCE5', okBg:'#E4DCEE'
+  }
+};
+function applyTheme(key){
+  const t = THEMES[key] || THEMES.florar;
+  const r = document.documentElement.style;
+  r.setProperty('--bg', t.bg);
+  r.setProperty('--surface', t.surface);
+  r.setProperty('--surface-2', t.surface2);
+  r.setProperty('--ink', t.ink);
+  r.setProperty('--ink-soft', t.inkSoft);
+  r.setProperty('--line', t.line);
+  r.setProperty('--glaze', t.glaze);
+  r.setProperty('--glaze-dark', t.glazeDark);
+  r.setProperty('--oxide', t.oxide);
+  r.setProperty('--oxide-soft', t.oxideSoft);
+  r.setProperty('--ok-bg', t.okBg);
+}
+
+let state = {
+  config: null,
+  holidays: [],
+  students: {},
+  overrides: {},
+  extraBookings: {},
+  announcements: [],
+  admins: {},
+  pinResets: [],
+  activities: [],
+  studentInfo: '',
+  slotAssignments: {},
+  swapNotifications: [],
+  substitutions: {},
+  session: { role: null, studentId: null }
+};
+
+// ---------- storage helpers ----------
+async function loadShared(key, fallback){
+  try{
+    const res = await window.storage.get(key, true);
+    return res ? JSON.parse(res.value) : fallback;
+  }catch(e){ return fallback; }
+}
+async function saveShared(key, value){
+  try{
+    await window.storage.set(key, JSON.stringify(value), true);
+    return true;
+  }catch(e){ console.error('Error guardando', key, e); return false; }
+}
+async function sha256(text){
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function defaultConfig(){
+  return {
+    slotsWeekday: [
+      {id:'w1', start:'10:30', end:'12:30'},
+      {id:'w2', start:'13:00', end:'15:00'},
+      {id:'w3', start:'15:30', end:'17:30'},
+      {id:'w4', start:'18:00', end:'20:00'}
+    ],
+    slotsSaturday: [
+      {id:'s1', start:'11:00', end:'13:00'},
+      {id:'s2', start:'14:00', end:'16:00'}
+    ],
+    capacity: 8,
+    classesPerCycle: 4,
+    swapsPerMonth: 1,
+    paymentWindowStart: 1,
+    paymentWindowEnd: 10,
+    studioName: 'Taller de Cerámica',
+    monthlyFee: 15000,
+    mpLink: '',
+    theme: 'florar',
+    defaultStudentPin: '0000',
+    profeWhatsapp: '',
+    announcementVisibleDays: 7
+  };
+}
+
+async function loadAll(){
+  const [config, holidays, students, overrides, extraBookings, announcements, admins, pinResets, activities, studentInfo, slotAssignments, swapNotifications, substitutions] = await Promise.all([
+    loadShared('config', null),
+    loadShared('holidays', []),
+    loadShared('students', {}),
+    loadShared('overrides', {}),
+    loadShared('extraBookings', {}),
+    loadShared('announcements', []),
+    loadShared('admins', {}),
+    loadShared('pinResets', []),
+    loadShared('activities', []),
+    loadShared('studentInfo', ''),
+    loadShared('slotAssignments', {}),
+    loadShared('swapNotifications', []),
+    loadShared('substitutions', {})
+  ]);
+  state.config = Object.assign(defaultConfig(), config || {});
+  state.holidays = holidays || [];
+  state.students = students || {};
+  state.overrides = overrides || {};
+  state.extraBookings = extraBookings || {};
+  state.announcements = announcements || [];
+  state.admins = admins || {};
+  state.pinResets = pinResets || [];
+  state.activities = activities || [];
+  state.studentInfo = studentInfo || '';
+  state.slotAssignments = slotAssignments || {};
+  state.swapNotifications = swapNotifications || [];
+  state.substitutions = substitutions || {};
+  if(!config) await saveShared('config', state.config);
+  applyTheme(state.config.theme);
+}
+
+async function persist(key){
+  const map = {
+    config: state.config, holidays: state.holidays, students: state.students,
+    overrides: state.overrides, extraBookings: state.extraBookings,
+    announcements: state.announcements, admins: state.admins, pinResets: state.pinResets,
+    activities: state.activities, studentInfo: state.studentInfo,
+    slotAssignments: state.slotAssignments, swapNotifications: state.swapNotifications,
+    substitutions: state.substitutions
+  };
+  await saveShared(key, map[key]);
+}
+
+// ---------- date helpers ----------
+function pad(n){ return n.toString().padStart(2,'0'); }
+function isoDate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function todayISO(){ return isoDate(new Date()); }
+function parseISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function daysSince(dateISO){ return Math.floor((parseISO(todayISO()) - parseISO(dateISO)) / 86400000); }
+function monthKeyOf(dateISO){ return dateISO.slice(0,7); }
+function currentMonthKey(){ return monthKeyOf(todayISO()); }
+function fmtLong(dateISO){
+  const d = parseISO(dateISO);
+  return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+function fmtShort(dateISO){
+  const d = parseISO(dateISO);
+  return `${DIAS_CORTO[d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth()+1)}`;
+}
+function isHoliday(dateISO){
+  return state.holidays.find(h => h.date === dateISO);
+}
+function activityForDate(dateISO){
+  return state.activities.find(a => dateISO >= a.date && dateISO <= (a.endDate || a.date));
+}
+function slotAssignmentKey(weekday, slotId){ return `${weekday}_${slotId}`; }
+function profeForSlot(weekday, slotId){ return state.slotAssignments[slotAssignmentKey(weekday, slotId)] || null; }
+function substitutionKey(date, slotId){ return `${date}_${slotId}`; }
+function profeForDateSlot(date, slotId){
+  const key = substitutionKey(date, slotId);
+  if(Object.prototype.hasOwnProperty.call(state.substitutions, key)) return state.substitutions[key] || null;
+  return profeForSlot(parseISO(date).getDay(), slotId);
+}
+function profeAccounts(){ return Object.values(state.admins).filter(a => a.role === 'profe'); }
+function linkify(text){
+  return escapeHtml(text).replace(/\n/g, '<br>').replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+function slotsForDate(dateISO){
+  const wd = parseISO(dateISO).getDay();
+  if(wd === 0) return [];
+  if(wd === 6) return state.config.slotsSaturday;
+  return state.config.slotsWeekday;
+}
+function slotsForWeekday(wd){
+  if(wd === 0) return [];
+  if(wd === 6) return state.config.slotsSaturday;
+  return state.config.slotsWeekday;
+}
+function slotById(dateISO, slotId){
+  return slotsForDate(dateISO).find(s => s.id === slotId);
+}
+function slotStartDateTime(dateISO, slotId){
+  const slot = slotById(dateISO, slotId);
+  if(!slot) return null;
+  const [h,m] = slot.start.split(':').map(Number);
+  const d = parseISO(dateISO);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+function hoursUntil(dateISO, slotId){
+  const dt = slotStartDateTime(dateISO, slotId);
+  if(!dt) return -999;
+  return (dt.getTime() - Date.now()) / 3600000;
+}
+function occurrencesInMonth(weekday, monthKey){
+  const [y,m] = monthKey.split('-').map(Number);
+  const dates = [];
+  const d = new Date(y, m-1, 1);
+  while(d.getMonth() === m-1){
+    if(d.getDay() === weekday) dates.push(isoDate(d));
+    d.setDate(d.getDate()+1);
+  }
+  return dates;
+}
+function nextDateForWeekday(weekday){
+  const d = new Date();
+  for(let i=0;i<7;i++){
+    if(d.getDay() === weekday) return isoDate(d);
+    d.setDate(d.getDate()+1);
+  }
+  return isoDate(d);
+}
+function slugify(name){
+  return name.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+}
+function mondayOf(dateISO){
+  const d = parseISO(dateISO);
+  const wd = d.getDay();
+  const diff = wd === 0 ? -6 : 1 - wd;
+  d.setDate(d.getDate() + diff);
+  return isoDate(d);
+}
+function addDays(dateISO, n){
+  const d = parseISO(dateISO);
+  d.setDate(d.getDate()+n);
+  return isoDate(d);
+}
+function money(n){
+  return '$' + Number(n||0).toLocaleString('es-AR');
+}
+
+// ---------- domain logic ----------
+function slotOccupancy(dateISO, slotId, excludeStudentId){
+  let names = [];
+  const wd = parseISO(dateISO).getDay();
+  for(const sid in state.students){
+    if(sid === excludeStudentId) continue;
+    const s = state.students[sid];
+    if(s.defaultWeekday === wd && s.defaultSlotId === slotId){
+      const ov = (state.overrides[sid] || {})[dateISO];
+      if(!(ov && ov.cancelled)) names.push(s.name);
+    }
+  }
+  for(const sid in state.extraBookings){
+    if(sid === excludeStudentId) continue;
+    (state.extraBookings[sid] || []).forEach(b => {
+      if(b.date === dateISO && b.slotId === slotId) names.push(state.students[sid]?.name || '?');
+    });
+  }
+  return names;
+}
+function weekdayOccupancyCount(weekday, slotId, excludeStudentId){
+  return slotOccupancy(nextDateForWeekday(weekday), slotId, excludeStudentId).length;
+}
+function studentSessionsThisMonth(sid){
+  const s = state.students[sid];
+  const mk = currentMonthKey();
+  const dates = occurrencesInMonth(s.defaultWeekday, mk);
+  const rows = [];
+  dates.forEach(date => {
+    const ov = (state.overrides[sid] || {})[date];
+    if(ov && ov.cancelled){
+      rows.push({date, slotId: s.defaultSlotId, status: ov.reason === 'feriado' ? 'moved-holiday' : 'moved-swap', movedTo: ov.movedTo});
+    } else if(isHoliday(date)){
+      rows.push({date, slotId: s.defaultSlotId, status: 'pending-holiday'});
+    } else {
+      rows.push({date, slotId: s.defaultSlotId, status: 'confirmed'});
+    }
+  });
+  (state.extraBookings[sid] || []).forEach(b => {
+    if(monthKeyOf(b.date) === mk){
+      rows.push({date: b.date, slotId: b.slotId, status: 'rescheduled', from: b.fromDate});
+    }
+  });
+  rows.sort((a,b) => a.date.localeCompare(b.date) || a.slotId.localeCompare(b.slotId));
+  return rows;
+}
+function swapsUsedThisMonth(sid){
+  const s = state.students[sid];
+  return (s.swapsUsed || {})[currentMonthKey()] || 0;
+}
+function studentFee(sid){
+  const s = state.students[sid];
+  return (s.feeOverride !== undefined && s.feeOverride !== null && s.feeOverride !== '') ? s.feeOverride : state.config.monthlyFee;
+}
+function isUnpaid(sid){
+  const s = state.students[sid];
+  return !(s.paidMonths || {})[currentMonthKey()];
+}
+function dayAvailability(date){
+  if(isHoliday(date)) return 'holiday';
+  const slots = slotsForDate(date);
+  if(!slots.length) return 'closed';
+  const anyRoom = slots.some(s => slotOccupancy(date, s.id).length < state.config.capacity);
+  return anyRoom ? 'available' : 'full';
+}
+
+// Calendario mensual reutilizable. mode: 'swap' (solo se pueden elegir días con lugar,
+// para pedir un cambio) o 'browse' (ver el mes completo sin anotarse desde acá).
+function renderMonthCalendar(container, opts){
+  const mode = opts.mode || 'browse';
+  const today = todayISO();
+  const mk = currentMonthKey();
+  const [y, m] = mk.split('-').map(Number);
+  const firstDay = new Date(y, m-1, 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const startWeekday = firstDay.getDay();
+  let cells = '';
+  for(let i = 0; i < startWeekday; i++) cells += '<div class="cal-cell empty"></div>';
+  for(let day = 1; day <= daysInMonth; day++){
+    const date = `${y}-${pad(m)}-${pad(day)}`;
+    const isPastForMode = mode === 'swap' ? date <= today : date < today;
+    let status;
+    if(parseISO(date).getDay() === 0) status = 'closed';
+    else if(isPastForMode) status = 'past';
+    else status = dayAvailability(date);
+    const activity = activityForDate(date);
+    let clickable = mode === 'swap' ? status === 'available' : (status === 'available' || status === 'full' || status === 'holiday');
+    if(mode !== 'swap' && activity) clickable = true;
+    const sel = opts.selectedDate === date;
+    cells += `<div class="cal-cell ${status} ${sel?'selected':''}" ${clickable ? `data-date="${date}"` : ''}>${day}${activity ? '<span class="activity-dot" title="actividad"></span>' : ''}</div>`;
+  }
+  container.innerHTML = `
+    <div class="cal-grid cal-header">${['D','L','M','M','J','V','S'].map(d => `<div class="cal-h">${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
+    <div class="cal-legend">
+      <span><span class="dot available"></span>con lugar</span>
+      <span><span class="dot full"></span>lleno</span>
+      <span><span class="dot holiday"></span>feriado</span>
+      <span><span class="activity-dot" style="position:static; display:inline-block; box-shadow:none;"></span> actividad</span>
+    </div>
+  `;
+  container.querySelectorAll('[data-date]').forEach(el => {
+    el.onclick = () => opts.onSelect(el.dataset.date);
+  });
+}
+
+// Calendario del alumno: el mismo calendario del taller, pero con SUS clases marcadas
+// con un puntito. Tocar un día suyo abre la acción (cambiar / reprogramar); tocar
+// cualquier otro día solo muestra la ocupación, para saber dónde hay lugar.
+function renderStudentMonthCalendar(container, sid){
+  const sessions = studentSessionsThisMonth(sid);
+  const ownMap = {};
+  sessions.forEach(r => { ownMap[r.date] = r; });
+  const today = todayISO();
+  const mk = currentMonthKey();
+  const [y, m] = mk.split('-').map(Number);
+  const firstDay = new Date(y, m-1, 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const startWeekday = firstDay.getDay();
+  let cells = '';
+  for(let i = 0; i < startWeekday; i++) cells += '<div class="cal-cell empty"></div>';
+  for(let day = 1; day <= daysInMonth; day++){
+    const date = `${y}-${pad(m)}-${pad(day)}`;
+    const own = ownMap[date];
+    const isPast = date <= today;
+    let cls;
+    if(own){
+      cls = (own.status === 'moved-swap' || own.status === 'moved-holiday') ? 'moved'
+          : (own.status === 'pending-holiday') ? 'holiday'
+          : (date < today) ? 'attended'
+          : 'available';
+    } else if(parseISO(date).getDay() === 0){
+      cls = 'closed';
+    } else if(isPast){
+      cls = 'past';
+    } else {
+      cls = dayAvailability(date);
+    }
+    const clickable = !!own || cls === 'available' || cls === 'full' || cls === 'holiday' || !!activityForDate(date);
+    cells += `<div class="cal-cell ${cls}" ${clickable ? `data-date="${date}"` : ''}>${day}${own ? '<span class="own-dot"></span>' : ''}${activityForDate(date) ? '<span class="activity-dot" title="actividad"></span>' : ''}</div>`;
+  }
+  container.innerHTML = `
+    <div class="cal-grid cal-header">${['D','L','M','M','J','V','S'].map(d => `<div class="cal-h">${d}</div>`).join('')}</div>
+    <div class="cal-grid">${cells}</div>
+    <div class="cal-legend">
+      <span><span class="own-dot" style="position:static; display:inline-block; background:var(--ink);"></span> tu clase</span>
+      <span><span class="dot available"></span>con lugar</span>
+      <span><span class="dot full"></span>lleno</span>
+      <span><span class="dot holiday"></span>feriado</span>
+      <span><span class="activity-dot" style="position:static; display:inline-block; box-shadow:none;"></span> actividad</span>
+    </div>
+  `;
+  container.querySelectorAll('[data-date]').forEach(el => {
+    el.onclick = () => {
+      const date = el.dataset.date;
+      if(ownMap[date]) openOwnSessionModal(sid, date, ownMap[date]);
+      else openDayInfoModal(date);
+    };
+  });
+}
+
+function openOwnSessionModal(sid, date, row){
+  const slot = slotById(date, row.slotId) || {};
+  const profe = profeForDateSlot(date, row.slotId);
+  const swapsLeft = state.config.swapsPerMonth - swapsUsedThisMonth(sid);
+  let body = '', actionBtn = '';
+  if(row.status === 'confirmed'){
+    const hrs = hoursUntil(date, row.slotId);
+    const future = hrs > 0;
+    body = `<p class="muted">${slot.start||''}–${slot.end||''}${profe ? ' · profe: '+profe : ''}</p><span class="tag ok">confirmada</span>`;
+    if(future){
+      const eligible = hrs >= 24 && swapsLeft > 0;
+      actionBtn = `<button class="primary block" id="own-action" style="margin-top:14px;" ${eligible?'':'disabled'}>Cambiar este turno</button>`;
+      if(!eligible){
+        body += `<p class="hint">${hrs < 24 ? 'Ya no se puede: falta menos de 24hs.' : 'Ya usaste tu cambio de este mes.'}</p>`;
+      }
+    } else {
+      body += `<p class="hint">Ya se dictó esta clase.</p>`;
+    }
+  } else if(row.status === 'pending-holiday'){
+    body = `<p class="muted">${slot.start||''}–${slot.end||''}</p><span class="tag warn">feriado — a reprogramar</span>`;
+    actionBtn = `<button class="primary block" id="own-action" style="margin-top:14px;">Reprogramar</button>`;
+  } else if(row.status === 'moved-swap' || row.status === 'moved-holiday'){
+    body = `<p class="muted">${slot.start||''}–${slot.end||''}</p><span class="tag moved">movida a ${fmtLong(row.movedTo.date)}</span>`;
+  } else if(row.status === 'rescheduled'){
+    body = `<p class="muted">${slot.start||''}–${slot.end||''}</p><span class="tag moved">reprogramada (antes ${fmtLong(row.from)})</span>`;
+  }
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>${fmtLong(date)}</h3>
+      ${activityInfoHtml(date)}
+      ${body}
+      ${actionBtn}
+      <button class="ghost block" id="own-close" style="margin-top:10px;">Cerrar</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('#own-close').onclick = () => backdrop.remove();
+  const actionEl = backdrop.querySelector('#own-action');
+  if(actionEl){
+    actionEl.onclick = () => {
+      backdrop.remove();
+      openSwapModal(sid, date, row.status === 'pending-holiday');
+    };
+  }
+}
+
+function activityInfoHtml(date){
+  const act = activityForDate(date);
+  if(!act) return '';
+  const range = act.endDate && act.endDate !== act.date ? `${fmtShort(act.date)} — ${fmtShort(act.endDate)}` : '';
+  return `<div class="banner" style="background:#F6EAD1; border-color:#C9962E;">
+    <strong>${escapeHtml(act.title)}</strong>
+    ${range ? `<div class="muted" style="margin-bottom:4px;">${range}</div>` : ''}
+    ${act.description ? linkify(act.description) : ''}
+  </div>`;
+}
+
+function openDayInfoModal(date){
+  const hol = isHoliday(date);
+  const slots = slotsForDate(date);
+  const rowsHtml = hol
+    ? `<p class="muted">Feriado${hol.label ? ': '+escapeHtml(hol.label) : ''}. No hay clases este día.</p>`
+    : slots.map(slot => {
+        const occ = slotOccupancy(date, slot.id).length;
+        const full = occ >= state.config.capacity;
+        return `<div class="list-item"><span>${slot.start}–${slot.end}</span><span class="tag ${full?'warn':'ok'}">${occ}/${state.config.capacity}</span></div>`;
+      }).join('');
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>${fmtLong(date)}</h3>
+      ${activityInfoHtml(date)}
+      ${rowsHtml}
+      <button class="ghost block" id="btn-close-day" style="margin-top:14px;">Cerrar</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('#btn-close-day').onclick = () => backdrop.remove();
+  backdrop.onclick = (e) => { if(e.target === backdrop) backdrop.remove(); };
+}
+
+function withinPaymentWindow(){
+  const day = parseInt(todayISO().split('-')[2], 10);
+  return day >= state.config.paymentWindowStart && day <= state.config.paymentWindowEnd;
+}
+
+// ---------- render root ----------
+const app = document.getElementById('app');
+function render(){
+  if(!state.session.role) return renderLanding();
+  if(state.session.role === 'student') return renderStudentDashboard();
+  if(state.session.role === 'admin') return renderAdminDashboard();
+}
+
+function renderLanding(){
+  app.innerHTML = `
+    <div class="center-stage">
+      <h1>${state.config.studioName}</h1>
+      <p>Gestioná tus turnos, cambios y avisos del taller desde acá.</p>
+      <div class="landing-buttons">
+        <button class="primary block" id="btn-student">Soy alumno/a</button>
+        <button class="block" id="btn-admin">Soy profe${(state.pinResets.length + state.swapNotifications.length) ? ` <span class="tag warn">${state.pinResets.length + state.swapNotifications.length} novedad${(state.pinResets.length + state.swapNotifications.length)>1?'es':''}</span>` : ''}</button>
+      </div>
+      <p class="footer-note">Se puede abrir desde el navegador del celular y agregar a la pantalla de inicio como una app.</p>
+    </div>
+  `;
+  document.getElementById('btn-student').onclick = () => renderStudentAuth();
+  document.getElementById('btn-admin').onclick = () => renderAdminAuth();
+}
+
+// ---------- student auth (login only — cuentas las crea una profe) ----------
+function renderStudentAuth(){
+  app.innerHTML = `
+    <div class="topbar">
+      <h1>${state.config.studioName}</h1>
+      <button class="ghost" id="btn-back">volver</button>
+    </div>
+    <div class="card">
+      <h3>Entrar</h3>
+      <div class="field">
+        <label>Usuario (nombre y apellido)</label>
+        <input id="in-name" placeholder="Ej: Julia Gómez">
+      </div>
+      <div class="field">
+        <label>PIN</label>
+        <input id="in-pin" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <p class="muted" style="margin-top:10px;">Tu usuario y PIN te los da la profesora al crear tu cuenta.</p>
+      <div id="auth-err"></div>
+      <button class="primary block" id="btn-enter" style="margin-top:14px;">Entrar</button>
+      <button class="ghost block" id="btn-forgot-pin" style="margin-top:8px;">¿Olvidaste tu PIN?</button>
+    </div>
+  `;
+  document.getElementById('btn-back').onclick = () => { state.session = {role:null}; render(); };
+  document.getElementById('btn-enter').onclick = handleStudentAuth;
+  document.getElementById('btn-forgot-pin').onclick = renderForgotPin;
+}
+
+function renderForgotPin(){
+  app.innerHTML = `
+    <div class="topbar">
+      <h1>${state.config.studioName}</h1>
+      <button class="ghost" id="btn-back">volver</button>
+    </div>
+    <div class="card">
+      <h3>Pedir restablecer PIN</h3>
+      <p class="muted">Escribí tu nombre tal como lo registró la profesora. Le va a quedar la solicitud para que te restablezca el PIN.</p>
+      <label>Nombre y apellido</label>
+      <input id="fp-name" placeholder="Ej: Julia Gómez">
+      <div id="fp-err"></div>
+      <button class="primary block" id="btn-fp-send" style="margin-top:14px;">Enviar solicitud</button>
+    </div>
+  `;
+  document.getElementById('btn-back').onclick = () => renderStudentAuth();
+  document.getElementById('btn-fp-send').onclick = async () => {
+    const name = document.getElementById('fp-name').value.trim();
+    const errEl = document.getElementById('fp-err');
+    errEl.innerHTML = '';
+    const id = slugify(name);
+    if(!state.students[id]){ errEl.innerHTML = '<p class="err">No encontramos esa cuenta. Revisá cómo escribiste tu nombre.</p>'; return; }
+    if(state.pinResets.find(r => r.studentId === id)){
+      errEl.innerHTML = '<p class="ok" style="color:var(--glaze-dark);">Ya hay una solicitud pendiente. Esperá a que la profesora te restablezca el PIN.</p>';
+      return;
+    }
+    state.pinResets.push({ id: Date.now().toString(), studentId: id, name: state.students[id].name, date: todayISO() });
+    await persist('pinResets');
+    const wa = state.config.profeWhatsapp;
+    const waMsg = encodeURIComponent(`Hola! Pedí restablecer mi PIN en la app del taller. Soy ${state.students[id].name}.`);
+    errEl.innerHTML = `
+      <p style="color:var(--glaze-dark);">Listo. Cuando la profesora vea tu pedido te va a restablecer el PIN a ${state.config.defaultStudentPin}.</p>
+      ${wa ? `<a href="https://wa.me/${wa}?text=${waMsg}" target="_blank" rel="noopener"><button class="primary block" style="margin-top:8px;">Avisarle también por WhatsApp</button></a>` : '<p class="muted">Tip para la profe: cargá un WhatsApp en Configuración y este botón te va a avisar al toque la próxima vez.</p>'}
+    `;
+  };
+}
+
+function handleStudentAuth(){
+  const name = document.getElementById('in-name').value.trim();
+  const pin = document.getElementById('in-pin').value.trim();
+  const errEl = document.getElementById('auth-err');
+  errEl.innerHTML = '';
+  if(name.length < 2){ errEl.innerHTML = '<p class="err">Ingresá tu usuario.</p>'; return; }
+  if(!pin){ errEl.innerHTML = '<p class="err">Ingresá tu PIN.</p>'; return; }
+  const id = slugify(name);
+  const existing = state.students[id];
+  if(!existing || existing.pin !== pin){
+    errEl.innerHTML = '<p class="err">No encontramos esa cuenta o el PIN no coincide. Consultá con la profesora.</p>';
+    return;
+  }
+  state.session = {role:'student', studentId:id};
+  render();
+}
+
+// ---------- reusable: weekday + slot picker (para turno fijo semanal) ----------
+function renderWeekdaySlotPicker(container, opts){
+  let selDay = opts.initialDay ?? null;
+  let selSlot = opts.initialSlot ?? null;
+  const dayOptions = [1,2,3,4,5,6];
+  function paint(){
+    const slotsHtml = selDay === null ? '' : (slotsForWeekday(selDay).map(slot => {
+      const occ = weekdayOccupancyCount(selDay, slot.id, opts.excludeStudentId);
+      const full = occ >= state.config.capacity;
+      const isSel = selSlot === slot.id;
+      return `<div class="chip ${isSel?'selected':''} ${full && !isSel ?'full':''}" data-slot="${slot.id}">${slot.start}–${slot.end} <span class="muted">(${occ}/${state.config.capacity})</span></div>`;
+    }).join('') || '<p class="muted">Ese día no hay turnos configurados.</p>');
+    container.innerHTML = `
+      <div class="step-label">1. Elegí el día</div>
+      <div class="chip-row">
+        ${dayOptions.map(d => `<div class="chip ${selDay===d?'selected':''}" data-day="${d}">${DIAS_CORTO[d]}</div>`).join('')}
+      </div>
+      <div class="step-label">2. Elegí el horario</div>
+      <div class="chip-row">${slotsHtml}</div>
+    `;
+    container.querySelectorAll('[data-day]').forEach(el => {
+      el.onclick = () => { selDay = parseInt(el.dataset.day,10); selSlot = null; paint(); opts.onChange(selDay, selSlot); };
+    });
+    container.querySelectorAll('[data-slot]:not(.full)').forEach(el => {
+      el.onclick = () => { selSlot = el.dataset.slot; paint(); opts.onChange(selDay, selSlot); };
+    });
+  }
+  paint();
+}
+
+// ---------- student dashboard ----------
+function renderStudentDashboard(){
+  const sid = state.session.studentId;
+  const s = state.students[sid];
+  if(!s){ state.session = {role:null}; return render(); }
+  const rows = studentSessionsThisMonth(sid);
+  const confirmedCount = rows.filter(r => r.status === 'confirmed' || r.status === 'rescheduled' || r.status === 'moved-swap' || r.status === 'moved-holiday').length;
+  const swapsLeft = state.config.swapsPerMonth - swapsUsedThisMonth(sid);
+  const defaultSlot = state.config[s.defaultWeekday === 6 ? 'slotsSaturday' : 'slotsWeekday'].find(x => x.id === s.defaultSlotId);
+
+  let paymentBanner = '';
+  if(isUnpaid(sid)){
+    const fee = studentFee(sid);
+    const mp = s.mpLink || state.config.mpLink;
+    paymentBanner = `
+      <div class="banner">
+        <strong>Debés la cuota de este mes</strong>
+        Cuota de ${fmtMonthName()}: ${money(fee)}. ${withinPaymentWindow() ? `El pago se hace entre el día ${state.config.paymentWindowStart} y el ${state.config.paymentWindowEnd}.` : 'Ya venció la fecha habitual de pago.'}
+        ${mp ? `<div class="mp-btn"><a href="${mp}" target="_blank" rel="noopener"><button class="primary block">Pagar con Mercado Pago</button></a></div>` : ''}
+      </div>`;
+  }
+
+  const announcementsHtml = state.announcements
+    .filter(a => daysSince(a.date) <= state.config.announcementVisibleDays)
+    .slice(-8).reverse().map(a => `
+    <div class="announcement">
+      <div class="date">${fmtLong(a.date)}</div>
+      <div>${escapeHtml(a.message)}</div>
+    </div>
+  `).join('') || '<p class="muted">No hay avisos por ahora.</p>';
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div>
+        <h1>Hola, ${s.name.split(' ')[0]}</h1>
+        <div class="sub">${DIAS[s.defaultWeekday]} · ${defaultSlot ? defaultSlot.start+'–'+defaultSlot.end : ''}${profeForSlot(s.defaultWeekday, s.defaultSlotId) ? ' · profe: '+profeForSlot(s.defaultWeekday, s.defaultSlotId) : ''}</div>
+      </div>
+      <button class="ghost" id="btn-logout">salir</button>
+    </div>
+    ${paymentBanner}
+    ${state.studentInfo ? `<div class="card" style="background:#F6EAD1; border-color:#C9962E;"><h3>Información</h3><div>${linkify(state.studentInfo)}</div></div>` : ''}
+    <div class="stat-grid">
+      <div class="stat"><div class="num">${confirmedCount}</div><div class="label">clases este mes</div></div>
+      <div class="stat"><div class="num">${swapsLeft}</div><div class="label">cambio${swapsLeft===1?'':'s'} disponible${swapsLeft===1?'':'s'} este mes</div></div>
+    </div>
+    <div class="card">
+      <h3>Calendario del taller</h3>
+      <p class="muted" style="margin-top:6px;">Tus clases están marcadas con un punto. Tocá un día para verlo o cambiarlo; tocá cualquier otro día para ver si hay lugar.</p>
+      <div id="student-calendar" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <h3>Avisos</h3>
+      ${announcementsHtml}
+    </div>
+    <div class="card">
+      <h3>Tu cuenta</h3>
+      <button class="ghost block" id="btn-change-pin">Cambiar mi PIN</button>
+    </div>
+    <p class="footer-note">${state.config.studioName} · turno fijo, cambios con 24hs de anticipación</p>
+  `;
+  document.getElementById('btn-logout').onclick = () => { state.session = {role:null}; render(); };
+  renderStudentMonthCalendar(document.getElementById('student-calendar'), sid);
+  document.getElementById('btn-change-pin').onclick = () => openChangePinModal(sid);
+}
+
+function openChangePinModal(sid){
+  const s = state.students[sid];
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>Cambiar mi PIN</h3>
+      <label>PIN actual</label>
+      <input id="cp-current" inputmode="numeric" maxlength="4">
+      <label>PIN nuevo</label>
+      <input id="cp-new" inputmode="numeric" maxlength="4">
+      <label>Repetir PIN nuevo</label>
+      <input id="cp-new2" inputmode="numeric" maxlength="4">
+      <div id="cp-err"></div>
+      <div class="row" style="margin-top:16px;">
+        <button class="ghost block" id="cp-cancel">Cancelar</button>
+        <button class="primary block" id="cp-save">Guardar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('#cp-cancel').onclick = () => backdrop.remove();
+  backdrop.querySelector('#cp-save').onclick = async () => {
+    const cur = backdrop.querySelector('#cp-current').value.trim();
+    const next = backdrop.querySelector('#cp-new').value.trim();
+    const next2 = backdrop.querySelector('#cp-new2').value.trim();
+    const errEl = backdrop.querySelector('#cp-err');
+    errEl.innerHTML = '';
+    if(cur !== s.pin){ errEl.innerHTML = '<p class="err">El PIN actual no coincide.</p>'; return; }
+    if(next.length < 4){ errEl.innerHTML = '<p class="err">El PIN nuevo debe tener 4 dígitos.</p>'; return; }
+    if(next !== next2){ errEl.innerHTML = '<p class="err">Los PIN nuevos no coinciden.</p>'; return; }
+    s.pin = next;
+    await persist('students');
+    backdrop.remove();
+  };
+}
+function fmtMonthName(){
+  const d = new Date();
+  return MESES[d.getMonth()];
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ---------- swap modal: paso 1 día, paso 2 horario ----------
+function openSwapModal(sid, originalDate, isHolidayReschedule){
+  const s = state.students[sid];
+  const originalSlotId = s.defaultSlotId;
+  const originalSlot = slotById(originalDate, originalSlotId) || {};
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>${isHolidayReschedule ? 'Reprogramar clase de feriado' : 'Cambiar turno'}</h3>
+      <div class="banner" style="background:var(--ok-bg); border-color:var(--glaze);">
+        <strong>Clase que estás cambiando</strong>
+        ${fmtLong(originalDate)} · ${originalSlot.start||''}–${originalSlot.end||''}
+      </div>
+      <p class="muted">Elegí un día de este mes con lugar.</p>
+      <div id="swap-steps"></div>
+      <div id="swap-summary"></div>
+      <div class="row" style="margin-top:16px;">
+        <button class="ghost block" id="btn-cancel-swap">Cancelar</button>
+        <button class="primary block" id="btn-confirm-swap" disabled>Confirmar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  const stepsEl = backdrop.querySelector('#swap-steps');
+  const summaryEl = backdrop.querySelector('#swap-summary');
+  let chosenDate = null, chosenSlot = null;
+  function paintSteps(){
+    const slotsHtml = chosenDate === null ? '' : (slotsForDate(chosenDate).map(slot => {
+      const isSameAsOriginal = chosenDate === originalDate && slot.id === originalSlotId;
+      const occ = slotOccupancy(chosenDate, slot.id, sid);
+      const full = occ.length >= state.config.capacity;
+      const hrs = hoursUntil(chosenDate, slot.id);
+      const blocked = full || hrs < 24 || isSameAsOriginal;
+      return `<div class="slot-option ${chosenSlot===slot.id?'selected':''} ${blocked?'full':''}" data-slot="${slot.id}">
+        <span>${slot.start}–${slot.end}</span>
+        <span class="muted">${isSameAsOriginal ? 'es la que estás cambiando' : occ.length+'/'+state.config.capacity}</span>
+      </div>`;
+    }).join('') || '<p class="muted">No hay turnos ese día.</p>');
+    stepsEl.innerHTML = `
+      <div class="step-label">1. Elegí el día (con lugar, dentro de este mes)</div>
+      <div id="swap-calendar" style="margin-bottom:14px;"></div>
+      <div class="step-label">2. Elegí el horario</div>
+      <div>${slotsHtml}</div>
+    `;
+    renderMonthCalendar(stepsEl.querySelector('#swap-calendar'), {
+      mode: 'swap',
+      selectedDate: chosenDate,
+      onSelect: (date) => { chosenDate = date; chosenSlot = null; paintSteps(); updateConfirm(); }
+    });
+    stepsEl.querySelectorAll('.slot-option:not(.full)').forEach(el => {
+      el.onclick = () => { chosenSlot = el.dataset.slot; paintSteps(); updateConfirm(); };
+    });
+  }
+  function updateConfirm(){
+    backdrop.querySelector('#btn-confirm-swap').disabled = !(chosenDate && chosenSlot);
+    if(chosenDate && chosenSlot){
+      const slot = slotById(chosenDate, chosenSlot) || {};
+      summaryEl.innerHTML = `<div class="banner" style="background:#E6E1F0; border-color:#584A7A; color:#584A7A;">
+        <strong>Vas a mover esta clase a</strong>
+        ${fmtLong(chosenDate)} · ${slot.start||''}–${slot.end||''}
+      </div>`;
+    } else {
+      summaryEl.innerHTML = '';
+    }
+  }
+  paintSteps();
+  backdrop.querySelector('#btn-cancel-swap').onclick = () => backdrop.remove();
+  backdrop.querySelector('#btn-confirm-swap').onclick = async () => {
+    await confirmSwap(sid, originalDate, {date: chosenDate, slot: chosenSlot}, isHolidayReschedule);
+    backdrop.remove();
+    renderStudentDashboard();
+  };
+}
+
+async function confirmSwap(sid, originalDate, target, isHolidayReschedule){
+  const s = state.students[sid];
+  const fromWeekday = s.defaultWeekday;
+  const fromSlotId = s.defaultSlotId;
+  const toWeekday = parseISO(target.date).getDay();
+  if(!state.overrides[sid]) state.overrides[sid] = {};
+  state.overrides[sid][originalDate] = {
+    cancelled: true,
+    reason: isHolidayReschedule ? 'feriado' : 'cambio',
+    movedTo: { date: target.date, slotId: target.slot }
+  };
+  if(!state.extraBookings[sid]) state.extraBookings[sid] = [];
+  state.extraBookings[sid].push({ date: target.date, slotId: target.slot, fromDate: originalDate });
+  if(!isHolidayReschedule){
+    const mk = currentMonthKey();
+    if(!s.swapsUsed) s.swapsUsed = {};
+    s.swapsUsed[mk] = (s.swapsUsed[mk] || 0) + 1;
+  }
+  await Promise.all([persist('overrides'), persist('extraBookings'), persist('students')]);
+  await notifySwap(s, originalDate, fromWeekday, fromSlotId, target.date, toWeekday, target.slot);
+}
+
+async function notifySwap(s, fromDate, fromWeekday, fromSlotId, toDate, toWeekday, toSlotId){
+  const fromSlot = slotById(fromDate, fromSlotId) || {};
+  const toSlot = slotById(toDate, toSlotId) || {};
+  const fromTxt = `${fmtShort(fromDate)} · ${fromSlot.start||''}–${fromSlot.end||''}`;
+  const toTxt = `${fmtShort(toDate)} · ${toSlot.start||''}–${toSlot.end||''}`;
+  const notifs = [{
+    id: Date.now().toString() + '-g', forProfe: null, date: todayISO(),
+    message: `${s.name} cambió su clase del ${fromTxt} al ${toTxt}.`
+  }];
+  const fromProfe = profeForSlot(fromWeekday, fromSlotId);
+  const toProfe = profeForSlot(toWeekday, toSlotId);
+  if(fromProfe && fromProfe !== toProfe){
+    notifs.push({ id: Date.now().toString() + '-a', forProfe: fromProfe, date: todayISO(),
+      message: `Se te quitó ${s.name} del turno del ${fromTxt} — movió su clase.` });
+  }
+  if(toProfe && toProfe !== fromProfe){
+    notifs.push({ id: Date.now().toString() + '-b', forProfe: toProfe, date: todayISO(),
+      message: `Se te sumó ${s.name} para el turno del ${toTxt}.` });
+  }
+  state.swapNotifications.push(...notifs);
+  await persist('swapNotifications');
+}
+
+// ---------- admin auth: dueño/a + profes ----------
+function passwordIssues(pw){
+  if(pw.length < 6) return 'Mínimo 6 caracteres.';
+  if(!/[a-zA-Z]/.test(pw) || !/[0-9]/.test(pw)) return 'Combiná letras y números.';
+  return null;
+}
+
+function renderAdminAuth(){
+  if(Object.keys(state.admins).length === 0){
+    return renderOwnerSetup();
+  }
+  app.innerHTML = `
+    <div class="topbar">
+      <h1>${state.config.studioName}</h1>
+      <button class="ghost" id="btn-back">volver</button>
+    </div>
+    <div class="card">
+      <h3>Acceso del equipo docente</h3>
+      <label>Usuario</label>
+      <input id="in-admin-user" autocapitalize="none">
+      <label>Contraseña</label>
+      <input id="in-admin-pass" type="password">
+      <div id="admin-err"></div>
+      <button class="primary block" id="btn-admin-enter" style="margin-top:14px;">Entrar</button>
+    </div>
+  `;
+  document.getElementById('btn-back').onclick = () => { state.session = {role:null}; render(); };
+  document.getElementById('btn-admin-enter').onclick = async () => {
+    const username = document.getElementById('in-admin-user').value.trim().toLowerCase();
+    const pass = document.getElementById('in-admin-pass').value;
+    const errEl = document.getElementById('admin-err');
+    const rec = state.admins[username];
+    if(!rec){ errEl.innerHTML = '<p class="err">Usuario no encontrado.</p>'; return; }
+    const hash = await sha256(pass);
+    if(hash !== rec.passwordHash){ errEl.innerHTML = '<p class="err">Contraseña incorrecta.</p>'; return; }
+    state.session = {role:'admin', username, isOwner: rec.role === 'owner', tab:null};
+    render();
+  };
+}
+
+function renderOwnerSetup(){
+  app.innerHTML = `
+    <div class="topbar">
+      <h1>${state.config.studioName}</h1>
+      <button class="ghost" id="btn-back">volver</button>
+    </div>
+    <div class="card">
+      <h3>Primera vez: creá tu cuenta de dueño/a</h3>
+      <p class="muted">Esta cuenta va a poder crear el resto de las cuentas de profes.</p>
+      <label>Usuario</label>
+      <input id="in-owner-user" autocapitalize="none" placeholder="Ej: valentina">
+      <label>Contraseña</label>
+      <input id="in-owner-pass" type="password">
+      <p class="hint">Mínimo 6 caracteres, combinando letras y números.</p>
+      <label>Repetir contraseña</label>
+      <input id="in-owner-pass2" type="password">
+      <div id="owner-err"></div>
+      <button class="primary block" id="btn-owner-create" style="margin-top:14px;">Crear cuenta</button>
+    </div>
+  `;
+  document.getElementById('btn-back').onclick = () => { state.session = {role:null}; render(); };
+  document.getElementById('btn-owner-create').onclick = async () => {
+    const username = document.getElementById('in-owner-user').value.trim().toLowerCase();
+    const pass = document.getElementById('in-owner-pass').value;
+    const pass2 = document.getElementById('in-owner-pass2').value;
+    const errEl = document.getElementById('owner-err');
+    errEl.innerHTML = '';
+    if(username.length < 3){ errEl.innerHTML = '<p class="err">Elegí un usuario de al menos 3 caracteres.</p>'; return; }
+    const issue = passwordIssues(pass);
+    if(issue){ errEl.innerHTML = `<p class="err">${issue}</p>`; return; }
+    if(pass !== pass2){ errEl.innerHTML = '<p class="err">Las contraseñas no coinciden.</p>'; return; }
+    const passwordHash = await sha256(pass);
+    state.admins[username] = { username, passwordHash, role:'owner', createdAt: todayISO() };
+    await persist('admins');
+    state.session = {role:'admin', username, isOwner:true, tab:null};
+    render();
+  };
+}
+
+function renderAdminDashboard(){
+  const isOwner = state.session.isOwner;
+  const tabs = isOwner ? ['profes'] : ['semana','alumnos','feriados','actividades','avisos','config'];
+  const tab = state.session.tab || tabs[0];
+  app.innerHTML = `
+    <div class="topbar">
+      <div><h1>Panel</h1><div class="sub">${state.session.username}${isOwner ? '<span class="badge-role">dueño/a</span>' : '<span class="badge-role">profe</span>'}</div></div>
+      <button class="ghost" id="btn-logout">salir</button>
+    </div>
+    ${isOwner ? '<p class="muted" style="margin-bottom:14px;">Esta cuenta solo gestiona las cuentas del equipo docente. Para dar clase, entrá con una cuenta de profe.</p>' : ''}
+    <div class="tabs">
+      ${tabs.map(t => `<div class="tab ${t===tab?'active':''}" data-tab="${t}">${tabLabel(t)}</div>`).join('')}
+    </div>
+    <div id="tab-content"></div>
+  `;
+  document.getElementById('btn-logout').onclick = () => { state.session = {role:null}; render(); };
+  app.querySelectorAll('.tab').forEach(el => {
+    el.onclick = () => { state.session.tab = el.dataset.tab; renderAdminDashboard(); };
+  });
+  const content = document.getElementById('tab-content');
+  if(isOwner){
+    if(tab === 'profes') renderAdminProfes(content);
+    return;
+  }
+  if(tab === 'semana'){ content.innerHTML = adminWeekHtml(); bindAdminWeekNav(); }
+  if(tab === 'alumnos') renderAdminStudents(content);
+  if(tab === 'feriados') renderAdminHolidays(content);
+  if(tab === 'actividades') renderAdminActivities(content);
+  if(tab === 'avisos') renderAdminAnnouncements(content);
+  if(tab === 'config') renderAdminConfig(content);
+}
+
+function tabLabel(t){
+  return {semana:'Semana', alumnos:'Alumnos', feriados:'Feriados', actividades:'Actividades', avisos:'Avisos', config:'Configuración', profes:'Profes'}[t];
+}
+
+function adminWeekHtml(){
+  const base = state.session.weekBase || mondayOf(todayISO());
+  state.session.weekBase = base;
+  const week = [0,1,2,3,4,5].map(i => addDays(base, i));
+  const allSlotIds = [...new Set([...state.config.slotsWeekday.map(s=>s.id), ...state.config.slotsSaturday.map(s=>s.id)])];
+  let rowsHtml = '';
+  allSlotIds.forEach(slotId => {
+    let cells = '';
+    week.forEach(date => {
+      const slot = slotById(date, slotId);
+      if(!slot){ cells += '<td>—</td>'; return; }
+      const hol = isHoliday(date);
+      if(hol){ cells += `<td class="holiday"><span class="muted" style="font-size:0.68rem;">feriado</span></td>`; return; }
+      const names = slotOccupancy(date, slotId);
+      const full = names.length >= state.config.capacity;
+      const subProfe = profeForDateSlot(date, slotId);
+      const isSubstituted = Object.prototype.hasOwnProperty.call(state.substitutions, substitutionKey(date, slotId));
+      const cls = ['occ-cell', names.length ? 'has-people' : '', full ? 'full' : '', isSubstituted ? 'has-people' : ''].filter(Boolean).join(' ');
+      cells += `<td><button type="button" class="${cls}" data-date="${date}" data-slot="${slotId}">${names.length}/${state.config.capacity}${isSubstituted ? ' *' : ''}</button></td>`;
+    });
+    const label = slotById(week[0], slotId) || slotById(week[5], slotId);
+    rowsHtml += `<tr><th>${label ? label.start+'–'+label.end : slotId}</th>${cells}</tr>`;
+  });
+  return `
+    <div class="row" style="margin-bottom:12px;">
+      <button class="ghost" id="btn-prev-week">← semana anterior</button>
+      <button class="ghost" id="btn-next-week">semana siguiente →</button>
+    </div>
+    <div class="card" style="overflow-x:auto;">
+      <h3>${fmtLong(week[0])} — ${fmtLong(week[5])}</h3>
+      <table>
+        <tr><th></th>${week.map(d => `<th>${DIAS_CORTO[parseISO(d).getDay()]} ${pad(parseISO(d).getDate())}</th>`).join('')}</tr>
+        ${rowsHtml}
+      </table>
+      <p class="hint">Tocá un turno con alumnos para ver quiénes son.</p>
+    </div>
+  `;
+}
+function bindAdminWeekNav(){
+  const prev = document.getElementById('btn-prev-week');
+  const next = document.getElementById('btn-next-week');
+  if(prev) prev.onclick = () => { state.session.weekBase = addDays(state.session.weekBase, -7); renderAdminDashboard(); };
+  if(next) next.onclick = () => { state.session.weekBase = addDays(state.session.weekBase, 7); renderAdminDashboard(); };
+  document.querySelectorAll('.occ-cell').forEach(btn => {
+    btn.onclick = () => openOccupancyModal(btn.dataset.date, btn.dataset.slot);
+  });
+}
+function openOccupancyModal(date, slotId){
+  const slot = slotById(date, slotId);
+  const names = slotOccupancy(date, slotId);
+  const profes = profeAccounts();
+  const currentProfe = profeForDateSlot(date, slotId);
+  const regularProfe = profeForSlot(parseISO(date).getDay(), slotId);
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>${fmtLong(date)}</h3>
+      <p class="muted">${slot ? slot.start+'–'+slot.end : ''} · ${names.length}/${state.config.capacity} ocupados</p>
+      <div style="margin-top:10px;">
+        ${names.map(n => `<div class="list-item">${escapeHtml(n)}</div>`).join('')}
+      </div>
+      ${profes.length ? `
+        <div style="margin-top:14px;">
+          <label>Profe de este turno, solo para este día${currentProfe && currentProfe !== regularProfe ? ' (suplente)' : ''}</label>
+          <select id="sel-substitute">
+            <option value="">— usar el profe habitual${regularProfe ? ' ('+regularProfe+')' : ' (sin asignar)'} —</option>
+            ${profes.map(p => `<option value="${p.username}" ${currentProfe===p.username?'selected':''}>${p.username}</option>`).join('')}
+          </select>
+        </div>` : ''}
+      <button class="ghost block" id="btn-close-occ" style="margin-top:14px;">Cerrar</button>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('#btn-close-occ').onclick = () => backdrop.remove();
+  backdrop.onclick = (e) => { if(e.target === backdrop) backdrop.remove(); };
+  const sel = backdrop.querySelector('#sel-substitute');
+  if(sel){
+    sel.onchange = async () => {
+      await setSubstitution(date, slotId, sel.value || null, regularProfe);
+    };
+  }
+}
+
+async function setSubstitution(date, slotId, newProfe, regularProfe){
+  const key = substitutionKey(date, slotId);
+  if(newProfe) state.substitutions[key] = newProfe;
+  else delete state.substitutions[key];
+  await persist('substitutions');
+  const slot = slotById(date, slotId) || {};
+  const when = `${fmtShort(date)} · ${slot.start||''}–${slot.end||''}`;
+  const notifs = [];
+  const effectiveProfe = newProfe || regularProfe;
+  if(regularProfe && regularProfe !== effectiveProfe){
+    notifs.push({ id: Date.now().toString()+'-s1', forProfe: regularProfe, date: todayISO(),
+      message: `Te sustituyen el ${when} — da la clase ${effectiveProfe}.` });
+  }
+  if(newProfe && newProfe !== regularProfe){
+    notifs.push({ id: Date.now().toString()+'-s2', forProfe: newProfe, date: todayISO(),
+      message: `Vas a cubrir el turno del ${when}${regularProfe ? ' en lugar de '+regularProfe : ''}.` });
+  }
+  if(notifs.length){
+    state.swapNotifications.push(...notifs);
+    await persist('swapNotifications');
+  }
+}
+
+function renderAdminStudents(content){
+  const mk = currentMonthKey();
+  const me = state.session.username;
+  const iTeachSomething = Object.values(state.slotAssignments).includes(me);
+  if(!state.session.studentsFilter) state.session.studentsFilter = 'all';
+  const filter = state.session.studentsFilter;
+  const visibleStudents = Object.values(state.students).filter(s => {
+    if(filter !== 'mine') return true;
+    return profeForSlot(s.defaultWeekday, s.defaultSlotId) === me;
+  }).sort((a,b) => a.name.localeCompare(b.name));
+  const rowsHtml = visibleStudents.map(s => {
+    const slot = state.config[s.defaultWeekday===6?'slotsSaturday':'slotsWeekday'].find(x=>x.id===s.defaultSlotId);
+    const paid = (s.paidMonths||{})[mk];
+    const fee = studentFee(s.id);
+    const profe = profeForSlot(s.defaultWeekday, s.defaultSlotId);
+    return `
+      <div class="list-item">
+        <div>
+          <div style="font-weight:600;">${s.name}</div>
+          <div class="muted">usuario: ${s.id} · PIN ${s.pin}</div>
+          <div class="muted">${DIAS[s.defaultWeekday]} ${slot ? slot.start+'–'+slot.end : ''}${profe ? ' · profe: '+profe : ''}</div>
+          <div class="tag ${paid ? 'ok' : 'warn'}" style="margin-top:4px;">${paid ? 'pagó '+money(fee) : 'debe '+money(fee)}</div>
+        </div>
+        <div style="text-align:right; display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+          <button class="ghost small" data-pay="${s.id}">${paid ? 'Quitar pago' : 'Marcar pagado'}</button>
+          <button class="ghost small" data-edit="${s.id}">Editar</button>
+          <button class="danger small" data-del="${s.id}">Eliminar</button>
+        </div>
+      </div>`;
+  }).join('') || '<p class="muted">No hay alumnos para mostrar acá.</p>';
+  const resetsHtml = state.pinResets.length ? `
+    <div class="card">
+      <h3>Pedidos de restablecer PIN</h3>
+      ${state.pinResets.map(r => `
+        <div class="list-item">
+          <div>${escapeHtml(r.name)} <span class="muted">— pedido el ${fmtLong(r.date)}</span></div>
+          <button class="ghost small" data-resolve-reset="${r.id}">Restablecer a ${state.config.defaultStudentPin}</button>
+        </div>
+      `).join('')}
+    </div>` : '';
+  const myNotifs = state.swapNotifications.filter(n => n.forProfe === null || n.forProfe === me);
+  const notifsHtml = myNotifs.length ? `
+    <div class="card">
+      <h3>Novedades de cambios</h3>
+      ${myNotifs.map(n => `
+        <div class="list-item">
+          <div>${escapeHtml(n.message)} <span class="muted">— ${fmtLong(n.date)}</span></div>
+          <button class="ghost small" data-dismiss-notif="${n.id}">Listo</button>
+        </div>
+      `).join('')}
+    </div>` : '';
+  content.innerHTML = `
+    ${notifsHtml}
+    ${resetsHtml}
+    <div class="card">
+      <div class="row" style="align-items:center;">
+        <h3 style="margin:0;">Alumnos (${Object.keys(state.students).length})</h3>
+      </div>
+      ${iTeachSomething ? `
+        <div class="chip-row" style="margin-top:10px;">
+          <div class="chip ${filter==='all'?'selected':''}" data-filter="all">Todos</div>
+          <div class="chip ${filter==='mine'?'selected':''}" data-filter="mine">Solo los míos</div>
+        </div>` : ''}
+      <button class="primary block" id="btn-new-student" style="margin-top:10px;">+ Agregar alumno</button>
+    </div>
+    <div class="card">${rowsHtml}</div>
+  `;
+  document.getElementById('btn-new-student').onclick = () => openStudentForm(null);
+  content.querySelectorAll('[data-filter]').forEach(el => {
+    el.onclick = () => { state.session.studentsFilter = el.dataset.filter; renderAdminStudents(content); };
+  });
+  content.querySelectorAll('[data-dismiss-notif]').forEach(btn => {
+    btn.onclick = async () => {
+      state.swapNotifications = state.swapNotifications.filter(n => n.id !== btn.dataset.dismissNotif);
+      await persist('swapNotifications');
+      renderAdminStudents(content);
+    };
+  });
+  content.querySelectorAll('[data-resolve-reset]').forEach(btn => {
+    btn.onclick = async () => {
+      const reqId = btn.dataset.resolveReset;
+      const req = state.pinResets.find(r => r.id === reqId);
+      if(req && state.students[req.studentId]){
+        state.students[req.studentId].pin = state.config.defaultStudentPin;
+        await persist('students');
+      }
+      state.pinResets = state.pinResets.filter(r => r.id !== reqId);
+      await persist('pinResets');
+      renderAdminStudents(content);
+    };
+  });
+  content.querySelectorAll('[data-pay]').forEach(btn => {
+    btn.onclick = async () => {
+      const sid = btn.dataset.pay;
+      const s = state.students[sid];
+      if(!s.paidMonths) s.paidMonths = {};
+      if(s.paidMonths[mk]) delete s.paidMonths[mk];
+      else s.paidMonths[mk] = { date: todayISO() };
+      await persist('students');
+      renderAdminStudents(content);
+    };
+  });
+  content.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.onclick = () => openStudentForm(btn.dataset.edit);
+  });
+  content.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      const sid = btn.dataset.del;
+      if(!confirm(`¿Eliminar a ${state.students[sid].name}? Esto borra también su historial de cambios.`)) return;
+      delete state.students[sid];
+      delete state.overrides[sid];
+      delete state.extraBookings[sid];
+      await Promise.all([persist('students'), persist('overrides'), persist('extraBookings')]);
+      renderAdminStudents(content);
+    };
+  });
+}
+
+function openStudentForm(sid){
+  const editing = !!sid;
+  const s = editing ? state.students[sid] : null;
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>${editing ? 'Editar alumno' : 'Nuevo alumno'}</h3>
+      <label>Nombre y apellido</label>
+      <input id="f-name" value="${editing ? escapeHtml(s.name) : ''}" ${editing ? 'disabled' : ''}>
+      <div id="username-preview" class="hint">${editing ? 'Usuario: '+s.id : ''}</div>
+      <label>PIN</label>
+      <input id="f-pin" value="${editing ? s.pin : state.config.defaultStudentPin}" inputmode="numeric" maxlength="4">
+      <p class="hint">Por defecto se crea con PIN ${state.config.defaultStudentPin}; cambialo si querés uno distinto.</p>
+      <div id="picker-container" style="margin-top:14px;"></div>
+      <label>Cuota mensual personalizada (opcional)</label>
+      <input id="f-fee" type="number" placeholder="Dejar vacío = ${money(state.config.monthlyFee)} por defecto" value="${editing && s.feeOverride !== undefined ? s.feeOverride : ''}">
+      <label>Link de Mercado Pago personalizado (opcional)</label>
+      <input id="f-mp" placeholder="Dejar vacío = usar el link general" value="${editing && s.mpLink ? s.mpLink : ''}">
+      <div id="form-err"></div>
+      <div class="row" style="margin-top:16px;">
+        <button class="ghost block" id="btn-cancel-form">Cancelar</button>
+        <button class="primary block" id="btn-save-form">Guardar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  if(!editing){
+    const nameInput = backdrop.querySelector('#f-name');
+    const preview = backdrop.querySelector('#username-preview');
+    nameInput.oninput = () => {
+      preview.textContent = nameInput.value.trim() ? 'Usuario para ingresar: ' + slugify(nameInput.value) : '';
+    };
+  }
+  const pickerContainer = backdrop.querySelector('#picker-container');
+  let selDay = editing ? s.defaultWeekday : null;
+  let selSlot = editing ? s.defaultSlotId : null;
+  renderWeekdaySlotPicker(pickerContainer, {
+    initialDay: selDay, initialSlot: selSlot, excludeStudentId: sid,
+    onChange: (d, sl) => { selDay = d; selSlot = sl; }
+  });
+  backdrop.querySelector('#btn-cancel-form').onclick = () => backdrop.remove();
+  backdrop.querySelector('#btn-save-form').onclick = async () => {
+    const name = backdrop.querySelector('#f-name').value.trim();
+    const pin = backdrop.querySelector('#f-pin').value.trim();
+    const feeRaw = backdrop.querySelector('#f-fee').value.trim();
+    const mpRaw = backdrop.querySelector('#f-mp').value.trim();
+    const errEl = backdrop.querySelector('#form-err');
+    errEl.innerHTML = '';
+    if(!editing && name.length < 2){ errEl.innerHTML = '<p class="err">Ingresá el nombre.</p>'; return; }
+    if(!pin){ errEl.innerHTML = '<p class="err">Ingresá un PIN.</p>'; return; }
+    if(selDay === null || selSlot === null){ errEl.innerHTML = '<p class="err">Elegí día y horario.</p>'; return; }
+    let id = sid;
+    if(!editing){
+      id = slugify(name);
+      if(state.students[id]){ errEl.innerHTML = '<p class="err">Ya existe un alumno con ese nombre/usuario. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").</p>'; return; }
+      state.students[id] = { id, name, pin, defaultWeekday: selDay, defaultSlotId: selSlot, swapsUsed:{}, paidMonths:{}, createdAt: todayISO() };
+    } else {
+      state.students[id].pin = pin;
+      state.students[id].defaultWeekday = selDay;
+      state.students[id].defaultSlotId = selSlot;
+    }
+    if(feeRaw === ''){ delete state.students[id].feeOverride; } else { state.students[id].feeOverride = Number(feeRaw); }
+    if(mpRaw === ''){ delete state.students[id].mpLink; } else { state.students[id].mpLink = mpRaw; }
+    await persist('students');
+    backdrop.remove();
+    renderAdminDashboard();
+  };
+}
+
+function renderAdminHolidays(content){
+  const rowsHtml = state.holidays.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(h => `
+    <div class="list-item">
+      <div>${fmtLong(h.date)} <span class="muted">— ${escapeHtml(h.label||'')}</span></div>
+      <button class="ghost" data-del="${h.date}">quitar</button>
+    </div>
+  `).join('') || '<p class="muted">No hay feriados cargados.</p>';
+  content.innerHTML = `
+    <div class="card">
+      <h3>Agregar feriado</h3>
+      <div class="row">
+        <div><label>Fecha</label><input type="date" id="in-hol-date"></div>
+        <div><label>Motivo (opcional)</label><input id="in-hol-label" placeholder="Ej: Feriado nacional"></div>
+      </div>
+      <button class="primary block" id="btn-add-hol" style="margin-top:12px;">Agregar</button>
+    </div>
+    <div class="card"><h3>Feriados cargados</h3>${rowsHtml}</div>
+  `;
+  document.getElementById('btn-add-hol').onclick = async () => {
+    const date = document.getElementById('in-hol-date').value;
+    const label = document.getElementById('in-hol-label').value.trim();
+    if(!date) return;
+    if(!state.holidays.find(h=>h.date===date)) state.holidays.push({date, label});
+    await persist('holidays');
+    renderAdminHolidays(content);
+  };
+  content.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      state.holidays = state.holidays.filter(h => h.date !== btn.dataset.del);
+      await persist('holidays');
+      renderAdminHolidays(content);
+    };
+  });
+}
+
+function renderAdminActivities(content){
+  const rowsHtml = state.activities.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(a => `
+    <div class="list-item">
+      <div>
+        <div style="font-weight:600;">${escapeHtml(a.title)}</div>
+        <div class="muted">${fmtLong(a.date)}${a.endDate && a.endDate !== a.date ? ' — ' + fmtLong(a.endDate) : ''}</div>
+        ${a.description ? `<div class="muted">${escapeHtml(a.description)}</div>` : ''}
+      </div>
+      <button class="ghost small" data-del="${a.id}">quitar</button>
+    </div>
+  `).join('') || '<p class="muted">No hay actividades cargadas.</p>';
+  content.innerHTML = `
+    <div class="card">
+      <h3>Marcar una actividad especial</h3>
+      <p class="muted">Puede durar un solo día, una semana o lo que necesites — aparece marcada en el calendario de todos los alumnos durante todo ese rango, sin afectar cupos ni clases normales.</p>
+      <label>Título / temática</label>
+      <input id="in-act-title" placeholder="Ej: Semana de esmaltado a mano">
+      <div class="row">
+        <div><label>Desde</label><input type="date" id="in-act-date"></div>
+        <div><label>Hasta (opcional)</label><input type="date" id="in-act-end"></div>
+      </div>
+      <p class="hint">Si dejás "Hasta" vacío, la actividad dura solo ese día.</p>
+      <label>Descripción / link (opcional)</label>
+      <textarea id="in-act-desc" rows="2" placeholder="Detalles, o pegá un link a un PDF, fotos, etc."></textarea>
+      <button class="primary block" id="btn-add-act" style="margin-top:12px;">Agregar</button>
+    </div>
+    <div class="card"><h3>Actividades cargadas</h3>${rowsHtml}</div>
+  `;
+  document.getElementById('btn-add-act').onclick = async () => {
+    const date = document.getElementById('in-act-date').value;
+    const endDateRaw = document.getElementById('in-act-end').value;
+    const title = document.getElementById('in-act-title').value.trim();
+    const description = document.getElementById('in-act-desc').value.trim();
+    if(!date || !title) return;
+    const endDate = endDateRaw && endDateRaw >= date ? endDateRaw : date;
+    state.activities.push({ id: Date.now().toString(), date, endDate, title, description });
+    await persist('activities');
+    renderAdminActivities(content);
+  };
+  content.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      state.activities = state.activities.filter(a => a.id !== btn.dataset.del);
+      await persist('activities');
+      renderAdminActivities(content);
+    };
+  });
+}
+
+function renderAdminAnnouncements(content){
+  const rowsHtml = state.announcements.slice().reverse().map(a => `
+    <div class="list-item">
+      <div><div class="muted">${fmtLong(a.date)}</div>${escapeHtml(a.message)}</div>
+      <button class="ghost" data-del="${a.id}">quitar</button>
+    </div>
+  `).join('') || '<p class="muted">No hay avisos.</p>';
+  content.innerHTML = `
+    <div class="card">
+      <h3>Información fija</h3>
+      <p class="muted">Esto queda siempre visible arriba de todo en el celular del alumno — a diferencia de los avisos, no se acumula ni desaparece. Sirve para un link a un PDF, el material del mes, o algo que quieras que estén viendo siempre.</p>
+      <textarea id="in-student-info" rows="4" placeholder="Ej: Material de este mes: [link]. Este viernes hay jornada especial de esmaltado.">${escapeHtml(state.studentInfo || '')}</textarea>
+      <button class="primary block" id="btn-save-info" style="margin-top:12px;">Guardar</button>
+    </div>
+    <div class="card">
+      <h3>Nuevo aviso</h3>
+      <textarea id="in-announce" rows="3" placeholder="Escribí el comunicado para los alumnos…"></textarea>
+      <button class="primary block" id="btn-add-announce" style="margin-top:12px;">Publicar</button>
+    </div>
+    <div class="card"><h3>Avisos publicados</h3>${rowsHtml}</div>
+  `;
+  document.getElementById('btn-save-info').onclick = async () => {
+    state.studentInfo = document.getElementById('in-student-info').value.trim();
+    await persist('studentInfo');
+  };
+  document.getElementById('btn-add-announce').onclick = async () => {
+    const message = document.getElementById('in-announce').value.trim();
+    if(!message) return;
+    state.announcements.push({ id: Date.now().toString(), date: todayISO(), message });
+    await persist('announcements');
+    renderAdminAnnouncements(content);
+  };
+  content.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      state.announcements = state.announcements.filter(a => a.id !== btn.dataset.del);
+      await persist('announcements');
+      renderAdminAnnouncements(content);
+    };
+  });
+}
+
+function renderAdminProfes(content){
+  const rowsHtml = Object.values(state.admins).sort((a,b) => a.username.localeCompare(b.username)).map(a => `
+    <div class="list-item">
+      <div>
+        <div style="font-weight:600;">${a.username} ${a.role==='owner' ? '<span class="badge-role">dueño/a</span>' : '<span class="badge-role">profe</span>'}</div>
+        <div class="muted">creado ${a.createdAt}</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+        ${a.role !== 'owner' ? `<button class="ghost small" data-reset="${a.username}">Resetear contraseña</button>` : ''}
+        ${a.username !== state.session.username ? `<button class="danger small" data-del="${a.username}">Eliminar</button>` : '<span class="muted">vos</span>'}
+      </div>
+    </div>
+  `).join('');
+  content.innerHTML = `
+    <div class="card">
+      <h3>Agregar profe</h3>
+      <label>Usuario</label>
+      <input id="f-prof-user" autocapitalize="none">
+      <label>Contraseña</label>
+      <input id="f-prof-pass" type="password">
+      <p class="hint">Mínimo 6 caracteres, combinando letras y números.</p>
+      <div id="prof-err"></div>
+      <button class="primary block" id="btn-add-prof" style="margin-top:12px;">Crear cuenta de profe</button>
+    </div>
+    <div class="card"><h3>Cuentas del equipo</h3>${rowsHtml}</div>
+  `;
+  document.getElementById('btn-add-prof').onclick = async () => {
+    const username = document.getElementById('f-prof-user').value.trim().toLowerCase();
+    const pass = document.getElementById('f-prof-pass').value;
+    const errEl = document.getElementById('prof-err');
+    errEl.innerHTML = '';
+    if(username.length < 3){ errEl.innerHTML = '<p class="err">Elegí un usuario de al menos 3 caracteres.</p>'; return; }
+    if(state.admins[username]){ errEl.innerHTML = '<p class="err">Ya existe una cuenta con ese usuario.</p>'; return; }
+    const issue = passwordIssues(pass);
+    if(issue){ errEl.innerHTML = `<p class="err">${issue}</p>`; return; }
+    const passwordHash = await sha256(pass);
+    state.admins[username] = { username, passwordHash, role:'profe', createdAt: todayISO() };
+    await persist('admins');
+    renderAdminProfes(content);
+  };
+  content.querySelectorAll('[data-reset]').forEach(btn => {
+    btn.onclick = () => openResetProfePasswordModal(btn.dataset.reset, content);
+  });
+  content.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = async () => {
+      if(!confirm(`¿Eliminar la cuenta de ${btn.dataset.del}?`)) return;
+      delete state.admins[btn.dataset.del];
+      await persist('admins');
+      renderAdminProfes(content);
+    };
+  });
+}
+
+function openResetProfePasswordModal(username, content){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal">
+      <h3>Resetear contraseña de ${username}</h3>
+      <label>Contraseña nueva</label>
+      <input id="rp-pass" type="password">
+      <p class="hint">Mínimo 6 caracteres, combinando letras y números.</p>
+      <div id="rp-err"></div>
+      <div class="row" style="margin-top:16px;">
+        <button class="ghost block" id="rp-cancel">Cancelar</button>
+        <button class="primary block" id="rp-save">Guardar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  backdrop.querySelector('#rp-cancel').onclick = () => backdrop.remove();
+  backdrop.querySelector('#rp-save').onclick = async () => {
+    const pass = backdrop.querySelector('#rp-pass').value;
+    const errEl = backdrop.querySelector('#rp-err');
+    const issue = passwordIssues(pass);
+    if(issue){ errEl.innerHTML = `<p class="err">${issue}</p>`; return; }
+    state.admins[username].passwordHash = await sha256(pass);
+    await persist('admins');
+    backdrop.remove();
+    renderAdminProfes(content);
+  };
+}
+
+function renderAdminConfig(content){
+  const c = state.config;
+  content.innerHTML = `
+    <div class="card">
+      <h3>Paleta de colores</h3>
+      <div class="theme-grid" id="theme-grid">
+        ${Object.keys(THEMES).map(key => {
+          const t = THEMES[key];
+          return `<div class="theme-card ${c.theme===key?'selected':''}" data-theme="${key}">
+            <div class="theme-swatch">
+              <span style="background:${t.bg}"></span><span style="background:${t.glaze}"></span><span style="background:${t.oxide}"></span><span style="background:${t.ink}"></span>
+            </div>
+            <div class="theme-name">${t.name}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h3>Turnos de lunes a viernes</h3>
+      <div id="wd-slots"></div>
+      <button class="ghost" id="btn-add-wd">+ agregar turno</button>
+    </div>
+    <div class="card">
+      <h3>Turnos de sábado</h3>
+      <div id="sat-slots"></div>
+      <button class="ghost" id="btn-add-sat">+ agregar turno</button>
+    </div>
+    <div class="card" id="profes-por-turno-card">
+      <h3>Profe a cargo de cada turno</h3>
+      <p class="muted">Así los alumnos ven quién les da clase, y cada profe ve solo sus alumnos en la pestaña Alumnos. Opcional.</p>
+      <div id="slot-assign-list" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <h3>Reglas y cuota</h3>
+      <label>Cupo por turno</label>
+      <input type="number" id="in-capacity" value="${c.capacity}">
+      <label>Clases por ciclo (informativo)</label>
+      <input type="number" id="in-cycle" value="${c.classesPerCycle}">
+      <label>Cambios permitidos por mes</label>
+      <input type="number" id="in-swaps" value="${c.swapsPerMonth}">
+      <div class="row">
+        <div><label>Pago desde el día</label><input type="number" id="in-pay-start" value="${c.paymentWindowStart}"></div>
+        <div><label>hasta el día</label><input type="number" id="in-pay-end" value="${c.paymentWindowEnd}"></div>
+      </div>
+      <label>Cuota mensual por defecto</label>
+      <input type="number" id="in-fee" value="${c.monthlyFee}">
+      <label>Los avisos se muestran a los alumnos durante (días)</label>
+      <input type="number" id="in-announce-days" value="${c.announcementVisibleDays}">
+      <p class="hint">Pasados esos días, el aviso deja de aparecer en el home del alumno — pero vos seguís viéndolo en esta pestaña.</p>
+      <label>PIN por defecto para alumnos nuevos</label>
+      <input id="in-default-pin" value="${c.defaultStudentPin}" maxlength="4">
+      <label>Tu WhatsApp (para avisos rápidos, sin el +, ej: 5491122334455)</label>
+      <input id="in-whatsapp" value="${c.profeWhatsapp || ''}" placeholder="5491122334455">
+      <p class="hint">Si lo cargás, cuando un alumno pida restablecer su PIN le va a aparecer un botón para avisarte directo por WhatsApp.</p>
+      <label>Link de cobro de Mercado Pago (general)</label>
+      <input id="in-mp" placeholder="https://mpago.la/..." value="${c.mpLink || ''}">
+      <p class="hint">Generá este link desde tu cuenta de Mercado Pago (Link de pago o Punto de venta). El alumno paga ahí y vos confirmás acá con "Marcar pagado" — ver la nota sobre cobro automático más abajo.</p>
+      <button class="primary block" id="btn-save-config" style="margin-top:14px;">Guardar configuración</button>
+    </div>
+  `;
+  content.querySelectorAll('[data-theme]').forEach(el => {
+    el.onclick = async () => {
+      c.theme = el.dataset.theme;
+      applyTheme(c.theme);
+      await persist('config');
+      renderAdminConfig(content);
+    };
+  });
+  renderSlotEditor('wd-slots', 'slotsWeekday');
+  renderSlotEditor('sat-slots', 'slotsSaturday');
+  renderSlotAssignments();
+  document.getElementById('btn-add-wd').onclick = () => addSlot('slotsWeekday');
+  document.getElementById('btn-add-sat').onclick = () => addSlot('slotsSaturday');
+  document.getElementById('btn-save-config').onclick = async () => {
+    c.capacity = parseInt(document.getElementById('in-capacity').value,10) || c.capacity;
+    c.classesPerCycle = parseInt(document.getElementById('in-cycle').value,10) || c.classesPerCycle;
+    c.swapsPerMonth = parseInt(document.getElementById('in-swaps').value,10) || c.swapsPerMonth;
+    c.paymentWindowStart = parseInt(document.getElementById('in-pay-start').value,10) || c.paymentWindowStart;
+    c.paymentWindowEnd = parseInt(document.getElementById('in-pay-end').value,10) || c.paymentWindowEnd;
+    c.monthlyFee = parseInt(document.getElementById('in-fee').value,10) || c.monthlyFee;
+    c.announcementVisibleDays = parseInt(document.getElementById('in-announce-days').value,10) || c.announcementVisibleDays;
+    c.defaultStudentPin = document.getElementById('in-default-pin').value.trim() || c.defaultStudentPin;
+    c.profeWhatsapp = document.getElementById('in-whatsapp').value.trim().replace(/[^0-9]/g, '');
+    c.mpLink = document.getElementById('in-mp').value.trim();
+    await persist('config');
+    renderAdminConfig(content);
+  };
+
+  function renderSlotEditor(containerId, key){
+    const el = document.getElementById(containerId);
+    el.innerHTML = c[key].map((s,i) => `
+      <div class="row" style="margin-bottom:8px; align-items:flex-end;">
+        <div><label>Desde</label><input type="time" data-key="${key}" data-idx="${i}" data-field="start" value="${s.start}"></div>
+        <div><label>Hasta</label><input type="time" data-key="${key}" data-idx="${i}" data-field="end" value="${s.end}"></div>
+        <button class="ghost" data-remove="${key}:${i}">✕</button>
+      </div>
+    `).join('');
+    el.querySelectorAll('input[data-key]').forEach(inp => {
+      inp.onchange = async () => {
+        c[inp.dataset.key][inp.dataset.idx][inp.dataset.field] = inp.value;
+        await persist('config');
+      };
+    });
+    el.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.onclick = async () => {
+        const [key, idx] = btn.dataset.remove.split(':');
+        c[key].splice(parseInt(idx,10),1);
+        await persist('config');
+        renderAdminConfig(content);
+      };
+    });
+  }
+  async function addSlot(key){
+    c[key].push({ id: key.slice(0,1)+Date.now().toString().slice(-5), start:'09:00', end:'11:00' });
+    await persist('config');
+    renderAdminConfig(content);
+  }
+  function renderSlotAssignments(){
+    const el = document.getElementById('slot-assign-list');
+    const profes = profeAccounts();
+    if(!profes.length){
+      el.innerHTML = '<p class="muted">Todavía no hay cuentas de profe creadas — pedile al dueño/a que cree una en su panel.</p>';
+      return;
+    }
+    let rows = '';
+    [1,2,3,4,5,6].forEach(wd => {
+      slotsForWeekday(wd).forEach(slot => {
+        const key = slotAssignmentKey(wd, slot.id);
+        const current = state.slotAssignments[key] || '';
+        rows += `
+          <div class="row" style="margin-bottom:8px; align-items:center;">
+            <div class="muted" style="flex:1.2;">${DIAS_CORTO[wd]} · ${slot.start}–${slot.end}</div>
+            <select data-assign-key="${key}" style="flex:1;">
+              <option value="">Sin asignar</option>
+              ${profes.map(p => `<option value="${p.username}" ${current===p.username?'selected':''}>${p.username}</option>`).join('')}
+            </select>
+          </div>`;
+      });
+    });
+    el.innerHTML = rows;
+    el.querySelectorAll('[data-assign-key]').forEach(sel => {
+      sel.onchange = async () => {
+        if(sel.value) state.slotAssignments[sel.dataset.assignKey] = sel.value;
+        else delete state.slotAssignments[sel.dataset.assignKey];
+        await persist('slotAssignments');
+      };
+    });
+  }
+}
+
+// ---------- boot ----------
+(async function init(){
+  await loadAll();
+  render();
+})();
+</script>
+</body>
+</html>
