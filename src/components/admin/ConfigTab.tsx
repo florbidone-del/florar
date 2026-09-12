@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DIAS_CORTO, slotsForWeekday } from "@/lib/domain";
+import { DIAS_CORTO } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import type { AdminBundle } from "@/lib/views/admin";
+import { Collapsible } from "@/components/shared/Collapsible";
 import {
   saveConfigAction,
   setThemeAction,
@@ -57,8 +58,7 @@ export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
 
   return (
     <>
-      <div className="card">
-        <h3>Paleta de colores</h3>
+      <Collapsible title="Paleta de colores">
         <div className="theme-grid">
           {Object.entries(THEMES).map(([key, t]) => (
             <button
@@ -77,13 +77,17 @@ export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
             </button>
           ))}
         </div>
-      </div>
+      </Collapsible>
 
-      <SlotEditor type="weekday" title="Turnos de lunes a viernes" slots={c.slotsWeekday} onChanged={() => router.refresh()} />
-      <SlotEditor type="saturday" title="Turnos de sábado" slots={c.slotsSaturday} onChanged={() => router.refresh()} />
+      <Collapsible title="Turnos de lunes a viernes">
+        <SlotEditor type="weekday" slots={c.slotsWeekday} onChanged={() => router.refresh()} />
+      </Collapsible>
 
-      <div className="card">
-        <h3>Profe a cargo de cada turno</h3>
+      <Collapsible title="Turnos de sábado">
+        <SlotEditor type="saturday" slots={c.slotsSaturday} onChanged={() => router.refresh()} />
+      </Collapsible>
+
+      <Collapsible title="Profe a cargo de cada turno">
         <p className="muted">
           Así los alumnos ven quién les da clase, y cada profe ve solo sus alumnos en la pestaña Alumnos.
           Opcional.
@@ -93,46 +97,28 @@ export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
             Todavía no hay cuentas de profe creadas — pedile al dueño/a que cree una en su panel.
           </p>
         ) : (
-          <div style={{ marginTop: 10 }}>
-            {[1, 2, 3, 4, 5, 6].map((wd) =>
-              slotsForWeekday(snap, wd).map((slot) => {
-                const current =
-                  snap.slotAssignments.find((sa) => sa.weekday === wd && sa.slotId === slot.id)
-                    ?.profeUsername || "";
-                return (
-                  <div className="row" style={{ marginBottom: 8, alignItems: "center" }} key={`${wd}_${slot.id}`}>
-                    <div className="muted" style={{ flex: 1.2 }}>
-                      {DIAS_CORTO[wd]} · {slot.start}–{slot.end}
-                    </div>
-                    <select
-                      defaultValue={current}
-                      style={{ flex: 1 }}
-                      onChange={async (e) => {
-                        await setSlotAssignmentAction({
-                          weekday: wd,
-                          slotId: slot.id,
-                          profeUsername: e.target.value || null,
-                        });
-                        router.refresh();
-                      }}
-                    >
-                      <option value="">Sin asignar</option>
-                      {profes.map((p) => (
-                        <option value={p} key={p}>
-                          {p}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                );
-              })
-            )}
-          </div>
+          <>
+            <SlotAssignmentGrid
+              weekdays={[1, 2, 3, 4, 5]}
+              slots={c.slotsWeekday}
+              snap={snap}
+              profes={profes}
+              onChanged={() => router.refresh()}
+            />
+            <div style={{ marginTop: 14 }}>
+              <SlotAssignmentGrid
+                weekdays={[6]}
+                slots={c.slotsSaturday}
+                snap={snap}
+                profes={profes}
+                onChanged={() => router.refresh()}
+              />
+            </div>
+          </>
         )}
-      </div>
+      </Collapsible>
 
-      <div className="card">
-        <h3>Reglas y cuota</h3>
+      <Collapsible title="Reglas y cuota">
         <label>Cupo por turno</label>
         <input type="number" value={capacity} onChange={(e) => setCapacity(Number(e.target.value))} />
         <label>Clases por ciclo (informativo)</label>
@@ -186,19 +172,81 @@ export function ConfigTab({ bundle }: { bundle: AdminBundle }) {
         <button className="primary block" style={{ marginTop: 14 }} disabled={savingRules} onClick={saveRules}>
           Guardar configuración
         </button>
-      </div>
+      </Collapsible>
     </>
+  );
+}
+
+function SlotAssignmentGrid({
+  weekdays,
+  slots,
+  snap,
+  profes,
+  onChanged,
+}: {
+  weekdays: number[];
+  slots: { id: string; start: string; end: string }[];
+  snap: AdminBundle["snapshot"];
+  profes: string[];
+  onChanged: () => void;
+}) {
+  if (slots.length === 0) return null;
+
+  async function assign(weekday: number, slotId: string, value: string) {
+    await setSlotAssignmentAction({ weekday, slotId, profeUsername: value || null });
+    onChanged();
+  }
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table>
+        <tbody>
+          <tr>
+            <th></th>
+            {weekdays.map((wd) => (
+              <th key={wd}>{DIAS_CORTO[wd]}</th>
+            ))}
+          </tr>
+          {slots.map((slot) => (
+            <tr key={slot.id}>
+              <th style={{ whiteSpace: "nowrap" }}>
+                {slot.start}–{slot.end}
+              </th>
+              {weekdays.map((wd) => {
+                const current =
+                  snap.slotAssignments.find((sa) => sa.weekday === wd && sa.slotId === slot.id)
+                    ?.profeUsername || "";
+                return (
+                  <td key={wd}>
+                    <select
+                      defaultValue={current}
+                      style={{ fontSize: "0.72rem", padding: "6px 4px" }}
+                      onChange={(e) => assign(wd, slot.id, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {profes.map((p) => (
+                        <option value={p} key={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 function SlotEditor({
   type,
-  title,
   slots,
   onChanged,
 }: {
   type: "weekday" | "saturday";
-  title: string;
   slots: { id: string; start: string; end: string }[];
   onChanged: () => void;
 }) {
@@ -216,8 +264,7 @@ function SlotEditor({
   }
 
   return (
-    <div className="card">
-      <h3>{title}</h3>
+    <>
       {slots.map((s) => (
         <div className="row" style={{ marginBottom: 8, alignItems: "flex-end" }} key={s.id}>
           <div>
@@ -236,6 +283,6 @@ function SlotEditor({
       <button className="ghost" onClick={add}>
         + agregar turno
       </button>
-    </div>
+    </>
   );
 }

@@ -28,7 +28,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const isOwner = session.role === "owner";
   const tabs = isOwner
     ? ["profes"]
-    : ["semana", "alumnos", "feriados", "actividades", "avisos", "config"];
+    : ["semana", "alumnos", "avisos", "actividades", "feriados", "config"];
   const [tab, setTab] = useState(tabs[0]);
 
   async function logout() {
