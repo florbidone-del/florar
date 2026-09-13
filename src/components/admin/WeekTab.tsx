@@ -10,7 +10,6 @@ import {
   pad,
   parseISO,
   slotOccupancy,
-  sortSlots,
   todayISO,
 } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
@@ -22,7 +21,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
   const [modalCell, setModalCell] = useState<{ date: string; slotId: string } | null>(null);
 
   const week = [0, 1, 2, 3, 4, 5].map((i) => addDays(weekBase, i));
-  const orderedSlots = sortSlots(snap.config.slots);
+  const orderedSlots = [...snap.config.slots].sort((a, b) => a.start.localeCompare(b.start));
 
   return (
     <>

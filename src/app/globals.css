@@ -260,6 +260,7 @@ td.holiday{background:var(--oxide-soft);}
   padding:10px 2px;
   border-radius:6px;
   cursor:pointer;
+  white-space:nowrap;
 }
 .occ-cell.has-people{
   color:var(--ink);
@@ -310,6 +311,7 @@ td.holiday{background:var(--oxide-soft);}
   cursor:pointer;
   font-size:0.85rem;
   background:var(--surface);
+  white-space:nowrap;
 }
 .chip.selected{border-color:var(--glaze); background:var(--ok-bg); font-weight:600;}
 .chip.full{opacity:0.35; cursor:not-allowed;}
@@ -325,6 +327,7 @@ td.holiday{background:var(--oxide-soft);}
 }
 .slot-option:hover, .slot-option.selected{border-color:var(--glaze); background:var(--ok-bg);}
 .slot-option.full{opacity:0.4; cursor:not-allowed;}
+.slot-option span{white-space:nowrap;}
 .step-label{font-size:0.78rem; color:var(--ink-soft); margin-bottom:8px; text-transform:none;}
 .footer-note{
   text-align:center;
