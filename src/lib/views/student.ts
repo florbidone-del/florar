@@ -9,6 +9,7 @@ import {
   dayAvailability,
   fmtShort,
   isHoliday,
+  isoDate,
   isUnpaid,
   money,
   parseISO,
@@ -153,7 +154,7 @@ export async function buildStudentPanelData(
     orderBy: { createdAt: "asc" },
   });
   const announcements = allAnnouncements
-    .map((a) => ({ id: a.id, date: a.createdAt.toISOString().slice(0, 10), message: a.message }))
+    .map((a) => ({ id: a.id, date: isoDate(a.createdAt), message: a.message }))
     .filter((a) => daysSince(a.date) <= snap.config.announcementVisibleDays)
     .slice(-8)
     .reverse();

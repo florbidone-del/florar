@@ -1,7 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
-import type { WorkshopSnapshot } from "@/lib/domain";
+import { isoDate, type WorkshopSnapshot } from "@/lib/domain";
 
 export type AdminDTO = {
   username: string;
@@ -49,24 +49,24 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       username: a.username,
       role: a.role,
       isMainProfe: a.isMainProfe,
-      createdAt: a.createdAt.toISOString().slice(0, 10),
+      createdAt: isoDate(a.createdAt),
     })),
     notifications: notifications.map((n) => ({
       id: n.id,
       forProfe: n.forProfe,
       message: n.message,
-      createdAt: n.createdAt.toISOString().slice(0, 10),
+      createdAt: isoDate(n.createdAt),
     })),
     pinResets: pinResets.map((r) => ({
       id: r.id,
       studentId: r.studentId,
       studentName: r.student.name,
-      requestedAt: r.requestedAt.toISOString().slice(0, 10),
+      requestedAt: isoDate(r.requestedAt),
     })),
     announcements: announcements.map((a) => ({
       id: a.id,
       message: a.message,
-      createdAt: a.createdAt.toISOString().slice(0, 10),
+      createdAt: isoDate(a.createdAt),
     })),
   };
 }

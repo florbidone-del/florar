@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import type { WorkshopSnapshot, ConfigDTO } from "@/lib/domain";
+import { isoDate, type WorkshopSnapshot, type ConfigDTO } from "@/lib/domain";
 
 function dOnly(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -96,7 +96,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       feeOverride: s.feeOverride,
       mpLink: s.mpLink,
       theme: s.theme,
-      createdAt: s.createdAt.toISOString(),
+      createdAt: isoDate(s.createdAt),
     })),
     scheduleChanges: scheduleChanges.map((c) => ({
       id: c.id,
