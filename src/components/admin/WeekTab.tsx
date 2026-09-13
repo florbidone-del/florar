@@ -4,11 +4,13 @@ import { useState } from "react";
 import {
   DIAS_CORTO,
   addDays,
+  capitalize,
   fmtLong,
   isHoliday,
   mondayOf,
   pad,
   parseISO,
+  profeForDateSlot,
   slotOccupancy,
   todayISO,
 } from "@/lib/domain";
@@ -71,6 +73,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
                     const isSubstituted = snap.substitutions.some(
                       (s) => s.date === date && s.slotId === slotId
                     );
+                    const profe = profeForDateSlot(snap, date, slotId);
                     const cls = [
                       "occ-cell",
                       names.length ? "has-people" : "",
@@ -88,6 +91,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
                         >
                           {names.length}/{snap.config.capacity}
                           {isSubstituted ? " *" : ""}
+                          {profe && <div className="names">{capitalize(profe)}</div>}
                         </button>
                       </td>
                     );
