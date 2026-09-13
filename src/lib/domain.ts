@@ -91,6 +91,33 @@ export function slugify(name: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
+
+function onlyLetters(word: string) {
+  return word
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z]/g, "");
+}
+
+/**
+ * Candidatos de usuario en orden de preferencia: inicial del nombre + apellido, y si ya
+ * existe, dos letras del nombre + apellido, tres, etc. (ej: "Santiago Sosa" -> ssosa,
+ * luego sasosa, sansosa...). Si el nombre es una sola palabra, cae al slug de siempre.
+ */
+export function usernameCandidates(fullName: string): string[] {
+  const words = fullName.trim().split(/\s+/).map(onlyLetters).filter(Boolean);
+  if (words.length < 2) return [slugify(fullName)];
+  const [nombre, ...resto] = words;
+  const apellido = resto.join("");
+  const candidates: string[] = [];
+  for (let n = 1; n <= nombre.length; n++) {
+    candidates.push(nombre.slice(0, n) + apellido);
+  }
+  candidates.push(slugify(fullName));
+  return candidates;
+}
 export function occurrencesInMonth(weekday: number, monthKey: string) {
   const [y, m] = monthKey.split("-").map(Number);
   const dates: string[] = [];

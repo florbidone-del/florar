@@ -67,12 +67,12 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
         <div className="card">
           <h3>Pedir restablecer PIN</h3>
           <p className="muted">
-            Escribí tu nombre tal como lo registró la profesora. Le va a quedar la
-            solicitud para que te restablezca el PIN.
+            Escribí tu usuario, el mismo con el que entrás siempre. Le va a quedar la
+            solicitud a la profesora para que te restablezca el PIN.
           </p>
-          <label>Nombre y apellido</label>
+          <label>Usuario</label>
           <input
-            placeholder="Ej: Julia Gómez"
+            placeholder="Ej: ssosa"
             value={fpName}
             onChange={(e) => setFpName(e.target.value)}
           />
@@ -135,9 +135,9 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
       <div className="card">
         <h3>Entrar</h3>
         <div className="field">
-          <label>Usuario (nombre y apellido)</label>
+          <label>Usuario</label>
           <input
-            placeholder="Ej: Julia Gómez"
+            placeholder="Ej: ssosa"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />

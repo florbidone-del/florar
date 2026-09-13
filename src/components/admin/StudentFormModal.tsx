@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/shared/Modal";
-import { money, slugify } from "@/lib/domain";
+import { money, usernameCandidates } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import { WeekdaySlotPicker } from "@/components/admin/WeekdaySlotPicker";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/students";
@@ -69,7 +69,11 @@ export function StudentFormModal({
       <label>Nombre y apellido</label>
       <input value={editing ? student?.name : name} disabled={editing} onChange={(e) => setName(e.target.value)} />
       {!editing && (
-        <div className="hint">{name.trim() ? `Usuario para ingresar: ${slugify(name)}` : ""}</div>
+        <div className="hint">
+          {name.trim()
+            ? `Usuario para ingresar: ${usernameCandidates(name)[0]} (si ya existe, se ajusta solo)`
+            : ""}
+        </div>
       )}
       {editing && <div className="hint">Usuario: {student?.id}</div>}
       <label>PIN</label>

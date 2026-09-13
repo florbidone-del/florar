@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
 import { requireProfe } from "@/lib/authz";
-import { slugify, currentMonthKey, studentFee } from "@/lib/domain";
+import { usernameCandidates, currentMonthKey, studentFee } from "@/lib/domain";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
 import type { ActionResult } from "@/lib/actions/auth";
 
@@ -22,12 +22,18 @@ export async function createStudentAction(input: {
   if (!input.pin.trim()) return { error: "Ingresá un PIN." };
   if (input.defaultWeekday === null || !input.defaultSlotId)
     return { error: "Elegí día y horario." };
-  const id = slugify(name);
-  const existing = await prisma.student.findUnique({ where: { id } });
-  if (existing) {
+  let id: string | null = null;
+  for (const candidate of usernameCandidates(name)) {
+    const existing = await prisma.student.findUnique({ where: { id: candidate } });
+    if (!existing) {
+      id = candidate;
+      break;
+    }
+  }
+  if (!id) {
     return {
       error:
-        'Ya existe un alumno con ese nombre/usuario. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").',
+        'Ya existe un alumno con ese nombre. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").',
     };
   }
   await prisma.student.create({

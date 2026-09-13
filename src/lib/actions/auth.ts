@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSession, destroySession, requireStudent } from "@/lib/session";
-import { slugify, passwordIssues } from "@/lib/domain";
+import { passwordIssues } from "@/lib/domain";
 
 export type ActionResult = { error?: string } | { ok: true };
 
@@ -15,7 +15,7 @@ export async function studentLoginAction(input: {
   const pin = input.pin.trim();
   if (name.length < 2) return { error: "Ingresá tu usuario." };
   if (!pin) return { error: "Ingresá tu PIN." };
-  const id = slugify(name);
+  const id = name.toLowerCase();
   const student = await prisma.student.findUnique({ where: { id } });
   if (!student || student.pin !== pin) {
     return {
@@ -69,7 +69,7 @@ export type ForgotPinResult =
 export async function studentForgotPinAction(input: {
   name: string;
 }): Promise<ForgotPinResult> {
-  const id = slugify(input.name.trim());
+  const id = input.name.trim().toLowerCase();
   const student = await prisma.student.findUnique({ where: { id } });
   if (!student) return { status: "not-found" };
 
