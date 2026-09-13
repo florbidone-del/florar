@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
@@ -175,7 +175,7 @@ function SlotAssignmentGrid({
   onChanged: () => void;
 }) {
   if (slots.length === 0) return null;
-  const sorted = sortSlots(slots);
+  const sorted = [...slots].sort((a, b) => a.start.localeCompare(b.start));
 
   async function assign(weekday: number, slotId: string, value: string) {
     await setSlotAssignmentAction({ weekday, slotId, profeUsername: value || null });
@@ -187,14 +187,14 @@ function SlotAssignmentGrid({
       <table>
         <tbody>
           <tr>
-            <th></th>
+            <th className="row-head"></th>
             {WEEKDAYS_MON_FIRST.filter((wd) => wd !== 0).map((wd) => (
               <th key={wd}>{DIAS_CORTO[wd]}</th>
             ))}
           </tr>
           {sorted.map((slot) => (
             <tr key={slot.id}>
-              <th style={{ whiteSpace: "nowrap" }}>
+              <th className="row-head" style={{ whiteSpace: "nowrap" }}>
                 {slot.start}–{slot.end}
               </th>
               {WEEKDAYS_MON_FIRST.filter((wd) => wd !== 0).map((wd) => {
@@ -234,7 +234,18 @@ function SlotEditor({
   slots: { id: string; weekdays: number[]; start: string; end: string }[];
   onChanged: () => void;
 }) {
-  const sorted = sortSlots(slots);
+  // El orden visual se fija una vez al entrar y solo se actualiza cuando se agrega o
+  // quita un turno — así una fila no salta de lugar mientras vas tildando sus días.
+  const [order, setOrder] = useState<string[]>(() => sortSlots(slots).map((s) => s.id));
+  useEffect(() => {
+    setOrder((prev) => {
+      const stillThere = prev.filter((id) => slots.some((s) => s.id === id));
+      const newOnes = slots.filter((s) => !stillThere.includes(s.id));
+      return newOnes.length ? [...stillThere, ...sortSlots(newOnes).map((s) => s.id)] : stillThere;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slots.map((s) => s.id).join(",")]);
+  const sorted = order.map((id) => slots.find((s) => s.id === id)).filter((s): s is (typeof slots)[number] => !!s);
 
   async function update(
     id: string,

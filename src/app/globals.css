@@ -247,6 +247,7 @@ th,td{
   vertical-align:top;
 }
 th{background:var(--surface); font-weight:600; font-size:0.75rem;}
+th.row-head{position:sticky; left:0; z-index:2;}
 td.holiday{background:var(--oxide-soft);}
 .occ-count{font-family:var(--font-fraunces), serif; font-size:1.1rem;}
 .names{font-size:0.62rem; color:var(--ink-soft); margin-top:2px; word-break:break-word;}

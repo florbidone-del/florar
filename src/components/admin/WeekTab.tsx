@@ -40,7 +40,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
         <table>
           <tbody>
             <tr>
-              <th></th>
+              <th className="row-head"></th>
               {week.map((d) => (
                 <th key={d}>
                   {DIAS_CORTO[parseISO(d).getDay()]} {pad(parseISO(d).getDate())}
@@ -51,7 +51,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
               const slotId = slot.id;
               return (
                 <tr key={slotId}>
-                  <th style={{ whiteSpace: "nowrap" }}>
+                  <th className="row-head" style={{ whiteSpace: "nowrap" }}>
                     {slot.start}–{slot.end}
                   </th>
                   {week.map((date) => {
