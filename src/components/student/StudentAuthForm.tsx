@@ -72,7 +72,7 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
           </p>
           <label>Usuario</label>
           <input
-            placeholder="Ej: ssosa"
+            placeholder="Tu usuario"
             value={fpName}
             onChange={(e) => setFpName(e.target.value)}
           />
@@ -137,7 +137,7 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
         <div className="field">
           <label>Usuario</label>
           <input
-            placeholder="Ej: ssosa"
+            placeholder="Tu usuario"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />

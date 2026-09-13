@@ -103,8 +103,8 @@ function onlyLetters(word: string) {
 
 /**
  * Candidatos de usuario en orden de preferencia: inicial del nombre + apellido, y si ya
- * existe, dos letras del nombre + apellido, tres, etc. (ej: "Santiago Sosa" -> ssosa,
- * luego sasosa, sansosa...). Si el nombre es una sola palabra, cae al slug de siempre.
+ * existe, dos letras del nombre + apellido, tres, etc. (ej: "Ana Pérez" -> aperez,
+ * luego anperez, anaperez...). Si el nombre es una sola palabra, cae al slug de siempre.
  */
 export function usernameCandidates(fullName: string): string[] {
   const words = fullName.trim().split(/\s+/).map(onlyLetters).filter(Boolean);
