@@ -71,6 +71,7 @@ model Admin {
   passwordHash String
   role         AdminRole
   isMainProfe  Boolean   @default(false)
+  tutorialSeen Boolean   @default(false)
   createdAt    DateTime  @default(now())
 
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
@@ -88,6 +89,7 @@ model Student {
   feeOverride     Int?
   mpLink          String?
   theme           String?
+  tutorialSeen    Boolean  @default(false)
   createdAt       DateTime @default(now())
 
   scheduleChanges ScheduleChange[]

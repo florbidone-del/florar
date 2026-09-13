@@ -7,6 +7,7 @@ export type AdminDTO = {
   username: string;
   role: "owner" | "profe";
   isMainProfe: boolean;
+  tutorialSeen: boolean;
   createdAt: string;
 };
 export type NotificationDTO = {
@@ -49,6 +50,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       username: a.username,
       role: a.role,
       isMainProfe: a.isMainProfe,
+      tutorialSeen: a.tutorialSeen,
       createdAt: isoDate(a.createdAt),
     })),
     notifications: notifications.map((n) => ({

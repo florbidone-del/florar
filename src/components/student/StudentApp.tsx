@@ -12,8 +12,54 @@ import { PayButton } from "@/components/student/PayButton";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import { Collapsible } from "@/components/shared/Collapsible";
-import { logoutAction, setMyThemeAction } from "@/lib/actions/auth";
+import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
+import { logoutAction, setMyThemeAction, dismissStudentTutorialAction } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
+
+function studentTourSteps(studioName: string): TourStep[] {
+  return [
+    {
+      title: `¡Bienvenido/a a ${studioName}!`,
+      body: <p className="muted">Un recorrido rapidito por lo que podés hacer acá. Se puede saltear.</p>,
+    },
+    {
+      title: "Tu calendario",
+      body: (
+        <p className="muted">
+          Tu clase fija aparece con fondo violeta sólido. Tocá ese día para ver el detalle o para
+          cambiarlo; tocá cualquier otro día para ver si tiene lugar.
+        </p>
+      ),
+    },
+    {
+      title: "Cambiar un turno",
+      body: (
+        <p className="muted">
+          Podés mover una clase puntual una vez por mes, con al menos 24hs de anticipación. Si cae un
+          feriado, esa clase queda para reprogramar sin gastar tu cambio del mes.
+        </p>
+      ),
+    },
+    {
+      title: "Avisos y cuota",
+      body: (
+        <p className="muted">
+          Arriba vas a ver la información fija de la profe y los avisos recientes. Si debés la cuota,
+          te va a aparecer un botón para pagar con Mercado Pago.
+        </p>
+      ),
+    },
+    {
+      title: "Tu cuenta",
+      body: (
+        <p className="muted">
+          Más abajo podés cambiar tu PIN y elegir el tema de colores de tu propia app, sin que afecte a
+          nadie más.
+        </p>
+      ),
+    },
+  ];
+}
 
 type ModalState =
   | { kind: "own"; day: CalendarDay }
@@ -25,6 +71,12 @@ type ModalState =
 export function StudentApp({ data }: { data: StudentPanelData }) {
   const router = useRouter();
   const [modal, setModal] = useState<ModalState>(null);
+  const [showTour, setShowTour] = useState(!data.tutorialSeen);
+
+  async function finishTour() {
+    setShowTour(false);
+    await dismissStudentTutorialAction();
+  }
 
   async function logout() {
     await logoutAction();
@@ -187,6 +239,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         />
       )}
       {modal?.kind === "pin" && <ChangePinModal onClose={() => setModal(null)} />}
+      {showTour && <OnboardingTour steps={studentTourSteps(data.studioName)} onFinish={finishTour} />}
     </>
   );
 }

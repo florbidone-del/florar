@@ -2,7 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { createSession, destroySession, requireStudent } from "@/lib/session";
+import { createSession, destroySession, requireAdmin, requireStudent } from "@/lib/session";
 import { passwordIssues } from "@/lib/domain";
 
 export type ActionResult = { error?: string } | { ok: true };
@@ -57,6 +57,26 @@ export async function setMyThemeAction(theme: string): Promise<ActionResult> {
   await prisma.student.update({
     where: { id: session.studentId },
     data: { theme },
+  });
+  return { ok: true };
+}
+
+export async function dismissStudentTutorialAction(): Promise<ActionResult> {
+  const session = await requireStudent();
+  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
+  await prisma.student.update({
+    where: { id: session.studentId },
+    data: { tutorialSeen: true },
+  });
+  return { ok: true };
+}
+
+export async function dismissAdminTutorialAction(): Promise<ActionResult> {
+  const session = await requireAdmin();
+  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
+  await prisma.admin.update({
+    where: { username: session.username },
+    data: { tutorialSeen: true },
   });
   return { ok: true };
 }

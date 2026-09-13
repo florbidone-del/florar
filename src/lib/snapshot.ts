@@ -96,6 +96,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       feeOverride: s.feeOverride,
       mpLink: s.mpLink,
       theme: s.theme,
+      tutorialSeen: s.tutorialSeen,
       createdAt: isoDate(s.createdAt),
     })),
     scheduleChanges: scheduleChanges.map((c) => ({

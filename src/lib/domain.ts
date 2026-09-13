@@ -170,6 +170,7 @@ export type StudentDTO = {
   feeOverride: number | null;
   mpLink: string | null;
   theme: string | null;
+  tutorialSeen: boolean;
   createdAt: string;
 };
 export type ScheduleChangeDTO = {
