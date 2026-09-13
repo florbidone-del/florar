@@ -14,6 +14,7 @@ import {
   removeSlotAction,
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
+import { resetAllTutorialsAction } from "@/lib/actions/auth";
 
 export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMainProfe: boolean }) {
   const router = useRouter();
@@ -33,6 +34,16 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
   const [profeWhatsapp, setProfeWhatsapp] = useState(c.profeWhatsapp || "");
   const [mpLink, setMpLink] = useState(c.mpLink || "");
   const [savingRules, setSavingRules] = useState(false);
+  const [resettingTutorial, setResettingTutorial] = useState(false);
+  const [tutorialResetDone, setTutorialResetDone] = useState(false);
+
+  async function resetTutorials() {
+    if (!confirm("¿Reiniciar el tutorial para todas las cuentas (alumnos y profes)?")) return;
+    setResettingTutorial(true);
+    await resetAllTutorialsAction();
+    setResettingTutorial(false);
+    setTutorialResetDone(true);
+  }
 
   async function saveRules() {
     setSavingRules(true);
@@ -167,6 +178,21 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
         <button className="primary block" style={{ marginTop: 14 }} disabled={savingRules} onClick={saveRules}>
           Guardar configuración
         </button>
+        </Collapsible>
+      )}
+
+      {isMainProfe && (
+        <Collapsible title="Herramientas">
+          <a href="/api/export/payments">
+            <button className="ghost block">Exportar pagos (CSV)</button>
+          </a>
+          <p className="hint">Descarga todos los pagos registrados (alumno, mes, monto, estado, origen y fecha) para abrir en Excel.</p>
+          <button className="ghost block" style={{ marginTop: 14 }} disabled={resettingTutorial} onClick={resetTutorials}>
+            Reiniciar tutorial para todos los usuarios
+          </button>
+          {tutorialResetDone && (
+            <p className="hint">Listo — la próxima vez que cada alumno o profe entre, va a ver el tutorial de nuevo.</p>
+          )}
         </Collapsible>
       )}
     </>

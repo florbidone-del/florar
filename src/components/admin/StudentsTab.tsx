@@ -13,18 +13,21 @@ import {
 } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import {
-  toggleManualPaymentAction,
+  markPaidManuallyAction,
+  unmarkPaidAction,
   deleteStudentAction,
   resolvePinResetAction,
   dismissNotificationAction,
 } from "@/lib/actions/students";
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
+import { Modal } from "@/components/shared/Modal";
 
 export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string }) {
   const router = useRouter();
   const snap = bundle.snapshot;
   const [filter, setFilter] = useState<"all" | "mine">("all");
   const [formStudentId, setFormStudentId] = useState<string | null | "new">(null);
+  const [payStudentId, setPayStudentId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const iTeachSomething = snap.slotAssignments.some((sa) => sa.profeUsername === me);
@@ -34,9 +37,9 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
     .filter((s) => (filter === "mine" ? profeForSlot(snap, s.defaultWeekday, s.defaultSlotId) === me : true))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  async function togglePaid(id: string) {
+  async function removeUnpaid(id: string) {
     setBusy(id);
-    await toggleManualPaymentAction(id);
+    await unmarkPaidAction(id);
     setBusy(null);
     router.refresh();
   }
@@ -112,10 +115,10 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
         ) : (
           visibleStudents.map((s) => {
             const slot = snap.config.slots.find((x) => x.id === s.defaultSlotId);
-            const paid = snap.payments.some(
+            const payment = snap.payments.find(
               (p) => p.studentId === s.id && p.monthKey === mk && p.status === "approved"
             );
-            const fee = studentFee(snap, s.id);
+            const fee = studentFee(snap);
             const profe = profeForSlot(snap, s.defaultWeekday, s.defaultSlotId);
             return (
               <div className="list-item" key={s.id}>
@@ -128,13 +131,17 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
                     {DIAS[s.defaultWeekday]} {slot ? `${slot.start}–${slot.end}` : ""}
                     {profe ? ` · profe: ${capitalize(profe)}` : ""}
                   </div>
-                  <div className={`tag ${paid ? "ok" : "warn"}`} style={{ marginTop: 4 }}>
-                    {paid ? `pagó ${money(fee)}` : `debe ${money(fee)}`}
+                  <div className={`tag ${payment ? "ok" : "warn"}`} style={{ marginTop: 4 }}>
+                    {payment ? `pagó ${money(payment.amount)}` : `debe ${money(fee)}`}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-                  <button className="ghost small" disabled={busy === s.id} onClick={() => togglePaid(s.id)}>
-                    {paid ? "Quitar pago" : "Marcar pagado"}
+                  <button
+                    className="ghost small"
+                    disabled={busy === s.id}
+                    onClick={() => (payment ? removeUnpaid(s.id) : setPayStudentId(s.id))}
+                  >
+                    {payment ? "Quitar pago" : "Marcar pagado"}
                   </button>
                   <button className="ghost small" onClick={() => setFormStudentId(s.id)}>
                     Editar
@@ -159,6 +166,60 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
           }}
         />
       )}
+      {payStudentId && (
+        <MarkPaidModal
+          studentName={snap.students.find((s) => s.id === payStudentId)?.name || ""}
+          defaultAmount={studentFee(snap)}
+          onClose={() => setPayStudentId(null)}
+          onConfirm={async (amount) => {
+            await markPaidManuallyAction(payStudentId, amount);
+            setPayStudentId(null);
+            router.refresh();
+          }}
+        />
+      )}
     </>
+  );
+}
+
+function MarkPaidModal({
+  studentName,
+  defaultAmount,
+  onClose,
+  onConfirm,
+}: {
+  studentName: string;
+  defaultAmount: number;
+  onClose: () => void;
+  onConfirm: (amount: number) => Promise<void>;
+}) {
+  const [amount, setAmount] = useState(String(defaultAmount));
+  const [pending, setPending] = useState(false);
+
+  return (
+    <Modal onClose={onClose}>
+      <h3>Marcar pagado — {studentName}</h3>
+      <label>Monto recibido</label>
+      <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <p className="hint">
+        Por defecto es la cuota calculada del mes. Cambialo si cobraste otra cosa (ej. descuento por
+        pago en efectivo).
+      </p>
+      <div className="row" style={{ marginTop: 16 }}>
+        <button className="ghost block" onClick={onClose}>
+          Cancelar
+        </button>
+        <button
+          className="primary block"
+          disabled={pending}
+          onClick={async () => {
+            setPending(true);
+            await onConfirm(Number(amount));
+          }}
+        >
+          Confirmar
+        </button>
+      </div>
+    </Modal>
   );
 }

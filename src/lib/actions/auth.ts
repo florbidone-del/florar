@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createSession, destroySession, requireAdmin, requireStudent } from "@/lib/session";
+import { requireMainProfe } from "@/lib/authz";
 import { passwordIssues } from "@/lib/domain";
 
 export type ActionResult = { error?: string } | { ok: true };
@@ -78,6 +79,14 @@ export async function dismissAdminTutorialAction(): Promise<ActionResult> {
     where: { username: session.username },
     data: { tutorialSeen: true },
   });
+  return { ok: true };
+}
+
+export async function resetAllTutorialsAction(): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.student.updateMany({ data: { tutorialSeen: false } });
+  await prisma.admin.updateMany({ data: { tutorialSeen: false } });
   return { ok: true };
 }
 

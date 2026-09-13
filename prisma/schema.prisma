@@ -87,8 +87,6 @@ model Student {
   defaultWeekday  Int
   defaultSlotId   String
   defaultSlot     Slot     @relation(fields: [defaultSlotId], references: [id])
-  feeOverride     Int?
-  mpLink          String?
   theme           String?
   tutorialSeen    Boolean  @default(false)
   createdAt       DateTime @default(now())

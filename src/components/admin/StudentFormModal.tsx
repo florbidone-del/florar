@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/shared/Modal";
-import { money, usernameCandidates } from "@/lib/domain";
+import { usernameCandidates } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import { WeekdaySlotPicker } from "@/components/admin/WeekdaySlotPicker";
 import { createStudentAction, updateStudentAction } from "@/lib/actions/students";
@@ -26,8 +26,6 @@ export function StudentFormModal({
   const [pin, setPin] = useState(student?.pin || snap.config.defaultStudentPin);
   const [selDay, setSelDay] = useState<number | null>(student?.defaultWeekday ?? null);
   const [selSlot, setSelSlot] = useState<string | null>(student?.defaultSlotId ?? null);
-  const [fee, setFee] = useState(student?.feeOverride != null ? String(student.feeOverride) : "");
-  const [mpLink, setMpLink] = useState(student?.mpLink || "");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
@@ -38,23 +36,9 @@ export function StudentFormModal({
     if (selDay === null || !selSlot) return setError("Elegí día y horario.");
 
     setPending(true);
-    const feeOverride = fee.trim() === "" ? null : Number(fee);
     const res = editing
-      ? await updateStudentAction(studentId!, {
-          pin,
-          defaultWeekday: selDay,
-          defaultSlotId: selSlot,
-          feeOverride,
-          mpLink: mpLink.trim() || null,
-        })
-      : await createStudentAction({
-          name,
-          pin,
-          defaultWeekday: selDay,
-          defaultSlotId: selSlot,
-          feeOverride,
-          mpLink: mpLink.trim() || null,
-        });
+      ? await updateStudentAction(studentId!, { pin, defaultWeekday: selDay, defaultSlotId: selSlot })
+      : await createStudentAction({ name, pin, defaultWeekday: selDay, defaultSlotId: selSlot });
     setPending(false);
     if ("error" in res) {
       setError(res.error!);
@@ -93,19 +77,6 @@ export function StudentFormModal({
           }}
         />
       </div>
-      <label>Cuota mensual personalizada (opcional)</label>
-      <input
-        type="number"
-        placeholder={`Dejar vacío = ${money(snap.config.monthlyFee)} por defecto`}
-        value={fee}
-        onChange={(e) => setFee(e.target.value)}
-      />
-      <label>Link de Mercado Pago personalizado (opcional)</label>
-      <input
-        placeholder="Dejar vacío = usar el link general"
-        value={mpLink}
-        onChange={(e) => setMpLink(e.target.value)}
-      />
       {error && <p className="err">{error}</p>}
       <div className="row" style={{ marginTop: 16 }}>
         <button className="ghost block" onClick={onClose}>

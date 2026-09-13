@@ -178,8 +178,8 @@ export async function buildStudentPanelData(
     capacity: snap.config.capacity,
     payment: {
       unpaid: isUnpaid(snap, studentId),
-      fee: money(studentFee(snap, studentId)),
-      mpLink: student.mpLink || snap.config.mpLink,
+      fee: money(studentFee(snap)),
+      mpLink: snap.config.mpLink,
       withinWindow: withinPaymentWindow(snap),
       isLate: isPastPaymentWindow(snap),
       lateFeePercent: snap.config.lateFeePercent,

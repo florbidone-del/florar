@@ -95,8 +95,6 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       pin: s.pin,
       defaultWeekday: s.defaultWeekday,
       defaultSlotId: s.defaultSlotId,
-      feeOverride: s.feeOverride,
-      mpLink: s.mpLink,
       theme: s.theme,
       tutorialSeen: s.tutorialSeen,
       createdAt: isoDate(s.createdAt),

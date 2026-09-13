@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
 
   const monthKey = currentMonthKey();
-  const amount = studentFee(snap, student.id);
+  const amount = studentFee(snap);
   const externalReference = `${student.id}__${monthKey}`;
   const baseUrl = appBaseUrl(req.url);
 

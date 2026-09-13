@@ -168,8 +168,6 @@ export type StudentDTO = {
   pin: string;
   defaultWeekday: number;
   defaultSlotId: string;
-  feeOverride: number | null;
-  mpLink: string | null;
   theme: string | null;
   tutorialSeen: boolean;
   createdAt: string;
@@ -416,12 +414,8 @@ export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {
 export function isPastPaymentWindow(snap: WorkshopSnapshot) {
   return new Date().getDate() > snap.config.paymentWindowEnd;
 }
-export function studentFee(snap: WorkshopSnapshot, studentId: string) {
-  const s = snap.students.find((st) => st.id === studentId);
-  const base =
-    s && s.feeOverride !== null && s.feeOverride !== undefined
-      ? s.feeOverride
-      : snap.config.monthlyFee;
+export function studentFee(snap: WorkshopSnapshot) {
+  const base = snap.config.monthlyFee;
   return isPastPaymentWindow(snap)
     ? Math.round(base * (1 + snap.config.lateFeePercent / 100))
     : base;

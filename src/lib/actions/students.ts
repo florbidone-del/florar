@@ -3,8 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
 import { requireProfe } from "@/lib/authz";
-import { usernameCandidates, currentMonthKey, studentFee } from "@/lib/domain";
-import { loadWorkshopSnapshot } from "@/lib/snapshot";
+import { usernameCandidates, currentMonthKey } from "@/lib/domain";
 import type { ActionResult } from "@/lib/actions/auth";
 
 export async function createStudentAction(input: {
@@ -12,8 +11,6 @@ export async function createStudentAction(input: {
   pin: string;
   defaultWeekday: number;
   defaultSlotId: string;
-  feeOverride?: number | null;
-  mpLink?: string | null;
 }): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
@@ -43,8 +40,6 @@ export async function createStudentAction(input: {
       pin: input.pin.trim(),
       defaultWeekday: input.defaultWeekday,
       defaultSlotId: input.defaultSlotId,
-      feeOverride: input.feeOverride ?? null,
-      mpLink: input.mpLink?.trim() || null,
     },
   });
   return { ok: true };
@@ -56,8 +51,6 @@ export async function updateStudentAction(
     pin: string;
     defaultWeekday: number;
     defaultSlotId: string;
-    feeOverride?: number | null;
-    mpLink?: string | null;
   }
 ): Promise<ActionResult> {
   const session = await requireProfe();
@@ -71,8 +64,6 @@ export async function updateStudentAction(
       pin: input.pin.trim(),
       defaultWeekday: input.defaultWeekday,
       defaultSlotId: input.defaultSlotId,
-      feeOverride: input.feeOverride ?? null,
-      mpLink: input.mpLink?.trim() || null,
     },
   });
   return { ok: true };
@@ -85,29 +76,28 @@ export async function deleteStudentAction(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Marcar pagado / quitar pago (a mano, por la profe) para el mes actual. */
-export async function toggleManualPaymentAction(
-  studentId: string
+/** Marcar pagado a mano, con el monto que haya recibido la profe (ej. con descuento por efectivo). */
+export async function markPaidManuallyAction(
+  studentId: string,
+  amount: number
 ): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
+  if (!Number.isFinite(amount) || amount < 0) return { error: "Monto inválido." };
   const mk = currentMonthKey();
-  const existing = await prisma.payment.findUnique({
+  await prisma.payment.upsert({
     where: { studentId_monthKey: { studentId, monthKey: mk } },
+    create: { studentId, monthKey: mk, amount: Math.round(amount), status: "approved", source: "manual" },
+    update: { status: "approved", source: "manual", amount: Math.round(amount) },
   });
-  if (existing && existing.status === "approved") {
-    await prisma.payment.delete({
-      where: { studentId_monthKey: { studentId, monthKey: mk } },
-    });
-  } else {
-    const snap = await loadWorkshopSnapshot();
-    const amount = studentFee(snap, studentId);
-    await prisma.payment.upsert({
-      where: { studentId_monthKey: { studentId, monthKey: mk } },
-      create: { studentId, monthKey: mk, amount, status: "approved", source: "manual" },
-      update: { status: "approved", source: "manual", amount },
-    });
-  }
+  return { ok: true };
+}
+
+export async function unmarkPaidAction(studentId: string): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const mk = currentMonthKey();
+  await prisma.payment.deleteMany({ where: { studentId, monthKey: mk } });
   return { ok: true };
 }
 
