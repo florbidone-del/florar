@@ -77,6 +77,7 @@ export function SwapModal({
           calendar={calendar}
           leadingBlanks={leadingBlanks}
           todayISO={todayISO}
+          originalDate={originalDate}
           selectedDate={chosenDate}
           onSelect={(d) => {
             setChosenDate(d);

@@ -6,12 +6,14 @@ export function SwapCalendar({
   calendar,
   leadingBlanks,
   todayISO,
+  originalDate,
   selectedDate,
   onSelect,
 }: {
   calendar: CalendarDay[];
   leadingBlanks: number;
   todayISO: string;
+  originalDate: string;
   selectedDate: string | null;
   onSelect: (date: string) => void;
 }) {
@@ -35,19 +37,22 @@ export function SwapCalendar({
           else if (isPastForSwap) cls = "past";
           else cls = day.generalStatus;
           const clickable = cls === "available";
+          const isOrigin = day.date === originalDate;
           return (
             <div
               key={day.date}
-              className={`cal-cell ${cls} ${selectedDate === day.date ? "selected" : ""}`}
+              className={`cal-cell ${cls} ${selectedDate === day.date ? "selected" : ""} ${isOrigin ? "origin" : ""}`}
               onClick={clickable ? () => onSelect(day.date) : undefined}
             >
               {day.day}
-              {day.activity && <span className="activity-dot" title="actividad" />}
             </div>
           );
         })}
       </div>
       <div className="cal-legend">
+        <span>
+          <span className="dot origin" /> la que cambiás
+        </span>
         <span>
           <span className="dot available" /> con lugar
         </span>
@@ -56,13 +61,6 @@ export function SwapCalendar({
         </span>
         <span>
           <span className="dot holiday" /> feriado
-        </span>
-        <span>
-          <span
-            className="activity-dot"
-            style={{ position: "static", display: "inline-block", boxShadow: "none" }}
-          />{" "}
-          actividad
         </span>
       </div>
     </div>

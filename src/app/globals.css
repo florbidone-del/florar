@@ -385,6 +385,7 @@ td.holiday{background:var(--oxide-soft);}
 .cal-cell.moved{background:#E6E1F0; border-color:#584A7A; color:#584A7A; cursor:pointer;}
 .cal-cell.attended{background:var(--surface); border-color:var(--line); color:var(--ink-soft); opacity:0.65; cursor:pointer;}
 .cal-cell.selected{outline:2px solid var(--ink); outline-offset:1px;}
+.cal-cell.origin{box-shadow:inset 0 0 0 2px var(--ink-soft);}
 .cal-cell.own-confirmed{
   background:var(--glaze); border-color:var(--glaze-dark); color:#fff;
   font-weight:700; cursor:pointer;
@@ -414,6 +415,7 @@ td.holiday{background:var(--oxide-soft);}
 .dot.full{background:var(--surface); border:1.5px solid var(--line);}
 .dot.holiday{background:var(--oxide-soft); border:1.5px solid var(--oxide);}
 .dot.moved{background:var(--surface); border:1.5px dashed var(--ink-soft);}
+.dot.origin{background:var(--surface-2); box-shadow:inset 0 0 0 2px var(--ink-soft);}
 .badge-role{
   font-size:0.68rem;
   padding:2px 7px;
