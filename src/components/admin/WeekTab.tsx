@@ -9,8 +9,8 @@ import {
   mondayOf,
   pad,
   parseISO,
-  slotById,
   slotOccupancy,
+  sortSlots,
   todayISO,
 } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
@@ -22,7 +22,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
   const [modalCell, setModalCell] = useState<{ date: string; slotId: string } | null>(null);
 
   const week = [0, 1, 2, 3, 4, 5].map((i) => addDays(weekBase, i));
-  const allSlotIds = snap.config.slots.map((s) => s.id);
+  const orderedSlots = sortSlots(snap.config.slots);
 
   return (
     <>
@@ -48,14 +48,15 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
                 </th>
               ))}
             </tr>
-            {allSlotIds.map((slotId) => {
-              const label = slotById(snap, week[0], slotId) || slotById(snap, week[5], slotId);
+            {orderedSlots.map((slot) => {
+              const slotId = slot.id;
               return (
                 <tr key={slotId}>
-                  <th>{label ? `${label.start}–${label.end}` : slotId}</th>
+                  <th style={{ whiteSpace: "nowrap" }}>
+                    {slot.start}–{slot.end}
+                  </th>
                   {week.map((date) => {
-                    const slot = slotById(snap, date, slotId);
-                    if (!slot) return <td key={date}>—</td>;
+                    if (!slot.weekdays.includes(parseISO(date).getDay())) return <td key={date}>—</td>;
                     const hol = isHoliday(snap, date);
                     if (hol) {
                       return (

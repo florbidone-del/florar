@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DIAS_CORTO, capitalize } from "@/lib/domain";
+import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
@@ -175,7 +175,7 @@ function SlotAssignmentGrid({
   onChanged: () => void;
 }) {
   if (slots.length === 0) return null;
-  const sorted = [...slots].sort((a, b) => a.start.localeCompare(b.start));
+  const sorted = sortSlots(slots);
 
   async function assign(weekday: number, slotId: string, value: string) {
     await setSlotAssignmentAction({ weekday, slotId, profeUsername: value || null });
@@ -234,7 +234,7 @@ function SlotEditor({
   slots: { id: string; weekdays: number[]; start: string; end: string }[];
   onChanged: () => void;
 }) {
-  const sorted = [...slots].sort((a, b) => a.start.localeCompare(b.start));
+  const sorted = sortSlots(slots);
 
   async function update(
     id: string,

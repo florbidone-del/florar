@@ -233,6 +233,17 @@ export function slotsForWeekday(snap: WorkshopSnapshot, wd: number) {
 export function slotsForDate(snap: WorkshopSnapshot, dateISO: string) {
   return slotsForWeekday(snap, parseISO(dateISO).getDay());
 }
+/** Orden para mostrar turnos: primero los que se comparten entre más días (ej. lunes a viernes),
+ * después los de un solo día ordenados por ese día (lunes antes que viernes), y por horario. */
+export function sortSlots<T extends { weekdays: number[]; start: string }>(slots: T[]): T[] {
+  return [...slots].sort((a, b) => {
+    if (b.weekdays.length !== a.weekdays.length) return b.weekdays.length - a.weekdays.length;
+    const minA = Math.min(...a.weekdays);
+    const minB = Math.min(...b.weekdays);
+    if (minA !== minB) return minA - minB;
+    return a.start.localeCompare(b.start);
+  });
+}
 export function slotById(snap: WorkshopSnapshot, dateISO: string, slotId: string) {
   return slotsForDate(snap, dateISO).find((s) => s.id === slotId) || null;
 }
