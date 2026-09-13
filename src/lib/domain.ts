@@ -152,6 +152,7 @@ export type ConfigDTO = {
   paymentWindowStart: number;
   paymentWindowEnd: number;
   monthlyFee: number;
+  lateFeePercent: number;
   mpLink: string | null;
   theme: string;
   defaultStudentPin: string;
@@ -411,12 +412,19 @@ export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {
       c.studentId === studentId && c.reason === "cambio" && c.monthKey === mk
   ).length;
 }
+/** Pasado el último día de la ventana de pago, se considera fuera de fecha (aplica recargo). */
+export function isPastPaymentWindow(snap: WorkshopSnapshot) {
+  return new Date().getDate() > snap.config.paymentWindowEnd;
+}
 export function studentFee(snap: WorkshopSnapshot, studentId: string) {
   const s = snap.students.find((st) => st.id === studentId);
-  if (!s) return snap.config.monthlyFee;
-  return s.feeOverride !== null && s.feeOverride !== undefined
-    ? s.feeOverride
-    : snap.config.monthlyFee;
+  const base =
+    s && s.feeOverride !== null && s.feeOverride !== undefined
+      ? s.feeOverride
+      : snap.config.monthlyFee;
+  return isPastPaymentWindow(snap)
+    ? Math.round(base * (1 + snap.config.lateFeePercent / 100))
+    : base;
 }
 export function isUnpaid(snap: WorkshopSnapshot, studentId: string) {
   const mk = currentMonthKey();

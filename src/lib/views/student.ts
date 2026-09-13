@@ -21,6 +21,7 @@ import {
   studentSessionsThisMonth,
   swapsUsedThisMonth,
   todayISO,
+  isPastPaymentWindow,
   withinPaymentWindow,
   fmtMonthName,
   type WorkshopSnapshot,
@@ -57,6 +58,8 @@ export type StudentPanelData = {
     fee: string;
     mpLink: string | null;
     withinWindow: boolean;
+    isLate: boolean;
+    lateFeePercent: number;
     paymentWindowStart: number;
     paymentWindowEnd: number;
     monthName: string;
@@ -178,6 +181,8 @@ export async function buildStudentPanelData(
       fee: money(studentFee(snap, studentId)),
       mpLink: student.mpLink || snap.config.mpLink,
       withinWindow: withinPaymentWindow(snap),
+      isLate: isPastPaymentWindow(snap),
+      lateFeePercent: snap.config.lateFeePercent,
       paymentWindowStart: snap.config.paymentWindowStart,
       paymentWindowEnd: snap.config.paymentWindowEnd,
       monthName: fmtMonthName(),

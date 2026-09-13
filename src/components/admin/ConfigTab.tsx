@@ -27,6 +27,7 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
   const [paymentWindowStart, setPaymentWindowStart] = useState(c.paymentWindowStart);
   const [paymentWindowEnd, setPaymentWindowEnd] = useState(c.paymentWindowEnd);
   const [monthlyFee, setMonthlyFee] = useState(c.monthlyFee);
+  const [lateFeePercent, setLateFeePercent] = useState(c.lateFeePercent);
   const [announcementVisibleDays, setAnnouncementVisibleDays] = useState(c.announcementVisibleDays);
   const [defaultStudentPin, setDefaultStudentPin] = useState(c.defaultStudentPin);
   const [profeWhatsapp, setProfeWhatsapp] = useState(c.profeWhatsapp || "");
@@ -42,6 +43,7 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
       paymentWindowStart,
       paymentWindowEnd,
       monthlyFee,
+      lateFeePercent,
       announcementVisibleDays,
       defaultStudentPin,
       profeWhatsapp,
@@ -128,6 +130,16 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
         </div>
         <label>Cuota mensual por defecto</label>
         <input type="number" value={monthlyFee} onChange={(e) => setMonthlyFee(Number(e.target.value))} />
+        <label>Recargo por pago fuera de fecha (%)</label>
+        <input
+          type="number"
+          value={lateFeePercent}
+          onChange={(e) => setLateFeePercent(Number(e.target.value))}
+        />
+        <p className="hint">
+          Pasado el día {paymentWindowEnd} sin pagar, la cuota le aparece al alumno con este recargo ya
+          sumado (y el link de Mercado Pago cobra ese monto directo).
+        </p>
         <label>Los avisos se muestran a los alumnos durante (días)</label>
         <input
           type="number"

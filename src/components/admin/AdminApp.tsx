@@ -27,6 +27,7 @@ function ownerTourSteps(): TourStep[] {
     },
     {
       title: "Pestaña Profes",
+      focus: "profes",
       body: (
         <p className="muted">
           Acá creás las cuentas de profe, les reseteás la contraseña si hace falta, y marcás cuál es la
@@ -43,6 +44,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
     { title: "¡Bienvenida/o!", body: <p className="muted">Un repaso rápido de las pestañas. Se puede saltear.</p> },
     {
       title: "Semana",
+      focus: "semana",
       body: (
         <p className="muted">
           Ocupación de cada turno en la semana. Tocá un turno para ver quién está anotado y, si hace
@@ -52,6 +54,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
     },
     {
       title: "Alumnos",
+      focus: "alumnos",
       body: (
         <p className="muted">
           Alta y baja de alumnos, marcar la cuota como pagada, y ahí mismo aparecen las novedades de
@@ -60,16 +63,31 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       ),
     },
     {
-      title: "Avisos, Actividades y Feriados",
+      title: "Avisos",
+      focus: "avisos",
       body: (
         <p className="muted">
-          Publicá avisos y la información fija que ven los alumnos, marcá actividades especiales en el
-          calendario, y cargá los feriados del taller.
+          Publicá avisos y la información fija que ven los alumnos en su home.
         </p>
       ),
     },
     {
+      title: "Actividades",
+      focus: "actividades",
+      body: (
+        <p className="muted">
+          Marcá actividades especiales en el calendario de todos los alumnos, con fechas y material.
+        </p>
+      ),
+    },
+    {
+      title: "Feriados",
+      focus: "feriados",
+      body: <p className="muted">Cargá los feriados del taller — cancelan las clases de ese día automáticamente.</p>,
+    },
+    {
       title: "Configuración",
+      focus: "config",
       body: isMainProfe ? (
         <p className="muted">
           Turnos, tema de colores y, como sos la profe principal, también podés asignar qué profe da
@@ -162,6 +180,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         <OnboardingTour
           steps={isOwner ? ownerTourSteps() : profeTourSteps(isMainProfe)}
           onFinish={finishTour}
+          onStepChange={(step) => step.focus && setTab(step.focus)}
         />
       )}
     </>

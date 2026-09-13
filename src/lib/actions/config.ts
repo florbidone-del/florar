@@ -11,6 +11,7 @@ export async function saveConfigAction(input: {
   paymentWindowStart: number;
   paymentWindowEnd: number;
   monthlyFee: number;
+  lateFeePercent: number;
   announcementVisibleDays: number;
   defaultStudentPin: string;
   profeWhatsapp: string;
@@ -27,6 +28,7 @@ export async function saveConfigAction(input: {
       paymentWindowStart: input.paymentWindowStart,
       paymentWindowEnd: input.paymentWindowEnd,
       monthlyFee: input.monthlyFee,
+      lateFeePercent: input.lateFeePercent,
       announcementVisibleDays: input.announcementVisibleDays,
       defaultStudentPin: input.defaultStudentPin.trim() || "0000",
       profeWhatsapp: input.profeWhatsapp.trim().replace(/[^0-9]/g, "") || null,

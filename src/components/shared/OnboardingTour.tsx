@@ -1,20 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@/components/shared/Modal";
 
-export type TourStep = { title: string; body: React.ReactNode };
+export type TourStep = { title: string; body: React.ReactNode; focus?: string };
 
 export function OnboardingTour({
   steps,
   onFinish,
+  onStepChange,
 }: {
   steps: TourStep[];
   onFinish: () => void;
+  onStepChange?: (step: TourStep) => void;
 }) {
   const [i, setI] = useState(0);
   const step = steps[i];
   const isLast = i === steps.length - 1;
+
+  useEffect(() => {
+    onStepChange?.(step);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i]);
 
   return (
     <Modal onClose={onFinish}>

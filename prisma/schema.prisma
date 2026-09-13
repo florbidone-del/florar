@@ -38,6 +38,7 @@ model Config {
   paymentWindowStart     Int      @default(1)
   paymentWindowEnd       Int      @default(10)
   monthlyFee             Int      @default(15000)
+  lateFeePercent         Int      @default(20)
   mpLink                 String?
   theme                  String   @default("florar")
   defaultStudentPin      String   @default("0000")

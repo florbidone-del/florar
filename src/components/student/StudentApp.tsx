@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Linkify } from "@/components/shared/Linkify";
 import { StudentCalendar } from "@/components/student/StudentCalendar";
@@ -24,6 +24,7 @@ function studentTourSteps(studioName: string): TourStep[] {
     },
     {
       title: "Tu calendario",
+      focus: "calendar-section",
       body: (
         <p className="muted">
           Tu clase fija aparece con fondo violeta sólido. Tocá ese día para ver el detalle o para
@@ -33,6 +34,7 @@ function studentTourSteps(studioName: string): TourStep[] {
     },
     {
       title: "Cambiar un turno",
+      focus: "calendar-section",
       body: (
         <p className="muted">
           Podés mover una clase puntual una vez por mes, con al menos 24hs de anticipación. Si cae un
@@ -42,6 +44,7 @@ function studentTourSteps(studioName: string): TourStep[] {
     },
     {
       title: "Avisos y cuota",
+      focus: "announcements-section",
       body: (
         <p className="muted">
           Arriba vas a ver la información fija de la profe y los avisos recientes. Si debés la cuota,
@@ -51,6 +54,7 @@ function studentTourSteps(studioName: string): TourStep[] {
     },
     {
       title: "Tu cuenta",
+      focus: "account-section",
       body: (
         <p className="muted">
           Más abajo podés cambiar tu PIN y elegir el tema de colores de tu propia app, sin que afecte a
@@ -72,11 +76,18 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const router = useRouter();
   const [modal, setModal] = useState<ModalState>(null);
   const [showTour, setShowTour] = useState(!data.tutorialSeen);
+  const [tourFocus, setTourFocus] = useState<string | undefined>();
 
   async function finishTour() {
     setShowTour(false);
+    setTourFocus(undefined);
     await dismissStudentTutorialAction();
   }
+
+  useEffect(() => {
+    if (!tourFocus) return;
+    document.getElementById(tourFocus)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [tourFocus]);
 
   async function logout() {
     await logoutAction();
@@ -116,9 +127,11 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         <div className="banner">
           <strong>Debés la cuota de este mes</strong>
           Cuota de {data.payment.monthName}: {data.payment.fee}.{" "}
-          {data.payment.withinWindow
-            ? `El pago se hace entre el día ${data.payment.paymentWindowStart} y el ${data.payment.paymentWindowEnd}.`
-            : "Ya venció la fecha habitual de pago."}
+          {data.payment.isLate
+            ? `Te pasaste de la fecha de pago (día ${data.payment.paymentWindowEnd}) — tiene un recargo del ${data.payment.lateFeePercent}%, ya incluido en el monto.`
+            : data.payment.withinWindow
+              ? `El pago se hace entre el día ${data.payment.paymentWindowStart} y el ${data.payment.paymentWindowEnd}.`
+              : `El pago se habilita a partir del día ${data.payment.paymentWindowStart}.`}
           <PayButton fallbackLink={data.payment.mpLink} />
         </div>
       )}
@@ -145,7 +158,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" id="calendar-section">
         <h3>Calendario del taller</h3>
         <p className="muted" style={{ marginTop: 6 }}>
           Tus clases están marcadas en violeta sólido. Tocá un día para verlo o cambiarlo; tocá cualquier
@@ -168,7 +181,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card" id="announcements-section">
         <h3>Avisos</h3>
         {data.announcements.length === 0 ? (
           <p className="muted">No hay avisos por ahora.</p>
@@ -182,7 +195,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         )}
       </div>
 
-      <Collapsible title="Tu cuenta">
+      <Collapsible title="Tu cuenta" id="account-section" forceOpen={tourFocus === "account-section"}>
         <button className="ghost block" onClick={() => setModal({ kind: "pin" })}>
           Cambiar mi PIN
         </button>
@@ -239,7 +252,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         />
       )}
       {modal?.kind === "pin" && <ChangePinModal onClose={() => setModal(null)} />}
-      {showTour && <OnboardingTour steps={studentTourSteps(data.studioName)} onFinish={finishTour} />}
+      {showTour && (
+        <OnboardingTour
+          steps={studentTourSteps(data.studioName)}
+          onFinish={finishTour}
+          onStepChange={(step) => setTourFocus(step.focus)}
+        />
+      )}
     </>
   );
 }
