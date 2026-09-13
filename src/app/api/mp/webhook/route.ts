@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { fmtMonthName, money } from "@/lib/domain";
 import { isValidMpSignature, mapMpStatus, mpAccessToken } from "@/lib/mp";
 
 /** Mercado Pago llama acá cuando cambia el estado de un pago. Respondemos 200 rápido y procesamos después. */
@@ -42,6 +43,10 @@ export async function POST(req: NextRequest) {
     const [studentId, monthKey] = externalReference.split("__");
     const status = mapMpStatus(payment.status);
 
+    const previous = await prisma.payment.findUnique({
+      where: { studentId_monthKey: { studentId, monthKey } },
+    });
+
     await prisma.payment.upsert({
       where: { studentId_monthKey: { studentId, monthKey } },
       create: {
@@ -58,6 +63,20 @@ export async function POST(req: NextRequest) {
         mpPaymentId: String(payment.id),
       },
     });
+
+    if (status === "approved" && previous?.status !== "approved") {
+      const student = await prisma.student.findUnique({ where: { id: studentId } });
+      if (student) {
+        await prisma.notification.create({
+          data: {
+            forProfe: null,
+            message: `${student.name} pagó la cuota de ${fmtMonthName(`${monthKey}-01`)} (${money(
+              Math.round(payment.transaction_amount || 0)
+            )}) por Mercado Pago.`,
+          },
+        });
+      }
+    }
   } catch (err) {
     console.error("Error procesando webhook de Mercado Pago:", err);
   }
