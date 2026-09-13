@@ -143,6 +143,7 @@ export type StudentDTO = {
   defaultSlotId: string;
   feeOverride: number | null;
   mpLink: string | null;
+  theme: string | null;
   createdAt: string;
 };
 export type ScheduleChangeDTO = {

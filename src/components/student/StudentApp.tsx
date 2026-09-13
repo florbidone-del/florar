@@ -10,7 +10,8 @@ import { SwapModal } from "@/components/student/SwapModal";
 import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { PayButton } from "@/components/student/PayButton";
 import { fmtLong } from "@/lib/domain";
-import { logoutAction } from "@/lib/actions/auth";
+import { THEMES } from "@/lib/themes";
+import { logoutAction, setMyThemeAction } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
 type ModalState =
@@ -32,6 +33,11 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
 
   function closeAndRefresh() {
     setModal(null);
+    router.refresh();
+  }
+
+  async function chooseTheme(theme: string) {
+    await setMyThemeAction(theme);
     router.refresh();
   }
 
@@ -122,6 +128,26 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         <button className="ghost block" onClick={() => setModal({ kind: "pin" })}>
           Cambiar mi PIN
         </button>
+        <label style={{ marginTop: 14 }}>Tema de tu app</label>
+        <div className="theme-grid">
+          {Object.entries(THEMES).map(([key, t]) => (
+            <button
+              type="button"
+              key={key}
+              className={`theme-card ${data.theme === key ? "selected" : ""}`}
+              onClick={() => chooseTheme(key)}
+            >
+              <div className="theme-swatch">
+                <span style={{ background: t.bg }} />
+                <span style={{ background: t.glaze }} />
+                <span style={{ background: t.oxide }} />
+                <span style={{ background: t.ink }} />
+              </div>
+              <div className="theme-name">{t.name}</div>
+            </button>
+          ))}
+        </div>
+        <p className="hint">Esto solo cambia los colores de tu propia app — no afecta lo que ven la profe ni otros alumnos.</p>
       </div>
 
       <p className="footer-note">{data.studioName} · turno fijo, cambios con 24hs de anticipación</p>

@@ -92,6 +92,7 @@ model Student {
   defaultSlot     Slot     @relation(fields: [defaultSlotId], references: [id])
   feeOverride     Int?
   mpLink          String?
+  theme           String?
   createdAt       DateTime @default(now())
 
   scheduleChanges ScheduleChange[]

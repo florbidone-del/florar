@@ -3,6 +3,8 @@ import { Fraunces, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { loadConfig } from "@/lib/snapshot";
 import { themeCssVars } from "@/lib/themes";
+import { getSession } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -40,7 +42,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const config = await loadConfig().catch(() => null);
-  const themeVars = themeCssVars(config?.theme || "florar");
+  let effectiveTheme = config?.theme || "florar";
+  const session = await getSession().catch(() => null);
+  if (session?.kind === "student") {
+    const student = await prisma.student
+      .findUnique({ where: { id: session.studentId }, select: { theme: true } })
+      .catch(() => null);
+    if (student?.theme) effectiveTheme = student.theme;
+  }
+  const themeVars = themeCssVars(effectiveTheme);
 
   return (
     <html lang="es" style={themeVars as React.CSSProperties}>

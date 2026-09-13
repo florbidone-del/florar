@@ -106,6 +106,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       defaultSlotId: s.defaultSlotId,
       feeOverride: s.feeOverride,
       mpLink: s.mpLink,
+      theme: s.theme,
       createdAt: s.createdAt.toISOString(),
     })),
     scheduleChanges: scheduleChanges.map((c) => ({
