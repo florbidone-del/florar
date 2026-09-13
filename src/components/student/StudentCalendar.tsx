@@ -32,10 +32,10 @@ export function StudentCalendar({
           const isPast = day.date < todayISO;
           let cls: string;
           if (day.own) {
-            if (day.own.status === "moved-swap" || day.own.status === "moved-holiday") cls = "moved";
-            else if (day.own.status === "pending-holiday") cls = "holiday";
-            else if (isPast) cls = "attended";
-            else cls = "available";
+            if (day.own.status === "moved-swap" || day.own.status === "moved-holiday") cls = "own-moved";
+            else if (day.own.status === "pending-holiday") cls = "own-pending";
+            else if (isPast) cls = "own-attended";
+            else cls = "own-confirmed";
           } else if (day.weekday === 0) {
             cls = "closed";
           } else if (isPast) {
@@ -58,16 +58,13 @@ export function StudentCalendar({
               }
             >
               {day.day}
-              {day.own && <span className="own-dot" />}
-              {day.activity && <span className="activity-dot" title="actividad" />}
             </div>
           );
         })}
       </div>
       <div className="cal-legend">
         <span>
-          <span className="own-dot" style={{ position: "static", display: "inline-block", background: "var(--ink)" }} />{" "}
-          tu clase
+          <span className="dot mine" /> tu clase
         </span>
         <span>
           <span className="dot available" /> con lugar
@@ -79,11 +76,7 @@ export function StudentCalendar({
           <span className="dot holiday" /> feriado
         </span>
         <span>
-          <span
-            className="activity-dot"
-            style={{ position: "static", display: "inline-block", boxShadow: "none" }}
-          />{" "}
-          actividad
+          <span className="dot moved" /> movida
         </span>
       </div>
     </div>

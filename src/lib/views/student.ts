@@ -61,6 +61,7 @@ export type StudentPanelData = {
   };
   studentInfo: string;
   announcements: { id: string; date: string; message: string }[];
+  activitiesThisMonth: { title: string; description: string | null; range: string }[];
   calendar: CalendarDay[];
   leadingBlanks: number;
   todayISO: string;
@@ -79,8 +80,7 @@ export async function buildStudentPanelData(
     ["confirmed", "rescheduled", "moved-swap", "moved-holiday"].includes(r.status)
   ).length;
   const swapsLeft = snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId);
-  const defaultSlotList = student.defaultWeekday === 6 ? snap.config.slotsSaturday : snap.config.slotsWeekday;
-  const defaultSlot = defaultSlotList.find((s) => s.id === student.defaultSlotId) || null;
+  const defaultSlot = snap.config.slots.find((s) => s.id === student.defaultSlotId) || null;
   const profeName = capitalize(profeForSlot(snap, student.defaultWeekday, student.defaultSlotId));
 
   const today = todayISO();
@@ -89,6 +89,15 @@ export async function buildStudentPanelData(
   const firstDay = new Date(y, m - 1, 1);
   const daysInMonth = new Date(y, m, 0).getDate();
   const leadingBlanks = firstDay.getDay();
+  const monthStart = `${mk}-01`;
+  const monthEnd = `${y}-${String(m).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+  const activitiesThisMonth = snap.activities
+    .filter((a) => a.startDate <= monthEnd && a.endDate >= monthStart)
+    .map((a) => ({
+      title: a.title,
+      description: a.description,
+      range: a.endDate !== a.startDate ? `${fmtShort(a.startDate)} — ${fmtShort(a.endDate)}` : fmtShort(a.startDate),
+    }));
 
   const calendar: CalendarDay[] = [];
   for (let day = 1; day <= daysInMonth; day++) {
@@ -172,6 +181,7 @@ export async function buildStudentPanelData(
     },
     studentInfo: snap.config.studentInfo,
     announcements,
+    activitiesThisMonth,
     calendar,
     leadingBlanks,
     todayISO: today,

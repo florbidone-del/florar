@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum SlotType {
-  weekday
-  saturday
-}
-
 enum AdminRole {
   owner
   profe
@@ -53,11 +48,11 @@ model Config {
 }
 
 model Slot {
-  id    String   @id
-  type  SlotType
-  start String
-  end   String
-  order Int      @default(0)
+  id       String @id
+  weekdays Int[]  @default([])
+  start    String
+  end      String
+  order    Int    @default(0)
 
   students         Student[]
   slotAssignments  SlotAssignment[]

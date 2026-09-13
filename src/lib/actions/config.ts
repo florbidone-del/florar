@@ -43,13 +43,13 @@ export async function setThemeAction(theme: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-export async function addSlotAction(type: "weekday" | "saturday"): Promise<ActionResult> {
+export async function addSlotAction(): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
-  const count = await prisma.slot.count({ where: { type } });
-  const id = (type === "weekday" ? "w" : "s") + Date.now().toString().slice(-6);
+  const count = await prisma.slot.count();
+  const id = "sl" + Date.now().toString().slice(-8);
   await prisma.slot.create({
-    data: { id, type, start: "09:00", end: "11:00", order: count },
+    data: { id, weekdays: [], start: "09:00", end: "11:00", order: count },
   });
   return { ok: true };
 }
@@ -58,12 +58,13 @@ export async function updateSlotAction(input: {
   id: string;
   start: string;
   end: string;
+  weekdays: number[];
 }): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
   await prisma.slot.update({
     where: { id: input.id },
-    data: { start: input.start, end: input.end },
+    data: { start: input.start, end: input.end, weekdays: input.weekdays },
   });
   return { ok: true };
 }

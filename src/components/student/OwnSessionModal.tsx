@@ -2,6 +2,7 @@
 
 import { Modal } from "@/components/shared/Modal";
 import { Linkify } from "@/components/shared/Linkify";
+import { Collapsible } from "@/components/shared/Collapsible";
 import { fmtLong, parseISO } from "@/lib/domain";
 import type { CalendarDay } from "@/lib/views/student";
 
@@ -101,8 +102,14 @@ export function OwnSessionModal({
       {day.activity && (
         <div className="banner" style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
           <strong>{day.activity.title}</strong>
-          {day.activity.range && <div className="muted" style={{ marginBottom: 4 }}>{day.activity.range}</div>}
-          {day.activity.description && <Linkify text={day.activity.description} />}
+          {day.activity.range && <div className="muted">{day.activity.range}</div>}
+          {day.activity.description && (
+            <div style={{ marginTop: 10 }}>
+              <Collapsible title="Material de la actividad">
+                <Linkify text={day.activity.description} />
+              </Collapsible>
+            </div>
+          )}
         </div>
       )}
       {body}

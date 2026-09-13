@@ -79,12 +79,9 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
         </div>
       </Collapsible>
 
-      <Collapsible title="Turnos de lunes a viernes">
-        <SlotEditor type="weekday" slots={c.slotsWeekday} onChanged={() => router.refresh()} />
-      </Collapsible>
-
-      <Collapsible title="Turnos de sábado">
-        <SlotEditor type="saturday" slots={c.slotsSaturday} onChanged={() => router.refresh()} />
+      <Collapsible title="Turnos">
+        <p className="muted">Elegí los días en los que se dicta cada turno — no hace falta que sean los mismos todos los días.</p>
+        <SlotEditor slots={c.slots} onChanged={() => router.refresh()} />
       </Collapsible>
 
       {isMainProfe && (
@@ -98,24 +95,7 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
               Todavía no hay cuentas de profe creadas — pedile al dueño/a que cree una en su panel.
             </p>
           ) : (
-            <>
-              <SlotAssignmentGrid
-                weekdays={[1, 2, 3, 4, 5]}
-                slots={c.slotsWeekday}
-                snap={snap}
-                profes={profes}
-                onChanged={() => router.refresh()}
-              />
-              <div style={{ marginTop: 14 }}>
-                <SlotAssignmentGrid
-                  weekdays={[6]}
-                  slots={c.slotsSaturday}
-                  snap={snap}
-                  profes={profes}
-                  onChanged={() => router.refresh()}
-                />
-              </div>
-            </>
+            <SlotAssignmentGrid slots={c.slots} snap={snap} profes={profes} onChanged={() => router.refresh()} />
           )}
         </Collapsible>
       )}
@@ -181,20 +161,21 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
   );
 }
 
+const WEEKDAYS_MON_FIRST = [1, 2, 3, 4, 5, 6, 0];
+
 function SlotAssignmentGrid({
-  weekdays,
   slots,
   snap,
   profes,
   onChanged,
 }: {
-  weekdays: number[];
-  slots: { id: string; start: string; end: string }[];
+  slots: { id: string; weekdays: number[]; start: string; end: string }[];
   snap: AdminBundle["snapshot"];
   profes: string[];
   onChanged: () => void;
 }) {
   if (slots.length === 0) return null;
+  const sorted = [...slots].sort((a, b) => a.start.localeCompare(b.start));
 
   async function assign(weekday: number, slotId: string, value: string) {
     await setSlotAssignmentAction({ weekday, slotId, profeUsername: value || null });
@@ -207,16 +188,17 @@ function SlotAssignmentGrid({
         <tbody>
           <tr>
             <th></th>
-            {weekdays.map((wd) => (
+            {WEEKDAYS_MON_FIRST.filter((wd) => wd !== 0).map((wd) => (
               <th key={wd}>{DIAS_CORTO[wd]}</th>
             ))}
           </tr>
-          {slots.map((slot) => (
+          {sorted.map((slot) => (
             <tr key={slot.id}>
               <th style={{ whiteSpace: "nowrap" }}>
                 {slot.start}–{slot.end}
               </th>
-              {weekdays.map((wd) => {
+              {WEEKDAYS_MON_FIRST.filter((wd) => wd !== 0).map((wd) => {
+                if (!slot.weekdays.includes(wd)) return <td key={wd}>—</td>;
                 const current =
                   snap.slotAssignments.find((sa) => sa.weekday === wd && sa.slotId === slot.id)
                     ?.profeUsername || "";
@@ -246,16 +228,25 @@ function SlotAssignmentGrid({
 }
 
 function SlotEditor({
-  type,
   slots,
   onChanged,
 }: {
-  type: "weekday" | "saturday";
-  slots: { id: string; start: string; end: string }[];
+  slots: { id: string; weekdays: number[]; start: string; end: string }[];
   onChanged: () => void;
 }) {
-  async function update(id: string, field: "start" | "end", value: string, current: { start: string; end: string }) {
-    await updateSlotAction({ id, start: field === "start" ? value : current.start, end: field === "end" ? value : current.end });
+  const sorted = [...slots].sort((a, b) => a.start.localeCompare(b.start));
+
+  async function update(
+    id: string,
+    changes: Partial<{ start: string; end: string; weekdays: number[] }>,
+    current: { start: string; end: string; weekdays: number[] }
+  ) {
+    await updateSlotAction({
+      id,
+      start: changes.start ?? current.start,
+      end: changes.end ?? current.end,
+      weekdays: changes.weekdays ?? current.weekdays,
+    });
     onChanged();
   }
   async function remove(id: string) {
@@ -263,25 +254,48 @@ function SlotEditor({
     onChanged();
   }
   async function add() {
-    await addSlotAction(type);
+    await addSlotAction();
     onChanged();
   }
 
   return (
     <>
-      {slots.map((s) => (
-        <div className="row" style={{ marginBottom: 8, alignItems: "flex-end" }} key={s.id}>
-          <div>
-            <label>Desde</label>
-            <input type="time" defaultValue={s.start} onBlur={(e) => update(s.id, "start", e.target.value, s)} />
+      {sorted.map((s) => (
+        <div key={s.id} className="card" style={{ background: "var(--surface-2)", marginBottom: 10 }}>
+          <div className="row" style={{ alignItems: "flex-end" }}>
+            <div>
+              <label>Desde</label>
+              <input type="time" defaultValue={s.start} onBlur={(e) => update(s.id, { start: e.target.value }, s)} />
+            </div>
+            <div>
+              <label>Hasta</label>
+              <input type="time" defaultValue={s.end} onBlur={(e) => update(s.id, { end: e.target.value }, s)} />
+            </div>
+            <button className="ghost" onClick={() => remove(s.id)}>
+              ✕
+            </button>
           </div>
-          <div>
-            <label>Hasta</label>
-            <input type="time" defaultValue={s.end} onBlur={(e) => update(s.id, "end", e.target.value, s)} />
+          <label>Días</label>
+          <div className="chip-row" style={{ marginBottom: 0 }}>
+            {WEEKDAYS_MON_FIRST.map((wd) => {
+              const selected = s.weekdays.includes(wd);
+              return (
+                <div
+                  key={wd}
+                  className={`chip ${selected ? "selected" : ""}`}
+                  onClick={() =>
+                    update(
+                      s.id,
+                      { weekdays: selected ? s.weekdays.filter((w) => w !== wd) : [...s.weekdays, wd] },
+                      s
+                    )
+                  }
+                >
+                  {DIAS_CORTO[wd]}
+                </div>
+              );
+            })}
           </div>
-          <button className="ghost" onClick={() => remove(s.id)}>
-            ✕
-          </button>
         </div>
       ))}
       <button className="ghost" onClick={add}>

@@ -111,8 +111,7 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
           <p className="muted">No hay alumnos para mostrar acá.</p>
         ) : (
           visibleStudents.map((s) => {
-            const slotList = s.defaultWeekday === 6 ? snap.config.slotsSaturday : snap.config.slotsWeekday;
-            const slot = slotList.find((x) => x.id === s.defaultSlotId);
+            const slot = snap.config.slots.find((x) => x.id === s.defaultSlotId);
             const paid = snap.payments.some(
               (p) => p.studentId === s.id && p.monthKey === mk && p.status === "approved"
             );

@@ -22,9 +22,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
   const [modalCell, setModalCell] = useState<{ date: string; slotId: string } | null>(null);
 
   const week = [0, 1, 2, 3, 4, 5].map((i) => addDays(weekBase, i));
-  const allSlotIds = Array.from(
-    new Set([...snap.config.slotsWeekday.map((s) => s.id), ...snap.config.slotsSaturday.map((s) => s.id)])
-  );
+  const allSlotIds = snap.config.slots.map((s) => s.id);
 
   return (
     <>

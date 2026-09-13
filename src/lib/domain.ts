@@ -113,7 +113,7 @@ export function nextDateForWeekday(weekday: number) {
 // ---------- tipos del snapshot ----------
 export type SlotDTO = {
   id: string;
-  type: "weekday" | "saturday";
+  weekdays: number[];
   start: string;
   end: string;
 };
@@ -131,8 +131,7 @@ export type ConfigDTO = {
   profeWhatsapp: string | null;
   announcementVisibleDays: number;
   studentInfo: string;
-  slotsWeekday: SlotDTO[];
-  slotsSaturday: SlotDTO[];
+  slots: SlotDTO[];
 };
 export type HolidayDTO = { date: string; label: string | null };
 export type StudentDTO = {
@@ -228,16 +227,11 @@ export function profeForDateSlot(
   if (sub) return sub.profeUsername;
   return profeForSlot(snap, parseISO(dateISO).getDay(), slotId);
 }
-export function slotsForDate(snap: WorkshopSnapshot, dateISO: string) {
-  const wd = parseISO(dateISO).getDay();
-  if (wd === 0) return [] as SlotDTO[];
-  if (wd === 6) return snap.config.slotsSaturday;
-  return snap.config.slotsWeekday;
-}
 export function slotsForWeekday(snap: WorkshopSnapshot, wd: number) {
-  if (wd === 0) return [] as SlotDTO[];
-  if (wd === 6) return snap.config.slotsSaturday;
-  return snap.config.slotsWeekday;
+  return snap.config.slots.filter((s) => s.weekdays.includes(wd));
+}
+export function slotsForDate(snap: WorkshopSnapshot, dateISO: string) {
+  return slotsForWeekday(snap, parseISO(dateISO).getDay());
 }
 export function slotById(snap: WorkshopSnapshot, dateISO: string, slotId: string) {
   return slotsForDate(snap, dateISO).find((s) => s.id === slotId) || null;

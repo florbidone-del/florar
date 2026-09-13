@@ -11,6 +11,7 @@ import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { PayButton } from "@/components/student/PayButton";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
+import { Collapsible } from "@/components/shared/Collapsible";
 import { logoutAction, setMyThemeAction } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
@@ -95,9 +96,15 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       <div className="card">
         <h3>Calendario del taller</h3>
         <p className="muted" style={{ marginTop: 6 }}>
-          Tus clases están marcadas con un punto. Tocá un día para verlo o cambiarlo; tocá cualquier otro día
-          para ver si hay lugar.
+          Tus clases están marcadas en violeta sólido. Tocá un día para verlo o cambiarlo; tocá cualquier
+          otro día para ver si hay lugar.
         </p>
+        {data.activitiesThisMonth.map((act, i) => (
+          <div className="banner" key={i} style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
+            <strong>{act.title}</strong>
+            <div className="muted">{act.range}</div>
+          </div>
+        ))}
         <div style={{ marginTop: 10 }}>
           <StudentCalendar
             calendar={data.calendar}
@@ -123,8 +130,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         )}
       </div>
 
-      <div className="card">
-        <h3>Tu cuenta</h3>
+      <Collapsible title="Tu cuenta">
         <button className="ghost block" onClick={() => setModal({ kind: "pin" })}>
           Cambiar mi PIN
         </button>
@@ -148,7 +154,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           ))}
         </div>
         <p className="hint">Esto solo cambia los colores de tu propia app — no afecta lo que ven la profe ni otros alumnos.</p>
-      </div>
+      </Collapsible>
 
       <p className="footer-note">{data.studioName} · turno fijo, cambios con 24hs de anticipación</p>
 

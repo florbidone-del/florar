@@ -1,10 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import type {
-  WorkshopSnapshot,
-  ConfigDTO,
-  SlotDTO,
-} from "@/lib/domain";
+import type { WorkshopSnapshot, ConfigDTO } from "@/lib/domain";
 
 function dOnly(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -29,13 +25,13 @@ const DEFAULT_CONFIG = {
   studentInfo: "",
 };
 
-const DEFAULT_SLOTS: { id: string; type: "weekday" | "saturday"; start: string; end: string; order: number }[] = [
-  { id: "w1", type: "weekday", start: "10:30", end: "12:30", order: 0 },
-  { id: "w2", type: "weekday", start: "13:00", end: "15:00", order: 1 },
-  { id: "w3", type: "weekday", start: "15:30", end: "17:30", order: 2 },
-  { id: "w4", type: "weekday", start: "18:00", end: "20:00", order: 3 },
-  { id: "s1", type: "saturday", start: "11:00", end: "13:00", order: 0 },
-  { id: "s2", type: "saturday", start: "14:00", end: "16:00", order: 1 },
+const DEFAULT_SLOTS: { id: string; weekdays: number[]; start: string; end: string; order: number }[] = [
+  { id: "w3", weekdays: [1], start: "15:30", end: "17:30", order: 0 },
+  { id: "w1", weekdays: [5], start: "10:30", end: "12:30", order: 1 },
+  { id: "w4", weekdays: [1, 2, 3, 4, 5], start: "18:00", end: "20:00", order: 2 },
+  { id: "s0", weekdays: [6], start: "09:00", end: "11:00", order: 3 },
+  { id: "s1", weekdays: [6], start: "11:00", end: "13:00", order: 4 },
+  { id: "s2", weekdays: [6], start: "14:00", end: "16:00", order: 5 },
 ];
 
 /** Crea la config y los turnos por defecto la primera vez que se corre la app contra una base vacía. */
@@ -54,14 +50,8 @@ export async function loadConfig(): Promise<ConfigDTO> {
   await ensureBootstrapped();
   const [config, slots] = await Promise.all([
     prisma.config.findUniqueOrThrow({ where: { id: 1 } }),
-    prisma.slot.findMany({ orderBy: { order: "asc" } }),
+    prisma.slot.findMany({ orderBy: { start: "asc" } }),
   ]);
-  const toDto = (s: (typeof slots)[number]): SlotDTO => ({
-    id: s.id,
-    type: s.type,
-    start: s.start,
-    end: s.end,
-  });
   return {
     studioName: config.studioName,
     capacity: config.capacity,
@@ -76,8 +66,7 @@ export async function loadConfig(): Promise<ConfigDTO> {
     profeWhatsapp: config.profeWhatsapp,
     announcementVisibleDays: config.announcementVisibleDays,
     studentInfo: config.studentInfo,
-    slotsWeekday: slots.filter((s) => s.type === "weekday").map(toDto),
-    slotsSaturday: slots.filter((s) => s.type === "saturday").map(toDto),
+    slots: slots.map((s) => ({ id: s.id, weekdays: s.weekdays, start: s.start, end: s.end })),
   };
 }
 
