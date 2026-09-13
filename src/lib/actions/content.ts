@@ -49,6 +49,30 @@ export async function addActivityAction(input: {
   return { ok: true };
 }
 
+export async function updateActivityAction(input: {
+  id: string;
+  date: string;
+  endDate?: string;
+  title: string;
+  description?: string;
+}): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const title = input.title.trim();
+  if (!input.date || !title) return { error: "Faltan datos." };
+  const endDate = input.endDate && input.endDate >= input.date ? input.endDate : input.date;
+  await prisma.activity.update({
+    where: { id: input.id },
+    data: {
+      startDate: dateInputToUTC(input.date),
+      endDate: dateInputToUTC(endDate),
+      title,
+      description: input.description?.trim() || null,
+    },
+  });
+  return { ok: true };
+}
+
 export async function removeActivityAction(id: string): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };

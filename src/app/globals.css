@@ -26,6 +26,9 @@ body{
 }
 a{overflow-wrap:anywhere; word-break:break-word;}
 .card, .banner{overflow-wrap:anywhere; word-break:break-word;}
+/* Que un link largo se corte no debe hacer que las palabras cortas de un botón se
+   partan letra por letra (hereda de .card/.banner si no se resetea acá). */
+button{overflow-wrap:normal; word-break:normal;}
 h1,h2,h3{
   font-family:var(--font-fraunces), Georgia, serif;
   font-weight:600;
@@ -281,6 +284,7 @@ td.holiday{background:var(--oxide-soft);}
   border-bottom:1px solid var(--line);
   gap:8px;
 }
+.list-item > button, .list-item > div:last-child > button{flex-shrink:0; white-space:nowrap;}
 .list-item:last-child{border-bottom:none;}
 .muted{color:var(--ink-soft); font-size:0.85rem;}
 .modal-backdrop{

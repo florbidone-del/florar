@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fmtLong } from "@/lib/domain";
+import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import type { AnnouncementFullDTO } from "@/lib/views/admin";
 import {
   saveStudentInfoAction,
@@ -53,7 +54,7 @@ export function AnnouncementsTab({
           avisos, no se acumula ni desaparece. Sirve para un link a un PDF, el material del mes, o algo
           que quieras que estén viendo siempre.
         </p>
-        <textarea
+        <AutoTextarea
           rows={4}
           placeholder="Ej: Material de este mes: [link]. Este viernes hay jornada especial de esmaltado."
           value={info}
@@ -65,7 +66,7 @@ export function AnnouncementsTab({
       </div>
       <div className="card">
         <h3>Nuevo aviso</h3>
-        <textarea
+        <AutoTextarea
           rows={3}
           placeholder="Escribí el comunicado para los alumnos…"
           value={message}

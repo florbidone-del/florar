@@ -4,10 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fmtLong } from "@/lib/domain";
 import type { ActivityDTO } from "@/lib/domain";
-import { addActivityAction, removeActivityAction } from "@/lib/actions/content";
+import { AutoTextarea } from "@/components/shared/AutoTextarea";
+import { Linkify } from "@/components/shared/Linkify";
+import { addActivityAction, removeActivityAction, updateActivityAction } from "@/lib/actions/content";
 
 export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
   const router = useRouter();
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [date, setDate] = useState("");
   const [end, setEnd] = useState("");
   const [title, setTitle] = useState("");
@@ -16,26 +19,43 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
 
   const sorted = [...activities].sort((a, b) => a.startDate.localeCompare(b.startDate));
 
-  async function add() {
-    if (!date || !title.trim()) return;
-    setPending(true);
-    await addActivityAction({ date, endDate: end, title, description });
-    setPending(false);
+  function startEdit(a: ActivityDTO) {
+    setEditingId(a.id);
+    setDate(a.startDate);
+    setEnd(a.endDate);
+    setTitle(a.title);
+    setDescription(a.description || "");
+  }
+  function cancelEdit() {
+    setEditingId(null);
     setDate("");
     setEnd("");
     setTitle("");
     setDescription("");
+  }
+
+  async function save() {
+    if (!date || !title.trim()) return;
+    setPending(true);
+    if (editingId) {
+      await updateActivityAction({ id: editingId, date, endDate: end, title, description });
+    } else {
+      await addActivityAction({ date, endDate: end, title, description });
+    }
+    setPending(false);
+    cancelEdit();
     router.refresh();
   }
   async function remove(id: string) {
     await removeActivityAction(id);
+    if (editingId === id) cancelEdit();
     router.refresh();
   }
 
   return (
     <>
       <div className="card">
-        <h3>Marcar una actividad especial</h3>
+        <h3>{editingId ? "Editar actividad" : "Marcar una actividad especial"}</h3>
         <p className="muted">
           Puede durar un solo día, una semana o lo que necesites — aparece marcada en el calendario de
           todos los alumnos durante todo ese rango, sin afectar cupos ni clases normales.
@@ -58,15 +78,22 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
         </div>
         <p className="hint">Si dejás &quot;Hasta&quot; vacío, la actividad dura solo ese día.</p>
         <label>Descripción / link (opcional)</label>
-        <textarea
+        <AutoTextarea
           rows={2}
           placeholder="Detalles, o pegá un link a un PDF, fotos, etc."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-        <button className="primary block" style={{ marginTop: 12 }} disabled={pending} onClick={add}>
-          Agregar
-        </button>
+        <div className="row" style={{ marginTop: 12 }}>
+          {editingId && (
+            <button className="ghost block" onClick={cancelEdit}>
+              Cancelar
+            </button>
+          )}
+          <button className="primary block" disabled={pending} onClick={save}>
+            {editingId ? "Guardar cambios" : "Agregar"}
+          </button>
+        </div>
       </div>
       <div className="card">
         <h3>Actividades cargadas</h3>
@@ -81,11 +108,20 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
                   {fmtLong(a.startDate)}
                   {a.endDate !== a.startDate ? ` — ${fmtLong(a.endDate)}` : ""}
                 </div>
-                {a.description && <div className="muted">{a.description}</div>}
+                {a.description && (
+                  <div className="muted">
+                    <Linkify text={a.description} />
+                  </div>
+                )}
               </div>
-              <button className="ghost small" onClick={() => remove(a.id)}>
-                quitar
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
+                <button className="ghost small" onClick={() => startEdit(a)}>
+                  editar
+                </button>
+                <button className="ghost small" onClick={() => remove(a.id)}>
+                  quitar
+                </button>
+              </div>
             </div>
           ))
         )}
