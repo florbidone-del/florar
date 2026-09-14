@@ -9,16 +9,18 @@ import { DayInfoModal } from "@/components/student/DayInfoModal";
 import { SwapModal } from "@/components/student/SwapModal";
 import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { PayButton } from "@/components/student/PayButton";
+import { ChatPanel } from "@/components/shared/ChatPanel";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { logoutAction, setMyThemeAction, dismissStudentTutorialAction } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
-const TABS = ["calendario", "blog", "info", "cuenta"] as const;
+const TABS = ["calendario", "chat", "blog", "info", "cuenta"] as const;
 type Tab = (typeof TABS)[number];
 const TAB_LABELS: Record<Tab, string> = {
   calendario: "Calendario",
+  chat: "Chat",
   blog: "CeramiBlog",
   info: "Información del taller",
   cuenta: "Mi cuenta",
@@ -26,6 +28,7 @@ const TAB_LABELS: Record<Tab, string> = {
 const SECTION_TAB: Record<string, Tab> = {
   "calendar-section": "calendario",
   "announcements-section": "calendario",
+  "chat-section": "chat",
   "blog-section": "blog",
   "info-section": "info",
   "account-section": "cuenta",
@@ -54,6 +57,16 @@ function studentTourSteps(studioName: string): TourStep[] {
         <p className="muted">
           Podés mover una clase puntual una vez por mes, con al menos 24hs de anticipación. Si cae un
           feriado, esa clase queda para reprogramar sin gastar tu cambio del mes.
+        </p>
+      ),
+    },
+    {
+      title: "Chat de tu turno",
+      focus: "chat-section",
+      body: (
+        <p className="muted">
+          Un chat solo entre vos, tus compañeros del mismo día y horario, y la profe de ese turno —
+          nadie más lo ve.
         </p>
       ),
     },
@@ -252,6 +265,12 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {tab === "chat" && (
+        <div id="chat-section">
+          <ChatPanel weekday={data.defaultWeekday} slotId={data.defaultSlotId} />
         </div>
       )}
 

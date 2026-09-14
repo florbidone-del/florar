@@ -47,7 +47,9 @@ export type StudentPanelData = {
   studentId: string;
   studentName: string;
   firstName: string;
+  defaultWeekday: number;
   defaultWeekdayLabel: string;
+  defaultSlotId: string;
   defaultSlot: { start: string; end: string } | null;
   profeName: string | null;
   totalClasses: number;
@@ -183,7 +185,9 @@ export async function buildStudentPanelData(
     studentId: student.id,
     studentName: student.name,
     firstName: student.name.split(" ")[0],
+    defaultWeekday: student.defaultWeekday,
     defaultWeekdayLabel: DIAS[student.defaultWeekday],
+    defaultSlotId: student.defaultSlotId,
     defaultSlot: defaultSlot ? { start: defaultSlot.start, end: defaultSlot.end } : null,
     profeName,
     totalClasses,

@@ -12,6 +12,7 @@ import { HolidaysTab } from "@/components/admin/HolidaysTab";
 import { ActivitiesTab } from "@/components/admin/ActivitiesTab";
 import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
 import { BlogTab } from "@/components/admin/BlogTab";
+import { ChatTab } from "@/components/admin/ChatTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
 import { ProfesTab } from "@/components/admin/ProfesTab";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
@@ -51,6 +52,18 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
           Ocupación de cada turno en la semana. Tocá un turno para ver quién está anotado y, si hace
           falta, asignar una suplencia solo para ese día.
         </p>
+      ),
+    },
+    {
+      title: "Chat",
+      focus: "chat",
+      body: isMainProfe ? (
+        <p className="muted">
+          Un chat por turno entre esos alumnos y su profe. Como sos la profe principal, podés ver y
+          participar en el de cualquier turno.
+        </p>
+      ) : (
+        <p className="muted">Un chat con los alumnos de tu turno — no ven los de otros turnos.</p>
       ),
     },
     {
@@ -117,6 +130,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
 const TAB_LABELS: Record<string, string> = {
   semana: "Semana",
   alumnos: "Alumnos",
+  chat: "Chat",
   feriados: "Feriados",
   actividades: "Actividades",
   avisos: "Avisos",
@@ -131,7 +145,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
   const tabs = isOwner
     ? ["profes"]
-    : ["semana", "alumnos", "avisos", "actividades", "blog", "feriados", "config"];
+    : ["semana", "alumnos", "chat", "avisos", "actividades", "blog", "feriados", "config"];
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
@@ -178,6 +192,9 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
         {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
         {!isOwner && tab === "alumnos" && <StudentsTab bundle={bundle} me={session.username} />}
+        {!isOwner && tab === "chat" && (
+          <ChatTab bundle={bundle} myUsername={session.username} isMainProfe={isMainProfe} />
+        )}
         {!isOwner && tab === "feriados" && <HolidaysTab holidays={bundle.snapshot.holidays} />}
         {!isOwner && tab === "actividades" && <ActivitiesTab activities={bundle.snapshot.activities} />}
         {!isOwner && tab === "avisos" && (

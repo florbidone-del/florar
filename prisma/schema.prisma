@@ -28,6 +28,11 @@ enum PaymentSource {
   mercadopago
 }
 
+enum ChatAuthorKind {
+  student
+  admin
+}
+
 // Fila única (id fijo = 1) con la configuración general del taller.
 model Config {
   id                     Int      @id @default(1)
@@ -60,6 +65,7 @@ model Slot {
   substitutions    Substitution[]
   fromChanges      ScheduleChange[] @relation("FromSlot")
   toChanges        ScheduleChange[] @relation("ToSlot")
+  chatMessages     ChatMessage[]
 }
 
 model Holiday {
@@ -78,6 +84,7 @@ model Admin {
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
   substitutions   Substitution[]   @relation("AdminSubstitutions")
   notifications   Notification[]
+  chatMessages    ChatMessage[]
 }
 
 model Student {
@@ -94,6 +101,7 @@ model Student {
   scheduleChanges ScheduleChange[]
   payments        Payment[]
   pinResets       PinResetRequest[]
+  chatMessages    ChatMessage[]
 
   @@index([defaultWeekday, defaultSlotId])
 }
@@ -188,6 +196,26 @@ model BlogPost {
   imageData      String?
   authorUsername String?
   createdAt      DateTime @default(now())
+}
+
+// Chat del turno: solo lo ven los alumnos de ese día+horario fijo y el profe asignado (o la
+// profe principal, para poder moderar). authorName queda fijo al momento de escribir para que
+// el mensaje siga siendo legible aunque esa cuenta se borre después.
+model ChatMessage {
+  id                  String         @id @default(cuid())
+  weekday             Int
+  slotId              String
+  slot                Slot           @relation(fields: [slotId], references: [id])
+  authorKind          ChatAuthorKind
+  authorName          String
+  authorStudentId     String?
+  authorStudent       Student?       @relation(fields: [authorStudentId], references: [id], onDelete: SetNull)
+  authorAdminUsername String?
+  authorAdmin         Admin?         @relation(fields: [authorAdminUsername], references: [username], onDelete: SetNull)
+  body                String
+  createdAt           DateTime       @default(now())
+
+  @@index([weekday, slotId, createdAt])
 }
 
 model Notification {
