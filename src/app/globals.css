@@ -508,6 +508,8 @@ td.holiday{background:var(--oxide-soft);}
   grid-template-columns:repeat(6, 1fr);
   gap:2px;
   width:210px;
+  max-height:220px;
+  overflow-y:auto;
   padding:8px;
   background:var(--surface);
   border:1.5px solid var(--line);
@@ -516,6 +518,7 @@ td.holiday{background:var(--oxide-soft);}
 }
 .emoji-picker-panel.align-right{left:auto; right:0;}
 .emoji-picker-item{
+  min-width:0;
   padding:4px;
   font-size:1.15rem;
   line-height:1;
