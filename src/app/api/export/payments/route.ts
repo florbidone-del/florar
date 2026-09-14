@@ -17,6 +17,8 @@ const SOURCE_ES: Record<string, string> = {
 
 const GREEN_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEFDD" } };
 const GREEN_FONT: Partial<ExcelJS.Font> = { color: { argb: "FF1E7A34" } };
+const YELLOW_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFCEEB0" } };
+const YELLOW_FONT: Partial<ExcelJS.Font> = { color: { argb: "FF8A6D1D" } };
 const RED_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF6D9D9" } };
 const RED_FONT: Partial<ExcelJS.Font> = { color: { argb: "FFB3261E" } };
 
@@ -43,14 +45,17 @@ export async function GET() {
     loadConfig(),
   ]);
 
+  // Origen y fecha solo tienen sentido para un pago efectivamente concretado (aprobado): un link de
+  // Mercado Pago abierto pero no pagado ya crea la fila en estado "pending", y no queremos que
+  // parezca que el pago se hizo con esos datos.
   const rows: Row[] = payments.map((p) => ({
     alumno: p.student.name,
     usuario: p.studentId,
     mes: p.monthKey,
     monto: p.amount,
     estado: STATUS_ES[p.status] || p.status,
-    origen: SOURCE_ES[p.source] || p.source,
-    fecha: isoDate(p.updatedAt),
+    origen: p.status === "approved" ? SOURCE_ES[p.source] || p.source : "—",
+    fecha: p.status === "approved" ? isoDate(p.updatedAt) : "—",
   }));
 
   // Alumnos que todavía no tienen ningún pago registrado este mes (por ej. recién agregados):
@@ -96,9 +101,11 @@ export async function GET() {
       estadoCell.fill = GREEN_FILL;
       estadoCell.font = GREEN_FONT;
     } else {
-      // "pendiente" y "rechazado" se marcan igual: ambos significan que todavía no cobraste.
-      estadoCell.fill = RED_FILL;
-      estadoCell.font = RED_FONT;
+      // "pendiente" y "rechazado" son lo mismo: todavía no cobraste. Se distingue por fecha límite:
+      // amarillo si ese mes todavía está dentro de la ventana de pago, rojo si ya se pasó.
+      const overdue = row.mes < mk || (row.mes === mk && isLate);
+      estadoCell.fill = overdue ? RED_FILL : YELLOW_FILL;
+      estadoCell.font = overdue ? RED_FONT : YELLOW_FONT;
     }
   }
 
