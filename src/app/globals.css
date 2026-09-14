@@ -431,5 +431,6 @@ td.holiday{background:var(--oxide-soft);}
   margin-left:6px;
 }
 @media (min-width:520px){
-  .landing-buttons{flex-direction:row; max-width:420px;}
+  .landing-buttons{flex-direction:row; max-width:420px; justify-content:center;}
+  .landing-buttons > *{flex:1;}
 }
