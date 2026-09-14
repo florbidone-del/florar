@@ -1,4 +1,4 @@
-# Florar — Taller de Cerámica
+# Florar - Taller de Cerámica
 
 App de gestión del taller: turnos, cambios, pagos y avisos. Migrada del prototipo original
 (`legacy/taller-ceramica.html`, un solo archivo pensado para correr dentro de un artefacto de

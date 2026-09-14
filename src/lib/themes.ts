@@ -14,6 +14,11 @@ export type Theme = {
 };
 
 export const THEMES: Record<string, Theme> = {
+  florar: {
+    name: "Florar", bg: "#EEE9F2", surface: "#F7F4FA", surface2: "#FCFAFD",
+    ink: "#2B2233", inkSoft: "#6E5F7A", line: "#DCD2E6",
+    glaze: "#4B3B63", glazeDark: "#352748", oxide: "#A6446B", oxideSoft: "#F1DCE5", okBg: "#E4DCEE",
+  },
   arcilla: {
     name: "Arcilla", bg: "#EDE7DA", surface: "#F7F2E9", surface2: "#FBF8F2",
     ink: "#2E2A22", inkSoft: "#6B6355", line: "#D8CFBD",
@@ -33,11 +38,6 @@ export const THEMES: Record<string, Theme> = {
     name: "Musgo", bg: "#E4E3D3", surface: "#EFEEDF", surface2: "#F7F6EC",
     ink: "#23281D", inkSoft: "#6E7259", line: "#CFCDB4",
     glaze: "#566B3D", glazeDark: "#3E4E2C", oxide: "#B4622E", oxideSoft: "#F1DFC9", okBg: "#DEE6D2",
-  },
-  florar: {
-    name: "Florar", bg: "#EEE9F2", surface: "#F7F4FA", surface2: "#FCFAFD",
-    ink: "#2B2233", inkSoft: "#6E5F7A", line: "#DCD2E6",
-    glaze: "#4B3B63", glazeDark: "#352748", oxide: "#A6446B", oxideSoft: "#F1DCE5", okBg: "#E4DCEE",
   },
 };
 

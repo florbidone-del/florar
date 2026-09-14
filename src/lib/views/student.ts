@@ -50,7 +50,8 @@ export type StudentPanelData = {
   defaultWeekdayLabel: string;
   defaultSlot: { start: string; end: string } | null;
   profeName: string | null;
-  confirmedCount: number;
+  totalClasses: number;
+  pendingHolidays: number;
   swapsLeft: number;
   capacity: number;
   payment: {
@@ -81,9 +82,12 @@ export async function buildStudentPanelData(
 
   const sessions = studentSessionsThisMonth(snap, studentId);
   const ownByDate = new Map(sessions.map((r) => [r.date, r]));
-  const confirmedCount = sessions.filter((r) =>
-    ["confirmed", "rescheduled", "moved-swap", "moved-holiday"].includes(r.status)
+  // "moved-holiday"/"moved-swap" son la fecha ORIGINAL que se vació: la clase real ya
+  // está contada por su fila "rescheduled" en la fecha destino. Sumar ambas duplica la clase.
+  const totalClasses = sessions.filter((r) =>
+    ["confirmed", "rescheduled", "pending-holiday"].includes(r.status)
   ).length;
+  const pendingHolidays = sessions.filter((r) => r.status === "pending-holiday").length;
   const swapsLeft = snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId);
   const defaultSlot = snap.config.slots.find((s) => s.id === student.defaultSlotId) || null;
   const profeName = capitalize(profeForSlot(snap, student.defaultWeekday, student.defaultSlotId));
@@ -173,7 +177,8 @@ export async function buildStudentPanelData(
     defaultWeekdayLabel: DIAS[student.defaultWeekday],
     defaultSlot: defaultSlot ? { start: defaultSlot.start, end: defaultSlot.end } : null,
     profeName,
-    confirmedCount,
+    totalClasses,
+    pendingHolidays,
     swapsLeft,
     capacity: snap.config.capacity,
     payment: {

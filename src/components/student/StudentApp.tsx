@@ -11,10 +11,23 @@ import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { PayButton } from "@/components/student/PayButton";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
-import { Collapsible } from "@/components/shared/Collapsible";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { logoutAction, setMyThemeAction, dismissStudentTutorialAction } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
+
+const TABS = ["calendario", "info", "cuenta"] as const;
+type Tab = (typeof TABS)[number];
+const TAB_LABELS: Record<Tab, string> = {
+  calendario: "Calendario",
+  info: "Información del taller",
+  cuenta: "Mi cuenta",
+};
+const SECTION_TAB: Record<string, Tab> = {
+  "calendar-section": "calendario",
+  "announcements-section": "calendario",
+  "info-section": "info",
+  "account-section": "cuenta",
+};
 
 function studentTourSteps(studioName: string): TourStep[] {
   return [
@@ -43,22 +56,27 @@ function studentTourSteps(studioName: string): TourStep[] {
       ),
     },
     {
-      title: "Avisos y cuota",
+      title: "Avisos",
       focus: "announcements-section",
       body: (
         <p className="muted">
-          Arriba vas a ver la información fija de la profe y los avisos recientes. Si debés la cuota,
-          te va a aparecer un botón para pagar con Mercado Pago.
+          Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
+          todo un botón para pagar con Mercado Pago, sin importar en qué pestaña estés.
         </p>
       ),
+    },
+    {
+      title: "Información del taller",
+      focus: "info-section",
+      body: <p className="muted">En esta pestaña encontrás la información fija del taller y de tu profe.</p>,
     },
     {
       title: "Tu cuenta",
       focus: "account-section",
       body: (
         <p className="muted">
-          Más abajo podés cambiar tu PIN y elegir el tema de colores de tu propia app, sin que afecte a
-          nadie más.
+          Acá podés cambiar tu PIN y elegir el tema de colores de tu propia app, sin que afecte a nadie
+          más.
         </p>
       ),
     },
@@ -77,6 +95,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const [modal, setModal] = useState<ModalState>(null);
   const [showTour, setShowTour] = useState(!data.tutorialSeen);
   const [tourFocus, setTourFocus] = useState<string | undefined>();
+  const [tab, setTab] = useState<Tab>("calendario");
 
   async function finishTour() {
     setShowTour(false);
@@ -86,8 +105,17 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
 
   useEffect(() => {
     if (!tourFocus) return;
-    document.getElementById(tourFocus)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = SECTION_TAB[tourFocus];
+    if (target) setTab(target);
   }, [tourFocus]);
+
+  useEffect(() => {
+    if (!tourFocus) return;
+    const id = setTimeout(() => {
+      document.getElementById(tourFocus)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => clearTimeout(id);
+  }, [tourFocus, tab]);
 
   async function logout() {
     await logoutAction();
@@ -136,90 +164,131 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       )}
 
-      {data.studentInfo && (
-        <div className="card" style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
-          <h3>Información</h3>
-          <div>
-            <Linkify text={data.studentInfo} />
+      <div className="tabs">
+        {TABS.map((t) => (
+          <button
+            type="button"
+            key={t}
+            className={`tab ${t === tab ? "active" : ""}`}
+            onClick={() => setTab(t)}
+          >
+            {TAB_LABELS[t]}
+          </button>
+        ))}
+      </div>
+
+      {tab === "calendario" && (
+        <div>
+          <div className="card" id="announcements-section">
+            <h3>Avisos</h3>
+            {data.announcements.length === 0 ? (
+              <p className="muted">No hay avisos por ahora.</p>
+            ) : (
+              data.announcements.map((a) => (
+                <div className="announcement" key={a.id}>
+                  <div className="date">{fmtLong(a.date)}</div>
+                  <div>{a.message}</div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="stat-grid">
+            <div className="stat">
+              <div className="num">{data.totalClasses}</div>
+              <div className="label">clase{data.totalClasses === 1 ? "" : "s"} este mes</div>
+            </div>
+            <div className="stat">
+              <div className="num">{data.swapsLeft}</div>
+              <div className="label">
+                cambio{data.swapsLeft === 1 ? "" : "s"} disponible{data.swapsLeft === 1 ? "" : "s"} este mes
+              </div>
+            </div>
+          </div>
+
+          {data.pendingHolidays > 0 && (
+            <div className="banner">
+              <strong>
+                {data.pendingHolidays === 1
+                  ? "Tenés 1 feriado por reprogramar"
+                  : `Tenés ${data.pendingHolidays} feriados por reprogramar`}
+              </strong>
+              Buscá el día marcado como feriado en tu calendario y tocalo para elegir una nueva fecha. No
+              te gasta el cambio del mes.
+            </div>
+          )}
+
+          <div className="card" id="calendar-section">
+            <h3>Calendario del taller</h3>
+            <p className="muted" style={{ marginTop: 6 }}>
+              Tus clases están marcadas en violeta sólido. Tocá un día para verlo o cambiarlo; tocá
+              cualquier otro día para ver si hay lugar.
+            </p>
+            {data.activitiesThisMonth.map((act, i) => (
+              <div className="banner" key={i} style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
+                <strong>{act.title}</strong>
+                <div className="muted">{act.range}</div>
+              </div>
+            ))}
+            <div style={{ marginTop: 10 }}>
+              <StudentCalendar
+                calendar={data.calendar}
+                leadingBlanks={data.leadingBlanks}
+                todayISO={data.todayISO}
+                onOwnClick={(day) => setModal({ kind: "own", day })}
+                onOtherClick={(day) => setModal({ kind: "other", day })}
+              />
+            </div>
           </div>
         </div>
       )}
 
-      <div className="stat-grid">
-        <div className="stat">
-          <div className="num">{data.confirmedCount}</div>
-          <div className="label">clases este mes</div>
-        </div>
-        <div className="stat">
-          <div className="num">{data.swapsLeft}</div>
-          <div className="label">
-            cambio{data.swapsLeft === 1 ? "" : "s"} disponible{data.swapsLeft === 1 ? "" : "s"} este mes
-          </div>
-        </div>
-      </div>
-
-      <div className="card" id="calendar-section">
-        <h3>Calendario del taller</h3>
-        <p className="muted" style={{ marginTop: 6 }}>
-          Tus clases están marcadas en violeta sólido. Tocá un día para verlo o cambiarlo; tocá cualquier
-          otro día para ver si hay lugar.
-        </p>
-        {data.activitiesThisMonth.map((act, i) => (
-          <div className="banner" key={i} style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
-            <strong>{act.title}</strong>
-            <div className="muted">{act.range}</div>
-          </div>
-        ))}
-        <div style={{ marginTop: 10 }}>
-          <StudentCalendar
-            calendar={data.calendar}
-            leadingBlanks={data.leadingBlanks}
-            todayISO={data.todayISO}
-            onOwnClick={(day) => setModal({ kind: "own", day })}
-            onOtherClick={(day) => setModal({ kind: "other", day })}
-          />
-        </div>
-      </div>
-
-      <div className="card" id="announcements-section">
-        <h3>Avisos</h3>
-        {data.announcements.length === 0 ? (
-          <p className="muted">No hay avisos por ahora.</p>
-        ) : (
-          data.announcements.map((a) => (
-            <div className="announcement" key={a.id}>
-              <div className="date">{fmtLong(a.date)}</div>
-              <div>{a.message}</div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <Collapsible title="Tu cuenta" id="account-section" forceOpen={tourFocus === "account-section"}>
-        <button className="ghost block" onClick={() => setModal({ kind: "pin" })}>
-          Cambiar mi PIN
-        </button>
-        <label style={{ marginTop: 14 }}>Tema de tu app</label>
-        <div className="theme-grid">
-          {Object.entries(THEMES).map(([key, t]) => (
-            <button
-              type="button"
-              key={key}
-              className={`theme-card ${data.theme === key ? "selected" : ""}`}
-              onClick={() => chooseTheme(key)}
-            >
-              <div className="theme-swatch">
-                <span style={{ background: t.bg }} />
-                <span style={{ background: t.glaze }} />
-                <span style={{ background: t.oxide }} />
-                <span style={{ background: t.ink }} />
+      {tab === "info" && (
+        <div id="info-section">
+          {data.studentInfo ? (
+            <div className="card" style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
+              <h3>Información</h3>
+              <div>
+                <Linkify text={data.studentInfo} />
               </div>
-              <div className="theme-name">{t.name}</div>
-            </button>
-          ))}
+            </div>
+          ) : (
+            <p className="muted">Todavía no hay información cargada.</p>
+          )}
         </div>
-        <p className="hint">Esto solo cambia los colores de tu propia app — no afecta lo que ven la profe ni otros alumnos.</p>
-      </Collapsible>
+      )}
+
+      {tab === "cuenta" && (
+        <div className="card" id="account-section">
+          <h3>Tu cuenta</h3>
+          <button className="ghost block" onClick={() => setModal({ kind: "pin" })}>
+            Cambiar mi PIN
+          </button>
+          <label style={{ marginTop: 14 }}>Tema de tu app</label>
+          <div className="theme-grid">
+            {Object.entries(THEMES).map(([key, t]) => (
+              <button
+                type="button"
+                key={key}
+                className={`theme-card ${data.theme === key ? "selected" : ""}`}
+                onClick={() => chooseTheme(key)}
+              >
+                <div className="theme-swatch">
+                  <span style={{ background: t.bg }} />
+                  <span style={{ background: t.glaze }} />
+                  <span style={{ background: t.oxide }} />
+                  <span style={{ background: t.ink }} />
+                </div>
+                <div className="theme-name">{t.name}</div>
+              </button>
+            ))}
+          </div>
+          <p className="hint">
+            Esto solo cambia los colores de tu propia app — no afecta lo que ven la profe ni otros
+            alumnos.
+          </p>
+        </div>
+      )}
 
       <p className="footer-note">{data.studioName} · turno fijo, cambios con 24hs de anticipación</p>
 

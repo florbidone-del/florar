@@ -20,7 +20,7 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Florar — Taller de Cerámica",
+  title: "Florar - Taller de Cerámica",
   description: "Gestión de turnos, pagos y avisos del taller de cerámica Florar.",
   manifest: "/manifest.json",
   appleWebApp: {

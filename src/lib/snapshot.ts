@@ -10,7 +10,7 @@ export function dateInputToUTC(dateISO: string) {
 }
 
 const DEFAULT_CONFIG = {
-  studioName: "Taller de Cerámica",
+  studioName: "Florar - Taller de Cerámica",
   capacity: 8,
   classesPerCycle: 4,
   swapsPerMonth: 1,
