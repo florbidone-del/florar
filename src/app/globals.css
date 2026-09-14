@@ -498,11 +498,11 @@ td.holiday{background:var(--oxide-soft);}
   .chat-turno-item{border-radius:var(--radius); text-align:left;}
   .chat-turno-panel{flex:1;}
 }
-.emoji-picker{position:relative; display:inline-block; flex-shrink:0;}
+.emoji-picker{position:relative; display:inline-block; flex-shrink:0; align-self:flex-start;}
 .emoji-picker-panel{
   position:absolute;
-  bottom:calc(100% + 6px);
-  right:0;
+  top:calc(100% + 6px);
+  left:0;
   z-index:20;
   display:grid;
   grid-template-columns:repeat(6, 1fr);
