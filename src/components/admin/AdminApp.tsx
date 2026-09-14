@@ -199,7 +199,9 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           </>
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
-        {!isOwner && tab === "config" && <ConfigTab bundle={bundle} isMainProfe={isMainProfe} />}
+        {!isOwner && tab === "config" && (
+          <ConfigTab bundle={bundle} isMainProfe={isMainProfe} myUsername={session.username} />
+        )}
       </div>
       {showTour && (
         <OnboardingTour

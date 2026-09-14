@@ -16,7 +16,7 @@ export async function authorizeChatTurno(weekday: number, slotId: string): Promi
   if (session.kind === "student") {
     const student = await prisma.student.findUnique({ where: { id: session.studentId } });
     if (!student || student.defaultWeekday !== weekday || student.defaultSlotId !== slotId) return null;
-    return { kind: "student", studentId: student.id, authorName: student.name };
+    return { kind: "student", studentId: student.id, authorName: student.nick || student.name };
   }
 
   const admin = await prisma.admin.findUnique({ where: { username: session.username } });
@@ -27,5 +27,5 @@ export async function authorizeChatTurno(weekday: number, slotId: string): Promi
     });
     if (!assignment || assignment.profeUsername !== admin.username) return null;
   }
-  return { kind: "admin", username: admin.username, authorName: capitalize(admin.username) };
+  return { kind: "admin", username: admin.username, authorName: admin.displayName || capitalize(admin.username) };
 }

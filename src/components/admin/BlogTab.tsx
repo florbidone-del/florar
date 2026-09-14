@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { fmtLong, capitalize } from "@/lib/domain";
+import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
+import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import type { BlogPostDTO } from "@/lib/views/admin";
 import { addBlogPostAction, removeBlogPostAction } from "@/lib/actions/content";
 
@@ -63,6 +64,9 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
+          <div style={{ marginTop: 6 }}>
+            <EmojiPicker onPick={(e) => setBody((b) => b + e)} />
+          </div>
         </div>
         <ImagePicker value={imageData} onChange={setImageData} />
         {error && <p className="err">{error}</p>}
@@ -81,7 +85,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
             <div className="blog-post" key={p.id}>
               <div className="muted">
                 {fmtLong(p.createdAt)}
-                {p.authorUsername ? ` — ${capitalize(p.authorUsername)}` : ""}
+                {p.authorName ? ` — ${p.authorName}` : ""}
               </div>
               {p.title && <h4>{p.title}</h4>}
               {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}

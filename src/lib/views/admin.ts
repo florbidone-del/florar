@@ -1,13 +1,14 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
-import { isoDate, type WorkshopSnapshot } from "@/lib/domain";
+import { isoDate, capitalize, type WorkshopSnapshot } from "@/lib/domain";
 
 export type AdminDTO = {
   username: string;
   role: "owner" | "profe";
   isMainProfe: boolean;
   tutorialSeen: boolean;
+  displayName: string | null;
   createdAt: string;
 };
 export type NotificationDTO = {
@@ -25,7 +26,7 @@ export type PinResetDTO = {
 export type AnnouncementFullDTO = {
   id: string;
   message: string;
-  authorUsername: string | null;
+  authorName: string | null;
   createdAt: string;
 };
 export type BlogPostDTO = {
@@ -33,7 +34,7 @@ export type BlogPostDTO = {
   title: string | null;
   body: string;
   imageData: string | null;
-  authorUsername: string | null;
+  authorName: string | null;
   createdAt: string;
 };
 
@@ -59,6 +60,11 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
   ]);
 
+  // Nombre a mostrar para cada profe: su nick si se puso uno, si no el usuario con mayúscula.
+  const authorNameByUsername = new Map(
+    admins.map((a) => [a.username, a.displayName || capitalize(a.username)])
+  );
+
   return {
     snapshot,
     admins: admins.map((a) => ({
@@ -66,6 +72,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       role: a.role,
       isMainProfe: a.isMainProfe,
       tutorialSeen: a.tutorialSeen,
+      displayName: a.displayName,
       createdAt: isoDate(a.createdAt),
     })),
     notifications: notifications.map((n) => ({
@@ -82,7 +89,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     })),
     announcements: announcements.map((a) => ({
       id: a.id,
-      authorUsername: a.authorUsername,
+      authorName: a.authorUsername ? authorNameByUsername.get(a.authorUsername) || null : null,
       message: a.message,
       createdAt: isoDate(a.createdAt),
     })),
@@ -91,7 +98,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       title: p.title,
       body: p.body,
       imageData: p.imageData,
-      authorUsername: p.authorUsername,
+      authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
       createdAt: isoDate(p.createdAt),
     })),
   };

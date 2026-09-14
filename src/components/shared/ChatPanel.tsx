@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { sendChatMessageAction } from "@/lib/actions/chat";
+import { EmojiPicker } from "@/components/shared/EmojiPicker";
 
 type ChatMsg = {
   id: string;
@@ -105,6 +106,7 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
             }
           }}
         />
+        <EmojiPicker onPick={(e) => setText((t) => t + e)} />
         <button type="button" className="primary" disabled={pending || !text.trim()} onClick={send}>
           Enviar
         </button>

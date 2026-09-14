@@ -7,6 +7,7 @@ import { THEMES } from "@/lib/themes";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
+import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import {
   saveConfigAction,
   setThemeAction,
@@ -15,14 +16,23 @@ import {
   removeSlotAction,
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
-import { resetAllTutorialsAction } from "@/lib/actions/auth";
+import { resetAllTutorialsAction, setMyDisplayNameAction } from "@/lib/actions/auth";
 import { saveStudentInfoAction } from "@/lib/actions/content";
 
-export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMainProfe: boolean }) {
+export function ConfigTab({
+  bundle,
+  isMainProfe,
+  myUsername,
+}: {
+  bundle: AdminBundle;
+  isMainProfe: boolean;
+  myUsername: string;
+}) {
   const router = useRouter();
   const snap = bundle.snapshot;
   const c = snap.config;
   const profes = bundle.admins.filter((a) => a.role === "profe").map((a) => a.username);
+  const me = bundle.admins.find((a) => a.username === myUsername);
 
   const [capacity, setCapacity] = useState(c.capacity);
   const [classesPerCycle, setClassesPerCycle] = useState(c.classesPerCycle);
@@ -40,11 +50,20 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
   const [tutorialResetDone, setTutorialResetDone] = useState(false);
   const [studentInfo, setStudentInfo] = useState(c.studentInfo);
   const [savingInfo, setSavingInfo] = useState(false);
+  const [displayName, setDisplayName] = useState(me?.displayName || "");
+  const [savingDisplayName, setSavingDisplayName] = useState(false);
 
   async function saveStudentInfo() {
     setSavingInfo(true);
     await saveStudentInfoAction(studentInfo);
     setSavingInfo(false);
+    router.refresh();
+  }
+
+  async function saveDisplayName() {
+    setSavingDisplayName(true);
+    await setMyDisplayNameAction(displayName);
+    setSavingDisplayName(false);
     router.refresh();
   }
 
@@ -82,6 +101,30 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
 
   return (
     <>
+      <Collapsible title="Tu nick">
+        <p className="muted">
+          Así te van a ver los alumnos en el chat, los avisos y el CeramiBlog, en vez de tu usuario de
+          acceso ({myUsername}). Podés agregarle emojis.
+        </p>
+        <div className="nick-row" style={{ marginTop: 10 }}>
+          <input
+            placeholder={capitalize(myUsername)}
+            maxLength={30}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+          <EmojiPicker onPick={(e) => setDisplayName((n) => n + e)} />
+        </div>
+        <button
+          className="ghost block"
+          style={{ marginTop: 8 }}
+          disabled={savingDisplayName}
+          onClick={saveDisplayName}
+        >
+          Guardar nick
+        </button>
+      </Collapsible>
+
       <Collapsible title="Paleta de colores">
         <div className="theme-grid">
           {Object.entries(THEMES).map(([key, t]) => (

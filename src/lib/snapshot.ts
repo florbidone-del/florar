@@ -96,6 +96,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       defaultWeekday: s.defaultWeekday,
       defaultSlotId: s.defaultSlotId,
       theme: s.theme,
+      nick: s.nick,
       tutorialSeen: s.tutorialSeen,
       createdAt: isoDate(s.createdAt),
     })),

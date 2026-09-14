@@ -10,10 +10,16 @@ import { SwapModal } from "@/components/student/SwapModal";
 import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
+import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
-import { logoutAction, setMyThemeAction, dismissStudentTutorialAction } from "@/lib/actions/auth";
+import {
+  logoutAction,
+  setMyThemeAction,
+  setMyNickAction,
+  dismissStudentTutorialAction,
+} from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
 const TABS = ["calendario", "chat", "blog", "info", "cuenta"] as const;
@@ -121,6 +127,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const [showTour, setShowTour] = useState(!data.tutorialSeen);
   const [tourFocus, setTourFocus] = useState<string | undefined>();
   const [tab, setTab] = useState<Tab>("calendario");
+  const [nick, setNick] = useState(data.nick || "");
+  const [savingNick, setSavingNick] = useState(false);
 
   async function finishTour() {
     setShowTour(false);
@@ -155,6 +163,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
 
   async function chooseTheme(theme: string) {
     await setMyThemeAction(theme);
+    router.refresh();
+  }
+
+  async function saveNick() {
+    setSavingNick(true);
+    await setMyNickAction(nick);
+    setSavingNick(false);
     router.refresh();
   }
 
@@ -321,6 +336,23 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           <h3>Tu cuenta</h3>
           <button className="ghost block" onClick={() => setModal({ kind: "pin" })}>
             Cambiar mi PIN
+          </button>
+          <label style={{ marginTop: 14 }}>Tu nick para el chat (opcional)</label>
+          <p className="hint" style={{ marginTop: 0 }}>
+            Tu nombre real ({data.studentName}) sigue siendo el que ve la profe en todos lados — esto
+            solo cambia cómo te ven tus compañeros en el chat de tu turno.
+          </p>
+          <div className="nick-row">
+            <input
+              placeholder={data.studentName}
+              maxLength={30}
+              value={nick}
+              onChange={(e) => setNick(e.target.value)}
+            />
+            <EmojiPicker onPick={(e) => setNick((n) => n + e)} />
+          </div>
+          <button className="ghost block" style={{ marginTop: 8 }} disabled={savingNick} onClick={saveNick}>
+            Guardar nick
           </button>
           <label style={{ marginTop: 14 }}>Tema de tu app</label>
           <div className="theme-grid">

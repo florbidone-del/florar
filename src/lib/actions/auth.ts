@@ -62,6 +62,30 @@ export async function setMyThemeAction(theme: string): Promise<ActionResult> {
   return { ok: true };
 }
 
+export async function setMyNickAction(nick: string): Promise<ActionResult> {
+  const session = await requireStudent();
+  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
+  const trimmed = nick.trim();
+  if (trimmed.length > 30) return { error: "Máximo 30 caracteres." };
+  await prisma.student.update({
+    where: { id: session.studentId },
+    data: { nick: trimmed || null },
+  });
+  return { ok: true };
+}
+
+export async function setMyDisplayNameAction(displayName: string): Promise<ActionResult> {
+  const session = await requireAdmin();
+  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
+  const trimmed = displayName.trim();
+  if (trimmed.length > 30) return { error: "Máximo 30 caracteres." };
+  await prisma.admin.update({
+    where: { username: session.username },
+    data: { displayName: trimmed || null },
+  });
+  return { ok: true };
+}
+
 export async function dismissStudentTutorialAction(): Promise<ActionResult> {
   const session = await requireStudent();
   if (!session) return { error: "Tenés que iniciar sesión de nuevo." };

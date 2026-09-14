@@ -47,6 +47,7 @@ export type StudentPanelData = {
   studentId: string;
   studentName: string;
   firstName: string;
+  nick: string | null;
   defaultWeekday: number;
   defaultWeekdayLabel: string;
   defaultSlotId: string;
@@ -168,16 +169,21 @@ export async function buildStudentPanelData(
     });
   }
 
-  const [allAnnouncements, allBlogPosts] = await Promise.all([
+  const [allAnnouncements, allBlogPosts, admins] = await Promise.all([
     prisma.announcement.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.admin.findMany({ select: { username: true, displayName: true } }),
   ]);
+  // Nombre a mostrar para cada profe: su nick si se puso uno, si no el usuario con mayúscula.
+  const authorNameByUsername = new Map(
+    admins.map((a) => [a.username, a.displayName || capitalize(a.username)])
+  );
   const announcements = allAnnouncements
     .map((a) => ({
       id: a.id,
       date: isoDate(a.createdAt),
       message: a.message,
-      authorName: a.authorUsername ? capitalize(a.authorUsername) : null,
+      authorName: a.authorUsername ? authorNameByUsername.get(a.authorUsername) || null : null,
     }))
     .filter((a) => daysSince(a.date) <= snap.config.announcementVisibleDays)
     .slice(-8)
@@ -188,7 +194,7 @@ export async function buildStudentPanelData(
     body: p.body,
     imageData: p.imageData,
     date: isoDate(p.createdAt),
-    authorName: p.authorUsername ? capitalize(p.authorUsername) : null,
+    authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
   }));
 
   return {
@@ -198,6 +204,7 @@ export async function buildStudentPanelData(
     studentId: student.id,
     studentName: student.name,
     firstName: student.name.split(" ")[0],
+    nick: student.nick,
     defaultWeekday: student.defaultWeekday,
     defaultWeekdayLabel: DIAS[student.defaultWeekday],
     defaultSlotId: student.defaultSlotId,

@@ -498,3 +498,29 @@ td.holiday{background:var(--oxide-soft);}
   .chat-turno-item{border-radius:var(--radius); text-align:left;}
   .chat-turno-panel{flex:1;}
 }
+.emoji-picker{position:relative; display:inline-block; flex-shrink:0;}
+.emoji-picker-panel{
+  position:absolute;
+  bottom:calc(100% + 6px);
+  right:0;
+  z-index:20;
+  display:grid;
+  grid-template-columns:repeat(6, 1fr);
+  gap:2px;
+  width:210px;
+  padding:8px;
+  background:var(--surface);
+  border:1.5px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:0 10px 30px -10px rgba(0,0,0,0.35);
+}
+.emoji-picker-item{
+  padding:4px;
+  font-size:1.15rem;
+  line-height:1;
+  border:none;
+  background:none;
+}
+.emoji-picker-item:hover{background:var(--surface-2); border-radius:6px;}
+.nick-row{display:flex; gap:8px; align-items:flex-start;}
+.nick-row input{flex:1; min-width:0;}

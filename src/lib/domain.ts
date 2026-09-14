@@ -169,6 +169,7 @@ export type StudentDTO = {
   defaultWeekday: number;
   defaultSlotId: string;
   theme: string | null;
+  nick: string | null;
   tutorialSeen: boolean;
   createdAt: string;
 };

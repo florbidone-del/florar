@@ -79,6 +79,7 @@ model Admin {
   role         AdminRole
   isMainProfe  Boolean   @default(false)
   tutorialSeen Boolean   @default(false)
+  displayName  String?
   createdAt    DateTime  @default(now())
 
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
@@ -95,6 +96,7 @@ model Student {
   defaultSlotId   String
   defaultSlot     Slot     @relation(fields: [defaultSlotId], references: [id])
   theme           String?
+  nick            String?
   tutorialSeen    Boolean  @default(false)
   createdAt       DateTime @default(now())
 

@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { fmtLong, capitalize } from "@/lib/domain";
+import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
+import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import type { AnnouncementFullDTO } from "@/lib/views/admin";
 import { addAnnouncementAction, removeAnnouncementAction } from "@/lib/actions/content";
 
@@ -39,9 +40,12 @@ export function AnnouncementsTab({ announcements }: { announcements: Announcemen
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button className="primary block" style={{ marginTop: 12 }} disabled={pending} onClick={publish}>
-          Publicar
-        </button>
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <EmojiPicker onPick={(e) => setMessage((m) => m + e)} />
+          <button className="primary block" style={{ flex: 1 }} disabled={pending} onClick={publish}>
+            Publicar
+          </button>
+        </div>
       </div>
       <div className="card">
         <h3>Avisos publicados</h3>
@@ -55,7 +59,7 @@ export function AnnouncementsTab({ announcements }: { announcements: Announcemen
               <div>
                 <div className="muted">
                   {fmtLong(a.createdAt)}
-                  {a.authorUsername ? ` — ${capitalize(a.authorUsername)}` : ""}
+                  {a.authorName ? ` — ${a.authorName}` : ""}
                 </div>
                 <CollapsibleText text={a.message} />
               </div>
