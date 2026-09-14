@@ -22,7 +22,12 @@ export type PinResetDTO = {
   studentName: string;
   requestedAt: string;
 };
-export type AnnouncementFullDTO = { id: string; message: string; createdAt: string };
+export type AnnouncementFullDTO = {
+  id: string;
+  message: string;
+  authorUsername: string | null;
+  createdAt: string;
+};
 export type BlogPostDTO = {
   id: string;
   title: string | null;
@@ -77,6 +82,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     })),
     announcements: announcements.map((a) => ({
       id: a.id,
+      authorUsername: a.authorUsername,
       message: a.message,
       createdAt: isoDate(a.createdAt),
     })),

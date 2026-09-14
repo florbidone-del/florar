@@ -68,8 +68,15 @@ export type StudentPanelData = {
     monthName: string;
   };
   studentInfo: string;
-  announcements: { id: string; date: string; message: string }[];
-  blogPosts: { id: string; title: string | null; body: string; imageData: string | null; date: string }[];
+  announcements: { id: string; date: string; message: string; authorName: string | null }[];
+  blogPosts: {
+    id: string;
+    title: string | null;
+    body: string;
+    imageData: string | null;
+    date: string;
+    authorName: string | null;
+  }[];
   activitiesThisMonth: { title: string; description: string | null; range: string }[];
   calendar: CalendarDay[];
   leadingBlanks: number;
@@ -166,7 +173,12 @@ export async function buildStudentPanelData(
     prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
   ]);
   const announcements = allAnnouncements
-    .map((a) => ({ id: a.id, date: isoDate(a.createdAt), message: a.message }))
+    .map((a) => ({
+      id: a.id,
+      date: isoDate(a.createdAt),
+      message: a.message,
+      authorName: a.authorUsername ? capitalize(a.authorUsername) : null,
+    }))
     .filter((a) => daysSince(a.date) <= snap.config.announcementVisibleDays)
     .slice(-8)
     .reverse();
@@ -176,6 +188,7 @@ export async function buildStudentPanelData(
     body: p.body,
     imageData: p.imageData,
     date: isoDate(p.createdAt),
+    authorName: p.authorUsername ? capitalize(p.authorUsername) : null,
   }));
 
   return {

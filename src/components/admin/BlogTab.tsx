@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { fmtLong } from "@/lib/domain";
+import { fmtLong, capitalize } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
@@ -79,7 +79,10 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
           emptyMessage="Todavía no hay posts."
           renderItem={(p) => (
             <div className="blog-post" key={p.id}>
-              <div className="muted">{fmtLong(p.createdAt)}</div>
+              <div className="muted">
+                {fmtLong(p.createdAt)}
+                {p.authorUsername ? ` — ${capitalize(p.authorUsername)}` : ""}
+              </div>
               {p.title && <h4>{p.title}</h4>}
               {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
               {p.body && (

@@ -211,7 +211,10 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             ) : (
               data.announcements.map((a) => (
                 <div className="announcement" key={a.id}>
-                  <div className="date">{fmtLong(a.date)}</div>
+                  <div className="date">
+                    {fmtLong(a.date)}
+                    {a.authorName ? ` — ${a.authorName}` : ""}
+                  </div>
                   <div>{a.message}</div>
                 </div>
               ))
@@ -281,7 +284,10 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           ) : (
             data.blogPosts.map((p) => (
               <div className="card blog-post" key={p.id}>
-                <div className="muted">{fmtLong(p.date)}</div>
+                <div className="muted">
+                  {fmtLong(p.date)}
+                  {p.authorName ? ` — ${p.authorName}` : ""}
+                </div>
                 {p.title && <h3>{p.title}</h3>}
                 {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
                 {p.body && (

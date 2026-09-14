@@ -182,9 +182,10 @@ model Activity {
 }
 
 model Announcement {
-  id        String   @id @default(cuid())
-  message   String
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  message        String
+  authorUsername String?
+  createdAt      DateTime @default(now())
 }
 
 // Posts tipo blog de la profe: links, fotos e ideas — a diferencia de Announcement,

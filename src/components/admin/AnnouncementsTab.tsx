@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { fmtLong } from "@/lib/domain";
+import { fmtLong, capitalize } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
@@ -53,7 +53,10 @@ export function AnnouncementsTab({ announcements }: { announcements: Announcemen
           renderItem={(a) => (
             <div className="list-item" key={a.id}>
               <div>
-                <div className="muted">{fmtLong(a.createdAt)}</div>
+                <div className="muted">
+                  {fmtLong(a.createdAt)}
+                  {a.authorUsername ? ` — ${capitalize(a.authorUsername)}` : ""}
+                </div>
                 <CollapsibleText text={a.message} />
               </div>
               <button className="ghost" onClick={() => remove(a.id)}>

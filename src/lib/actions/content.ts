@@ -92,7 +92,7 @@ export async function addAnnouncementAction(message: string): Promise<ActionResu
   if (!session) return { error: "No autorizado." };
   const trimmed = message.trim();
   if (!trimmed) return { error: "Escribí un mensaje." };
-  await prisma.announcement.create({ data: { message: trimmed } });
+  await prisma.announcement.create({ data: { message: trimmed, authorUsername: session.username } });
   return { ok: true };
 }
 
