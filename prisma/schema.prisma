@@ -179,6 +179,17 @@ model Announcement {
   createdAt DateTime @default(now())
 }
 
+// Posts tipo blog de la profe: links, fotos e ideas — a diferencia de Announcement,
+// no es urgente ni se filtra por antigüedad, queda como un registro permanente.
+model BlogPost {
+  id             String   @id @default(cuid())
+  title          String?
+  body           String
+  imageData      String?
+  authorUsername String?
+  createdAt      DateTime @default(now())
+}
+
 model Notification {
   id            String   @id @default(cuid())
   forProfe      String?

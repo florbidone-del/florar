@@ -434,3 +434,21 @@ td.holiday{background:var(--oxide-soft);}
   .landing-buttons{flex-direction:row; max-width:420px; justify-content:center;}
   .landing-buttons > *{flex:1;}
 }
+.blog-post + .blog-post{margin-top:14px;}
+.blog-post h3, .blog-post h4{margin-top:6px;}
+.blog-post-image{
+  display:block;
+  width:100%;
+  max-height:420px;
+  object-fit:cover;
+  border-radius:var(--radius);
+  margin-top:10px;
+  border:1.5px solid var(--line);
+}
+.image-picker-preview{
+  display:block;
+  max-width:220px;
+  max-height:220px;
+  border-radius:var(--radius);
+  border:1.5px solid var(--line);
+}

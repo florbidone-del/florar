@@ -23,6 +23,14 @@ export type PinResetDTO = {
   requestedAt: string;
 };
 export type AnnouncementFullDTO = { id: string; message: string; createdAt: string };
+export type BlogPostDTO = {
+  id: string;
+  title: string | null;
+  body: string;
+  imageData: string | null;
+  authorUsername: string | null;
+  createdAt: string;
+};
 
 export type AdminBundle = {
   snapshot: WorkshopSnapshot;
@@ -30,10 +38,11 @@ export type AdminBundle = {
   notifications: NotificationDTO[];
   pinResets: PinResetDTO[];
   announcements: AnnouncementFullDTO[];
+  blogPosts: BlogPostDTO[];
 };
 
 export async function loadAdminBundle(username: string): Promise<AdminBundle> {
-  const [snapshot, admins, notifications, pinResets, announcements] = await Promise.all([
+  const [snapshot, admins, notifications, pinResets, announcements, blogPosts] = await Promise.all([
     loadWorkshopSnapshot(),
     prisma.admin.findMany(),
     prisma.notification.findMany({
@@ -42,6 +51,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     }),
     prisma.pinResetRequest.findMany({ include: { student: true } }),
     prisma.announcement.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
   ]);
 
   return {
@@ -69,6 +79,14 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       id: a.id,
       message: a.message,
       createdAt: isoDate(a.createdAt),
+    })),
+    blogPosts: blogPosts.map((p) => ({
+      id: p.id,
+      title: p.title,
+      body: p.body,
+      imageData: p.imageData,
+      authorUsername: p.authorUsername,
+      createdAt: isoDate(p.createdAt),
     })),
   };
 }

@@ -11,6 +11,7 @@ import { StudentsTab } from "@/components/admin/StudentsTab";
 import { HolidaysTab } from "@/components/admin/HolidaysTab";
 import { ActivitiesTab } from "@/components/admin/ActivitiesTab";
 import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
+import { BlogTab } from "@/components/admin/BlogTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
 import { ProfesTab } from "@/components/admin/ProfesTab";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
@@ -81,6 +82,16 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       ),
     },
     {
+      title: "CeramiBlog",
+      focus: "blog",
+      body: (
+        <p className="muted">
+          Compartí links, fotos de piezas o técnicas e ideas — queda en una pestaña propia para los
+          alumnos, separado de los avisos urgentes.
+        </p>
+      ),
+    },
+    {
       title: "Feriados",
       focus: "feriados",
       body: <p className="muted">Cargá los feriados del taller — cancelan las clases de ese día automáticamente.</p>,
@@ -109,6 +120,7 @@ const TAB_LABELS: Record<string, string> = {
   feriados: "Feriados",
   actividades: "Actividades",
   avisos: "Avisos",
+  blog: "CeramiBlog",
   config: "Configuración",
   profes: "Profes",
 };
@@ -119,7 +131,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
   const tabs = isOwner
     ? ["profes"]
-    : ["semana", "alumnos", "avisos", "actividades", "feriados", "config"];
+    : ["semana", "alumnos", "avisos", "actividades", "blog", "feriados", "config"];
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
@@ -174,6 +186,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
             announcements={bundle.announcements}
           />
         )}
+        {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
         {!isOwner && tab === "config" && <ConfigTab bundle={bundle} isMainProfe={isMainProfe} />}
       </div>
       {showTour && (

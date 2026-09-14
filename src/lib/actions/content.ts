@@ -102,3 +102,31 @@ export async function removeAnnouncementAction(id: string): Promise<ActionResult
   await prisma.announcement.deleteMany({ where: { id } });
   return { ok: true };
 }
+
+/** Post de CeramiBlog: texto (con links) y, opcionalmente, una foto ya redimensionada en base64. */
+export async function addBlogPostAction(input: {
+  title?: string;
+  body: string;
+  imageData?: string | null;
+}): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const body = input.body.trim();
+  if (!body && !input.imageData) return { error: "Escribí algo o subí una foto." };
+  await prisma.blogPost.create({
+    data: {
+      title: input.title?.trim() || null,
+      body,
+      imageData: input.imageData || null,
+      authorUsername: session.username,
+    },
+  });
+  return { ok: true };
+}
+
+export async function removeBlogPostAction(id: string): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.blogPost.deleteMany({ where: { id } });
+  return { ok: true };
+}

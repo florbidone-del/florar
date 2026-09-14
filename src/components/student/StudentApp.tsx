@@ -15,16 +15,18 @@ import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTou
 import { logoutAction, setMyThemeAction, dismissStudentTutorialAction } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
-const TABS = ["calendario", "info", "cuenta"] as const;
+const TABS = ["calendario", "blog", "info", "cuenta"] as const;
 type Tab = (typeof TABS)[number];
 const TAB_LABELS: Record<Tab, string> = {
   calendario: "Calendario",
+  blog: "CeramiBlog",
   info: "Información del taller",
   cuenta: "Mi cuenta",
 };
 const SECTION_TAB: Record<string, Tab> = {
   "calendar-section": "calendario",
   "announcements-section": "calendario",
+  "blog-section": "blog",
   "info-section": "info",
   "account-section": "cuenta",
 };
@@ -62,6 +64,16 @@ function studentTourSteps(studioName: string): TourStep[] {
         <p className="muted">
           Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
           todo un botón para pagar con Mercado Pago, sin importar en qué pestaña estés.
+        </p>
+      ),
+    },
+    {
+      title: "CeramiBlog",
+      focus: "blog-section",
+      body: (
+        <p className="muted">
+          Acá la profe comparte links, fotos y técnicas de vez en cuando — es más para inspirarse que
+          para avisos urgentes.
         </p>
       ),
     },
@@ -240,6 +252,27 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {tab === "blog" && (
+        <div id="blog-section">
+          {data.blogPosts.length === 0 ? (
+            <p className="muted">Todavía no hay posts en el CeramiBlog.</p>
+          ) : (
+            data.blogPosts.map((p) => (
+              <div className="card blog-post" key={p.id}>
+                <div className="muted">{fmtLong(p.date)}</div>
+                {p.title && <h3>{p.title}</h3>}
+                {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+                {p.body && (
+                  <p>
+                    <Linkify text={p.body} />
+                  </p>
+                )}
+              </div>
+            ))
+          )}
         </div>
       )}
 
