@@ -33,7 +33,13 @@ export function OwnerSetupForm({ studioName }: { studioName: string }) {
           volver
         </button>
       </div>
-      <div className="card">
+      <form
+        className="card"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <h3>Primera vez: creá tu cuenta de dueño/a</h3>
         <p className="muted">Esta cuenta va a poder crear el resto de las cuentas de profes.</p>
         <label>Usuario</label>
@@ -49,10 +55,10 @@ export function OwnerSetupForm({ studioName }: { studioName: string }) {
         <label>Repetir contraseña</label>
         <input type="password" value={password2} onChange={(e) => setPassword2(e.target.value)} />
         {error && <p className="err">{error}</p>}
-        <button className="primary block" style={{ marginTop: 14 }} disabled={pending} onClick={handleSubmit}>
+        <button type="submit" className="primary block" style={{ marginTop: 14 }} disabled={pending}>
           Crear cuenta
         </button>
-      </div>
+      </form>
     </>
   );
 }

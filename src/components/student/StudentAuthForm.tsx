@@ -64,7 +64,13 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
             volver
           </button>
         </div>
-        <div className="card">
+        <form
+          className="card"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!fpResult || fpResult.kind !== "sent") handleForgot();
+          }}
+        >
           <h3>Pedir restablecer PIN</h3>
           <p className="muted">
             Escribí tu usuario, el mismo con el que entrás siempre. Le va a quedar la
@@ -110,16 +116,11 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
             </>
           )}
           {!fpResult || fpResult.kind !== "sent" ? (
-            <button
-              className="primary block"
-              style={{ marginTop: 14 }}
-              disabled={pending}
-              onClick={handleForgot}
-            >
+            <button type="submit" className="primary block" style={{ marginTop: 14 }} disabled={pending}>
               Enviar solicitud
             </button>
           ) : null}
-        </div>
+        </form>
       </>
     );
   }
@@ -132,7 +133,13 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
           volver
         </button>
       </div>
-      <div className="card">
+      <form
+        className="card"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleLogin();
+        }}
+      >
         <h3>Entrar</h3>
         <div className="field">
           <label>Usuario</label>
@@ -156,22 +163,18 @@ export function StudentAuthForm({ studioName }: { studioName: string }) {
           Tu usuario y PIN te los da la profesora al crear tu cuenta.
         </p>
         {error && <p className="err">{error}</p>}
-        <button
-          className="primary block"
-          style={{ marginTop: 14 }}
-          disabled={pending}
-          onClick={handleLogin}
-        >
+        <button type="submit" className="primary block" style={{ marginTop: 14 }} disabled={pending}>
           Entrar
         </button>
         <button
+          type="button"
           className="ghost block"
           style={{ marginTop: 8 }}
           onClick={() => setMode("forgot")}
         >
           ¿Olvidaste tu PIN?
         </button>
-      </div>
+      </form>
     </>
   );
 }

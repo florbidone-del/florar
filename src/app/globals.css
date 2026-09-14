@@ -177,6 +177,7 @@ label:first-child{margin-top:0;}
   width:100%;
   max-width:280px;
 }
+.landing-buttons button{padding:10px 16px; font-size:0.95rem;}
 .stat-grid{
   display:grid;
   grid-template-columns:1fr 1fr;

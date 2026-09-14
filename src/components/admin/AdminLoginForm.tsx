@@ -32,17 +32,23 @@ export function AdminLoginForm({ studioName }: { studioName: string }) {
           volver
         </button>
       </div>
-      <div className="card">
+      <form
+        className="card"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <h3>Acceso del equipo docente</h3>
         <label>Usuario</label>
         <input autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} />
         <label>Contraseña</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && <p className="err">{error}</p>}
-        <button className="primary block" style={{ marginTop: 14 }} disabled={pending} onClick={handleSubmit}>
+        <button type="submit" className="primary block" style={{ marginTop: 14 }} disabled={pending}>
           Entrar
         </button>
-      </div>
+      </form>
     </>
   );
 }
