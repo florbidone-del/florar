@@ -184,9 +184,9 @@ export function ConfigTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMain
       {isMainProfe && (
         <Collapsible title="Herramientas">
           <a href="/api/export/payments">
-            <button className="ghost block">Exportar pagos (CSV)</button>
+            <button className="ghost block">Exportar pagos (Excel)</button>
           </a>
-          <p className="hint">Descarga todos los pagos registrados (alumno, mes, monto, estado, origen y fecha) para abrir en Excel.</p>
+          <p className="hint">Descarga todos los pagos registrados (alumno, mes, monto, estado, origen y fecha) en un archivo .xlsx.</p>
           <button className="ghost block" style={{ marginTop: 14 }} disabled={resettingTutorial} onClick={resetTutorials}>
             Reiniciar tutorial para todos los usuarios
           </button>

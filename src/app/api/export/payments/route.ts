@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
 import { requireMainProfe } from "@/lib/authz";
 import { isoDate } from "@/lib/domain";
@@ -13,11 +14,6 @@ const SOURCE_ES: Record<string, string> = {
   mercadopago: "Mercado Pago",
 };
 
-function csvCell(value: string) {
-  if (/[",\n]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
-  return value;
-}
-
 /** Export de todos los pagos (alumno, mes, monto, estado, origen, fecha) para la profe principal. */
 export async function GET() {
   const session = await requireMainProfe();
@@ -30,24 +26,38 @@ export async function GET() {
     orderBy: [{ monthKey: "desc" }, { createdAt: "asc" }],
   });
 
-  const header = ["Alumno", "Usuario", "Mes", "Monto", "Estado", "Origen", "Fecha"];
-  const rows = payments.map((p) => [
-    p.student.name,
-    p.studentId,
-    p.monthKey,
-    String(p.amount),
-    STATUS_ES[p.status] || p.status,
-    SOURCE_ES[p.source] || p.source,
-    isoDate(p.updatedAt),
-  ]);
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Pagos");
+  sheet.columns = [
+    { header: "Alumno", key: "alumno", width: 26 },
+    { header: "Usuario", key: "usuario", width: 16 },
+    { header: "Mes", key: "mes", width: 10 },
+    { header: "Monto", key: "monto", width: 12 },
+    { header: "Estado", key: "estado", width: 12 },
+    { header: "Origen", key: "origen", width: 14 },
+    { header: "Fecha", key: "fecha", width: 12 },
+  ];
+  sheet.getRow(1).font = { bold: true };
 
-  const csv = [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
-  const bom = "﻿"; // para que Excel abra los acentos bien
+  for (const p of payments) {
+    sheet.addRow({
+      alumno: p.student.name,
+      usuario: p.studentId,
+      mes: p.monthKey,
+      monto: p.amount,
+      estado: STATUS_ES[p.status] || p.status,
+      origen: SOURCE_ES[p.source] || p.source,
+      fecha: isoDate(p.updatedAt),
+    });
+  }
+  sheet.getColumn("monto").numFmt = "#,##0";
 
-  return new NextResponse(bom + csv, {
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  return new NextResponse(buffer, {
     headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="pagos-${isoDate(new Date())}.csv"`,
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Disposition": `attachment; filename="pagos-${isoDate(new Date())}.xlsx"`,
     },
   });
 }
