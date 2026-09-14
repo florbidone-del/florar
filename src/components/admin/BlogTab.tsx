@@ -6,6 +6,8 @@ import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
+import { ShowMoreList } from "@/components/shared/ShowMoreList";
+import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import type { BlogPostDTO } from "@/lib/views/admin";
 import { addBlogPostAction, removeBlogPostAction } from "@/lib/actions/content";
 
@@ -70,25 +72,27 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
       </div>
       <div className="card">
         <h3>Posts publicados</h3>
-        {posts.length === 0 ? (
-          <p className="muted">Todavía no hay posts.</p>
-        ) : (
-          posts.map((p) => (
+        <ShowMoreList
+          items={posts}
+          initialCount={3}
+          itemLabelPlural="posts"
+          emptyMessage="Todavía no hay posts."
+          renderItem={(p) => (
             <div className="blog-post" key={p.id}>
               <div className="muted">{fmtLong(p.createdAt)}</div>
               {p.title && <h4>{p.title}</h4>}
               {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
               {p.body && (
                 <p>
-                  <Linkify text={p.body} />
+                  <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
                 </p>
               )}
               <button className="ghost" onClick={() => remove(p.id)}>
                 quitar
               </button>
             </div>
-          ))
-        )}
+          )}
+        />
       </div>
     </>
   );

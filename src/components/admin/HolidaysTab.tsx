@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { fmtLong } from "@/lib/domain";
+import { fmtLong, todayISO } from "@/lib/domain";
 import type { HolidayDTO } from "@/lib/domain";
+import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { addHolidayAction, removeHolidayAction } from "@/lib/actions/content";
 
 export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
@@ -12,7 +13,12 @@ export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
   const [label, setLabel] = useState("");
   const [pending, setPending] = useState(false);
 
-  const sorted = [...holidays].sort((a, b) => a.date.localeCompare(b.date));
+  // Los próximos primero (lo más útil de ver de entrada), y los que ya pasaron después,
+  // del más reciente al más viejo — así "mostrar más" no obliga a scrollear años de historial.
+  const today = todayISO();
+  const upcoming = holidays.filter((h) => h.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const past = holidays.filter((h) => h.date < today).sort((a, b) => b.date.localeCompare(a.date));
+  const sorted = [...upcoming, ...past];
 
   async function add() {
     if (!date) return;
@@ -48,10 +54,12 @@ export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
       </div>
       <div className="card">
         <h3>Feriados cargados</h3>
-        {sorted.length === 0 ? (
-          <p className="muted">No hay feriados cargados.</p>
-        ) : (
-          sorted.map((h) => (
+        <ShowMoreList
+          items={sorted}
+          initialCount={3}
+          itemLabelPlural="feriados"
+          emptyMessage="No hay feriados cargados."
+          renderItem={(h) => (
             <div className="list-item" key={h.date}>
               <div>
                 {fmtLong(h.date)} <span className="muted">— {h.label || ""}</span>
@@ -60,8 +68,8 @@ export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
                 quitar
               </button>
             </div>
-          ))
-        )}
+          )}
+        />
       </div>
     </>
   );

@@ -6,6 +6,7 @@ import { fmtLong } from "@/lib/domain";
 import type { ActivityDTO } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { Linkify } from "@/components/shared/Linkify";
+import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { addActivityAction, removeActivityAction, updateActivityAction } from "@/lib/actions/content";
 
 export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
@@ -110,7 +111,7 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
                 </div>
                 {a.description && (
                   <div className="muted">
-                    <Linkify text={a.description} />
+                    <CollapsibleText text={a.description} render={(t) => <Linkify text={t} />} />
                   </div>
                 )}
               </div>
