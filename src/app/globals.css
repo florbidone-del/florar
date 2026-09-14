@@ -514,6 +514,7 @@ td.holiday{background:var(--oxide-soft);}
   border-radius:var(--radius);
   box-shadow:0 10px 30px -10px rgba(0,0,0,0.35);
 }
+.emoji-picker-panel.align-right{left:auto; right:0;}
 .emoji-picker-item{
   padding:4px;
   font-size:1.15rem;
