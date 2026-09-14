@@ -480,3 +480,21 @@ td.holiday{background:var(--oxide-soft);}
 .chat-input-row{display:flex; gap:8px; margin-top:12px;}
 .chat-input-row input{flex:1; min-width:0; margin:0;}
 .chat-input-row button{flex-shrink:0;}
+.chat-layout{display:flex; flex-direction:column; gap:14px;}
+.chat-turno-list{display:flex; flex-wrap:wrap; gap:8px;}
+.chat-turno-item{
+  padding:8px 14px;
+  border-radius:20px;
+  white-space:nowrap;
+  font-size:0.85rem;
+  border-color:var(--line);
+  color:var(--ink-soft);
+}
+.chat-turno-item.active{background:var(--glaze); border-color:var(--glaze-dark); color:#fff; font-weight:600;}
+.chat-turno-panel{min-width:0;}
+@media (min-width:600px){
+  .chat-layout{flex-direction:row; align-items:flex-start;}
+  .chat-turno-list{flex-direction:column; flex-wrap:nowrap; width:190px; flex-shrink:0;}
+  .chat-turno-item{border-radius:var(--radius); text-align:left;}
+  .chat-turno-panel{flex:1;}
+}

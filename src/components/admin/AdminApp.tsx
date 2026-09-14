@@ -81,7 +81,9 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "avisos",
       body: (
         <p className="muted">
-          Publicá avisos y la información fija que ven los alumnos en su home.
+          Publicá avisos para los alumnos y cargá los feriados del taller — un feriado cancela la clase
+          de ese día automáticamente. La información fija (la que no cambia seguido) se mudó a
+          Configuración.
         </p>
       ),
     },
@@ -105,22 +107,17 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       ),
     },
     {
-      title: "Feriados",
-      focus: "feriados",
-      body: <p className="muted">Cargá los feriados del taller — cancelan las clases de ese día automáticamente.</p>,
-    },
-    {
       title: "Configuración",
       focus: "config",
       body: isMainProfe ? (
         <p className="muted">
-          Turnos, tema de colores y, como sos la profe principal, también podés asignar qué profe da
-          cada turno y ajustar las reglas y la cuota del taller.
+          Turnos, información fija para alumnos, tema de colores y, como sos la profe principal, también
+          podés asignar qué profe da cada turno y ajustar las reglas y la cuota del taller.
         </p>
       ) : (
         <p className="muted">
-          Turnos y tema de colores. La asignación de profes por turno y las reglas/cuota las maneja la
-          profe principal.
+          Turnos, información fija para alumnos y tema de colores. La asignación de profes por turno y
+          las reglas/cuota las maneja la profe principal.
         </p>
       ),
     },
@@ -131,7 +128,6 @@ const TAB_LABELS: Record<string, string> = {
   semana: "Semana",
   alumnos: "Alumnos",
   chat: "Chat",
-  feriados: "Feriados",
   actividades: "Actividades",
   avisos: "Avisos",
   blog: "CeramiBlog",
@@ -145,7 +141,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
   const tabs = isOwner
     ? ["profes"]
-    : ["semana", "alumnos", "chat", "avisos", "actividades", "blog", "feriados", "config"];
+    : ["semana", "alumnos", "chat", "avisos", "actividades", "blog", "config"];
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
@@ -195,13 +191,12 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         {!isOwner && tab === "chat" && (
           <ChatTab bundle={bundle} myUsername={session.username} isMainProfe={isMainProfe} />
         )}
-        {!isOwner && tab === "feriados" && <HolidaysTab holidays={bundle.snapshot.holidays} />}
         {!isOwner && tab === "actividades" && <ActivitiesTab activities={bundle.snapshot.activities} />}
         {!isOwner && tab === "avisos" && (
-          <AnnouncementsTab
-            studentInfo={bundle.snapshot.config.studentInfo}
-            announcements={bundle.announcements}
-          />
+          <>
+            <AnnouncementsTab announcements={bundle.announcements} />
+            <HolidaysTab holidays={bundle.snapshot.holidays} />
+          </>
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
         {!isOwner && tab === "config" && <ConfigTab bundle={bundle} isMainProfe={isMainProfe} />}

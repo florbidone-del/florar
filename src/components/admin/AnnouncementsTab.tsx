@@ -5,33 +5,15 @@ import { useRouter } from "next/navigation";
 import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import type { AnnouncementFullDTO } from "@/lib/views/admin";
-import {
-  saveStudentInfoAction,
-  addAnnouncementAction,
-  removeAnnouncementAction,
-} from "@/lib/actions/content";
+import { addAnnouncementAction, removeAnnouncementAction } from "@/lib/actions/content";
 
-export function AnnouncementsTab({
-  studentInfo,
-  announcements,
-}: {
-  studentInfo: string;
-  announcements: AnnouncementFullDTO[];
-}) {
+export function AnnouncementsTab({ announcements }: { announcements: AnnouncementFullDTO[] }) {
   const router = useRouter();
-  const [info, setInfo] = useState(studentInfo);
-  const [savingInfo, setSavingInfo] = useState(false);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
 
   const sorted = [...announcements].reverse();
 
-  async function saveInfo() {
-    setSavingInfo(true);
-    await saveStudentInfoAction(info);
-    setSavingInfo(false);
-    router.refresh();
-  }
   async function publish() {
     if (!message.trim()) return;
     setPending(true);
@@ -47,23 +29,6 @@ export function AnnouncementsTab({
 
   return (
     <>
-      <div className="card">
-        <h3>Información fija</h3>
-        <p className="muted">
-          Esto queda siempre visible arriba de todo en el celular del alumno — a diferencia de los
-          avisos, no se acumula ni desaparece. Sirve para un link a un PDF, el material del mes, o algo
-          que quieras que estén viendo siempre.
-        </p>
-        <AutoTextarea
-          rows={4}
-          placeholder="Ej: Material de este mes: [link]. Este viernes hay jornada especial de esmaltado."
-          value={info}
-          onChange={(e) => setInfo(e.target.value)}
-        />
-        <button className="primary block" style={{ marginTop: 12 }} disabled={savingInfo} onClick={saveInfo}>
-          Guardar
-        </button>
-      </div>
       <div className="card">
         <h3>Nuevo aviso</h3>
         <AutoTextarea

@@ -7,6 +7,10 @@ import type { AdminBundle } from "@/lib/views/admin";
 
 type Turno = { weekday: number; slotId: string; label: string };
 
+function turnoKey(t: Pick<Turno, "weekday" | "slotId">) {
+  return `${t.weekday}_${t.slotId}`;
+}
+
 export function ChatTab({ bundle, myUsername, isMainProfe }: { bundle: AdminBundle; myUsername: string; isMainProfe: boolean }) {
   const snap = bundle.snapshot;
 
@@ -27,37 +31,41 @@ export function ChatTab({ bundle, myUsername, isMainProfe }: { bundle: AdminBund
         })
         .sort((a, b) => a.weekday - b.weekday);
 
-  const [selected, setSelected] = useState<Turno | null>(turnos[0] || null);
+  const [selectedKey, setSelectedKey] = useState(turnos[0] ? turnoKey(turnos[0]) : null);
+  const selected = turnos.find((t) => turnoKey(t) === selectedKey) || null;
 
   if (turnos.length === 0) {
     return <p className="muted">Todavía no tenés ningún turno asignado.</p>;
   }
 
   return (
-    <>
+    <div className="chat-layout">
       {turnos.length > 1 && (
-        <div className="tabs">
+        <div className="chat-turno-list">
           {turnos.map((t) => (
             <button
               type="button"
-              key={`${t.weekday}_${t.slotId}`}
-              className={`tab ${selected?.weekday === t.weekday && selected?.slotId === t.slotId ? "active" : ""}`}
-              onClick={() => setSelected(t)}
+              key={turnoKey(t)}
+              className={`chat-turno-item ${turnoKey(t) === selectedKey ? "active" : ""}`}
+              onClick={() => setSelectedKey(turnoKey(t))}
             >
               {t.label}
             </button>
           ))}
         </div>
       )}
-      {selected && (
-        <>
-          <p className="muted" style={{ marginBottom: 10 }}>
-            Chat con los alumnos de {selected.label.toLowerCase()}
-            {isMainProfe ? " (sos la profe principal, podés ver y participar en todos los turnos)." : "."}
-          </p>
-          <ChatPanel key={`${selected.weekday}_${selected.slotId}`} weekday={selected.weekday} slotId={selected.slotId} />
-        </>
-      )}
-    </>
+      <div className="chat-turno-panel">
+        {selected && (
+          <>
+            {isMainProfe && (
+              <p className="muted" style={{ marginBottom: 10 }}>
+                Sos la profe principal: podés ver y participar en el chat de cualquier turno.
+              </p>
+            )}
+            <ChatPanel key={turnoKey(selected)} weekday={selected.weekday} slotId={selected.slotId} />
+          </>
+        )}
+      </div>
+    </div>
   );
 }
