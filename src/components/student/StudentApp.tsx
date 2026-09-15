@@ -12,10 +12,13 @@ import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen"
 import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { ChatIcon, GearIcon } from "@/components/shared/Icons";
+import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
+import { usePullToRefresh } from "@/lib/usePullToRefresh";
 import {
   logoutAction,
   setMyThemeAction,
@@ -136,6 +139,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const nickInputRef = useRef<HTMLInputElement>(null);
   const [isRefreshing, startRefresh] = useTransition();
   const [savingNick, setSavingNick] = useState(false);
+  const pullDistance = usePullToRefresh(() => startRefresh(() => router.refresh()));
 
   // "Atrás" en el celular vuelve a Calendario en vez de salir de la app, mientras no estés ahí.
   useBackToClose(() => setTab("calendario"), tab !== "calendario");
@@ -191,6 +195,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
 
   return (
     <>
+      <PullToRefreshIndicator pullDistance={pullDistance} refreshing={isRefreshing} />
       <div className="topbar">
         <div>
           <h1>Hola, {data.firstName}</h1>
@@ -203,30 +208,21 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <button
             type="button"
-            className={`icon-button ghost ${isRefreshing ? "spinning" : ""}`}
-            onClick={() => startRefresh(() => router.refresh())}
-            aria-label="Actualizar"
-            title="Actualizar"
-          >
-            ↻
-          </button>
-          <button
-            type="button"
-            className={`icon-button ghost ${tab === "chat" ? "active" : ""}`}
+            className={`icon-button solid ${tab === "chat" ? "active" : ""}`}
             onClick={() => setTab("chat")}
             aria-label="Chat"
             title="Chat"
           >
-            💬
+            <ChatIcon />
           </button>
           <button
             type="button"
-            className={`icon-button ghost ${tab === "cuenta" ? "active" : ""}`}
+            className={`icon-button solid ${tab === "cuenta" ? "active" : ""}`}
             onClick={() => setTab("cuenta")}
             aria-label="Mi cuenta"
             title="Mi cuenta"
           >
-            ⚙️
+            <GearIcon />
           </button>
           <button className="ghost" onClick={logout}>
             salir

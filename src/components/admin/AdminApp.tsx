@@ -17,6 +17,9 @@ import { ConfigTab } from "@/components/admin/ConfigTab";
 import { ProfesTab } from "@/components/admin/ProfesTab";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
+import { usePullToRefresh } from "@/lib/usePullToRefresh";
+import { ChatIcon, GearIcon } from "@/components/shared/Icons";
+import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 
 function ownerTourSteps(): TourStep[] {
   return [
@@ -145,6 +148,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
   const [isRefreshing, startRefresh] = useTransition();
+  const pullDistance = usePullToRefresh(() => startRefresh(() => router.refresh()));
 
   // "Atrás" en el celular vuelve a la pestaña inicial en vez de salir de la app.
   useBackToClose(() => setTab(tabs[0]), tab !== tabs[0]);
@@ -162,6 +166,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
 
   return (
     <>
+      <PullToRefreshIndicator pullDistance={pullDistance} refreshing={isRefreshing} />
       <div className="topbar">
         <div>
           <h1>Panel</h1>
@@ -171,34 +176,25 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           </div>
         </div>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <button
-            type="button"
-            className={`icon-button ghost ${isRefreshing ? "spinning" : ""}`}
-            onClick={() => startRefresh(() => router.refresh())}
-            aria-label="Actualizar"
-            title="Actualizar"
-          >
-            ↻
-          </button>
           {!isOwner && (
             <>
               <button
                 type="button"
-                className={`icon-button ghost ${tab === "chat" ? "active" : ""}`}
+                className={`icon-button solid ${tab === "chat" ? "active" : ""}`}
                 onClick={() => setTab("chat")}
                 aria-label="Chat"
                 title="Chat"
               >
-                💬
+                <ChatIcon />
               </button>
               <button
                 type="button"
-                className={`icon-button ghost ${tab === "config" ? "active" : ""}`}
+                className={`icon-button solid ${tab === "config" ? "active" : ""}`}
                 onClick={() => setTab("config")}
                 aria-label="Configuración"
                 title="Configuración"
               >
-                ⚙️
+                <GearIcon />
               </button>
             </>
           )}

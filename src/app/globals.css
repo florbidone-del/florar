@@ -121,6 +121,26 @@ button.block{width:100%;}
 .icon-button.active{background:var(--ok-bg);}
 .icon-button.spinning{animation:florar-spin 0.7s linear infinite;}
 @keyframes florar-spin{to{transform:rotate(360deg);}}
+.icon-button.solid{background:var(--glaze); border-color:var(--glaze-dark); color:#fff;}
+.icon-button.solid.active{background:var(--glaze-dark);}
+.pull-refresh-indicator{
+  position:fixed;
+  top:0;
+  left:50%;
+  z-index:60;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  background:var(--glaze);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.25);
+  pointer-events:none;
+  transition:opacity 0.15s;
+}
+.pull-refresh-indicator .spinning{animation:florar-spin 0.7s linear infinite;}
 input, select, textarea{
   font-family:var(--font-work-sans), sans-serif;
   font-size:1rem;
