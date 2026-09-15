@@ -47,15 +47,23 @@ export function OccupancyModal({
   return (
     <Modal onClose={onClose}>
       <h3>{fmtLong(date)}</h3>
-      <p className="muted">
-        {slot ? `${slot.start}–${slot.end}` : ""} · {names.length}/{snap.config.capacity} ocupados
-      </p>
+      <div className="occupancy-meta">
+        <span className="occupancy-time">{slot ? `${slot.start}–${slot.end}` : ""}</span>
+        <span className="muted">
+          {names.length}/{snap.config.capacity} ocupados
+        </span>
+      </div>
       <div style={{ marginTop: 10 }}>
-        {names.map((n, i) => (
-          <div className="list-item" key={i}>
-            {n}
-          </div>
-        ))}
+        {names.length === 0 ? (
+          <p className="muted">Nadie anotado todavía.</p>
+        ) : (
+          names.map((n, i) => (
+            <div className="roster-item" key={i}>
+              <span className="roster-index">{i + 1}</span>
+              <span className="roster-name">{n}</span>
+            </div>
+          ))
+        )}
       </div>
       {profes.length > 0 && (
         <div style={{ marginTop: 14 }}>

@@ -253,6 +253,7 @@ th,td{
 }
 th{background:var(--surface); font-weight:600; font-size:0.75rem;}
 th.row-head{position:sticky; left:0; z-index:2;}
+th.row-head.slot-time{font-family:var(--font-fraunces), serif; font-size:0.95rem; font-weight:700; color:var(--ink); padding:8px 6px;}
 td.holiday{background:var(--oxide-soft);}
 .occ-count{font-family:var(--font-fraunces), serif; font-size:1.1rem;}
 .names{font-size:0.62rem; color:var(--ink-soft); margin-top:2px; word-break:break-word;}
@@ -289,6 +290,37 @@ td.holiday{background:var(--oxide-soft);}
 .list-item > button, .list-item > div:last-child > button{flex-shrink:0; white-space:nowrap;}
 .list-item:last-child{border-bottom:none;}
 .muted{color:var(--ink-soft); font-size:0.85rem;}
+.occupancy-meta{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:4px;
+}
+.occupancy-time{font-family:var(--font-fraunces), serif; font-size:1.4rem; font-weight:600; color:var(--ink);}
+.roster-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid var(--line);
+}
+.roster-item:last-child{border-bottom:none;}
+.roster-index{
+  flex-shrink:0;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:var(--ok-bg);
+  color:var(--glaze-dark);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.75rem;
+  font-weight:700;
+}
+.roster-name{font-weight:600;}
 .modal-backdrop{
   position:fixed; inset:0;
   background:rgba(46,42,34,0.4);

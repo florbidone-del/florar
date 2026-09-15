@@ -53,7 +53,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
               const slotId = slot.id;
               return (
                 <tr key={slotId}>
-                  <th className="row-head" style={{ whiteSpace: "nowrap" }}>
+                  <th className="row-head slot-time" style={{ whiteSpace: "nowrap" }}>
                     {slot.start}–{slot.end}
                   </th>
                   {week.map((date) => {
