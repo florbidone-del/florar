@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { logoutAction, dismissAdminTutorialAction } from "@/lib/actions/auth";
 import { capitalize } from "@/lib/domain";
@@ -144,6 +144,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
+  const [isRefreshing, startRefresh] = useTransition();
 
   // "Atrás" en el celular vuelve a la pestaña inicial en vez de salir de la app.
   useBackToClose(() => setTab(tabs[0]), tab !== tabs[0]);
@@ -169,7 +170,16 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
             <span className="badge-role">{isOwner ? "dueño/a" : "profe"}</span>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <button
+            type="button"
+            className={`icon-button ghost ${isRefreshing ? "spinning" : ""}`}
+            onClick={() => startRefresh(() => router.refresh())}
+            aria-label="Actualizar"
+            title="Actualizar"
+          >
+            ↻
+          </button>
           {!isOwner && (
             <>
               <button

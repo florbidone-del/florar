@@ -30,6 +30,7 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     try {
@@ -96,6 +97,7 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
       {error && <p className="err">{error}</p>}
       <div className="chat-input-row">
         <input
+          ref={inputRef}
           placeholder="Escribí un mensaje…"
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -106,7 +108,7 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
             }
           }}
         />
-        <EmojiPicker onPick={(e) => setText((t) => t + e)} />
+        <EmojiPicker onPick={(e) => setText((t) => t + e)} targetRef={inputRef} />
         <button type="button" className="primary" disabled={pending || !text.trim()} onClick={send}>
           Enviar
         </button>

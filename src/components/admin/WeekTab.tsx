@@ -53,8 +53,10 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
               const slotId = slot.id;
               return (
                 <tr key={slotId}>
-                  <th className="row-head slot-time" style={{ whiteSpace: "nowrap" }}>
-                    {slot.start}–{slot.end}
+                  <th className="row-head slot-time">
+                    <span>{slot.start}</span>
+                    <span className="slot-time-sep">a</span>
+                    <span>{slot.end}</span>
                   </th>
                   {week.map((date) => {
                     if (!slot.weekdays.includes(parseISO(date).getDay())) return <td key={date}>—</td>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
@@ -19,6 +19,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
   const [imageData, setImageData] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   async function publish() {
     setError("");
@@ -59,13 +60,14 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
         <div className="field" style={{ marginTop: 10 }}>
           <label>Texto</label>
           <AutoTextarea
+            ref={bodyRef}
             rows={3}
             placeholder="Escribí la idea, contá algo, pegá un link…"
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
           <div style={{ marginTop: 6 }}>
-            <EmojiPicker onPick={(e) => setBody((b) => b + e)} />
+            <EmojiPicker onPick={(e) => setBody((b) => b + e)} targetRef={bodyRef} />
           </div>
         </div>
         <ImagePicker value={imageData} onChange={setImageData} />

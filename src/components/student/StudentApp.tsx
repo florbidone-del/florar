@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Linkify } from "@/components/shared/Linkify";
 import { StudentCalendar } from "@/components/student/StudentCalendar";
@@ -26,8 +26,9 @@ import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
 const ALL_TABS = ["calendario", "chat", "blog", "info", "cuenta"] as const;
 type Tab = (typeof ALL_TABS)[number];
-// "chat" no está acá: tiene su propio botón (globito) junto a "salir", no ocupa lugar de pestaña.
-const PILL_TABS: Tab[] = ["calendario", "blog", "info", "cuenta"];
+// "chat" y "cuenta" no están acá: tienen su propio botón (globito / rueda) junto a "salir", no
+// ocupan lugar de pestaña.
+const PILL_TABS: Tab[] = ["calendario", "blog", "info"];
 const TAB_LABELS: Record<Tab, string> = {
   calendario: "Calendario",
   chat: "Chat",
@@ -132,6 +133,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const [tourFocus, setTourFocus] = useState<string | undefined>();
   const [tab, setTab] = useState<Tab>("calendario");
   const [nick, setNick] = useState(data.nick || "");
+  const nickInputRef = useRef<HTMLInputElement>(null);
+  const [isRefreshing, startRefresh] = useTransition();
   const [savingNick, setSavingNick] = useState(false);
 
   // "Atrás" en el celular vuelve a Calendario en vez de salir de la app, mientras no estés ahí.
@@ -197,7 +200,16 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             {data.profeName ? ` · profe: ${data.profeName}` : ""}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <button
+            type="button"
+            className={`icon-button ghost ${isRefreshing ? "spinning" : ""}`}
+            onClick={() => startRefresh(() => router.refresh())}
+            aria-label="Actualizar"
+            title="Actualizar"
+          >
+            ↻
+          </button>
           <button
             type="button"
             className={`icon-button ghost ${tab === "chat" ? "active" : ""}`}
@@ -206,6 +218,15 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             title="Chat"
           >
             💬
+          </button>
+          <button
+            type="button"
+            className={`icon-button ghost ${tab === "cuenta" ? "active" : ""}`}
+            onClick={() => setTab("cuenta")}
+            aria-label="Mi cuenta"
+            title="Mi cuenta"
+          >
+            ⚙️
           </button>
           <button className="ghost" onClick={logout}>
             salir
@@ -380,12 +401,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           </p>
           <div className="nick-row">
             <input
+              ref={nickInputRef}
               placeholder={data.studentName}
               maxLength={30}
               value={nick}
               onChange={(e) => setNick(e.target.value)}
             />
-            <EmojiPicker onPick={(e) => setNick((n) => n + e)} />
+            <EmojiPicker onPick={(e) => setNick((n) => n + e)} targetRef={nickInputRef} />
           </div>
           <button className="ghost block" style={{ marginTop: 8 }} disabled={savingNick} onClick={saveNick}>
             Guardar nick

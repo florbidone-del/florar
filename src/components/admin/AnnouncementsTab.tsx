@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
@@ -14,6 +14,7 @@ export function AnnouncementsTab({ announcements }: { announcements: Announcemen
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const sorted = [...announcements].reverse();
 
@@ -35,13 +36,14 @@ export function AnnouncementsTab({ announcements }: { announcements: Announcemen
       <div className="card">
         <h3>Nuevo aviso</h3>
         <AutoTextarea
+          ref={messageRef}
           rows={3}
           placeholder="Escribí el comunicado para los alumnos…"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-          <EmojiPicker onPick={(e) => setMessage((m) => m + e)} />
+          <EmojiPicker onPick={(e) => setMessage((m) => m + e)} targetRef={messageRef} />
           <button className="primary block" style={{ flex: 1 }} disabled={pending} onClick={publish}>
             Publicar
           </button>

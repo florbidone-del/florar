@@ -22,8 +22,16 @@ const PANEL_WIDTH = 210;
 /** Botón que abre un panel simple con emojis frecuentes — para no depender del teclado nativo
  *  del sistema operativo. `onPick` agrega el emoji elegido al texto que maneje quien lo use.
  *  El panel se abre hacia la izquierda o la derecha según haya lugar, midiendo la posición real
- *  del botón — así funciona sin importar dónde caiga en su fila (por eso, no un lado fijo). */
-export function EmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
+ *  del botón — así funciona sin importar dónde caiga en su fila (por eso, no un lado fijo).
+ *  `targetRef`, si se pasa, vuelve a enfocar ese input/textarea después de elegir un emoji — si
+ *  no, el foco queda en el botón de emoji y cosas como "Enter para enviar" dejan de andar. */
+export function EmojiPicker({
+  onPick,
+  targetRef,
+}: {
+  onPick: (emoji: string) => void;
+  targetRef?: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
+}) {
   const [open, setOpen] = useState(false);
   const [alignRight, setAlignRight] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -58,6 +66,7 @@ export function EmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
               onClick={() => {
                 onPick(e);
                 setOpen(false);
+                targetRef?.current?.focus();
               }}
             >
               {e}

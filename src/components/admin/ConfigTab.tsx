@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
@@ -51,6 +51,7 @@ export function ConfigTab({
   const [studentInfo, setStudentInfo] = useState(c.studentInfo);
   const [savingInfo, setSavingInfo] = useState(false);
   const [displayName, setDisplayName] = useState(me?.displayName || "");
+  const displayNameInputRef = useRef<HTMLInputElement>(null);
   const [savingDisplayName, setSavingDisplayName] = useState(false);
 
   async function saveStudentInfo() {
@@ -108,12 +109,13 @@ export function ConfigTab({
         </p>
         <div className="nick-row" style={{ marginTop: 10 }}>
           <input
+            ref={displayNameInputRef}
             placeholder={capitalize(myUsername)}
             maxLength={30}
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
           />
-          <EmojiPicker onPick={(e) => setDisplayName((n) => n + e)} />
+          <EmojiPicker onPick={(e) => setDisplayName((n) => n + e)} targetRef={displayNameInputRef} />
         </div>
         <button
           className="ghost block"
