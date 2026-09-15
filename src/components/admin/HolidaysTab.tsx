@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { fmtLong, todayISO } from "@/lib/domain";
+import { fmtLong, daysSince } from "@/lib/domain";
 import type { HolidayDTO } from "@/lib/domain";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { addHolidayAction, removeHolidayAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
@@ -16,12 +16,11 @@ export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[];
   const [officialResult, setOfficialResult] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
 
-  // Los próximos primero (lo más útil de ver de entrada), y los que ya pasaron después,
-  // del más reciente al más viejo — así "mostrar más" no obliga a scrollear años de historial.
-  const today = todayISO();
-  const upcoming = holidays.filter((h) => h.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-  const past = holidays.filter((h) => h.date < today).sort((a, b) => b.date.localeCompare(a.date));
-  const sorted = [...upcoming, ...past];
+  // Ordenados por cercanía a hoy (sin importar si ya pasaron o todavía faltan) — así lo más
+  // relevante para mirar de entrada es siempre lo más próximo a la fecha actual.
+  const sorted = [...holidays].sort(
+    (a, b) => Math.abs(daysSince(a.date)) - Math.abs(daysSince(b.date))
+  );
 
   async function add() {
     if (!date) return;
