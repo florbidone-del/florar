@@ -18,12 +18,9 @@ export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[];
   const [officialResult, setOfficialResult] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
 
-  // Los próximos primero, del más cercano al más lejano — lo pasado importa mucho menos, así que
-  // va después y no ocupa lugar de entrada.
+  // Solo los que todavía faltan, del más cercano al más lejano — lo pasado no le sirve a nadie acá.
   const today = todayISO();
-  const upcoming = holidays.filter((h) => h.date >= today).sort((a, b) => a.date.localeCompare(b.date));
-  const past = holidays.filter((h) => h.date < today).sort((a, b) => b.date.localeCompare(a.date));
-  const sorted = [...upcoming, ...past];
+  const sorted = holidays.filter((h) => h.date >= today).sort((a, b) => a.date.localeCompare(b.date));
 
   async function add() {
     if (!date) return;

@@ -1,7 +1,5 @@
 "use client";
 
-import { RefreshIcon } from "@/components/shared/Icons";
-
 const TRIGGER_DISTANCE = 70;
 
 /** Círculo que aparece arriba de todo mientras se arrastra hacia abajo, y gira mientras refresca. */
@@ -30,7 +28,14 @@ export function PullToRefreshIndicator({
           transform: refreshing ? undefined : `rotate(${progress * 180}deg)`,
         }}
       >
-        <RefreshIcon size={20} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/florar-mark.png"
+          alt=""
+          width={28}
+          height={28}
+          style={{ borderRadius: "50%", display: "block" }}
+        />
       </span>
     </div>
   );
