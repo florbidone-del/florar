@@ -187,7 +187,9 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
       <div>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
         {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
-        {!isOwner && tab === "alumnos" && <StudentsTab bundle={bundle} me={session.username} />}
+        {!isOwner && tab === "alumnos" && (
+          <StudentsTab bundle={bundle} me={session.username} isMainProfe={isMainProfe} />
+        )}
         {!isOwner && tab === "chat" && (
           <ChatTab bundle={bundle} myUsername={session.username} isMainProfe={isMainProfe} />
         )}

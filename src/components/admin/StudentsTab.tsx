@@ -22,7 +22,15 @@ import {
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
 import { Modal } from "@/components/shared/Modal";
 
-export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string }) {
+export function StudentsTab({
+  bundle,
+  me,
+  isMainProfe,
+}: {
+  bundle: AdminBundle;
+  me: string;
+  isMainProfe: boolean;
+}) {
   const router = useRouter();
   const snap = bundle.snapshot;
   const [filter, setFilter] = useState<"all" | "mine">("all");
@@ -120,8 +128,8 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
             );
             const fee = studentFee(snap);
             const paid = payment?.amount || 0;
-            const isPartial = paid > 0 && paid < fee;
             const isPaid = paid >= fee;
+            const isPartial = paid > 0 && paid < fee;
             const profe = profeForSlot(snap, s.defaultWeekday, s.defaultSlotId);
             return (
               <div className="list-item" key={s.id}>
@@ -134,24 +142,33 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
                     {DIAS[s.defaultWeekday]} {slot ? `${slot.start}–${slot.end}` : ""}
                     {profe ? ` · profe: ${capitalize(profe)}` : ""}
                   </div>
-                  <div
-                    className={`tag ${isPaid ? "ok" : isPartial ? "partial" : "warn"}`}
-                    style={{ marginTop: 4 }}
-                  >
-                    {isPaid
-                      ? `pagó ${money(paid)}`
-                      : isPartial
-                        ? `pagó ${money(paid)} de ${money(fee)} — debe ${money(fee - paid)}`
-                        : `debe ${money(fee)}`}
-                  </div>
+                  {/* Todo lo de cuotas es un tema de plata entre la profe principal y el alumno —
+                      el resto de las profes no lo ve acá. */}
+                  {isMainProfe && (
+                    <div
+                      className={`tag ${isPaid ? "ok" : isPartial ? "partial" : "warn"}`}
+                      style={{ marginTop: 4 }}
+                    >
+                      {isPaid
+                        ? `pagó ${money(paid)}`
+                        : isPartial
+                          ? `pagó ${money(paid)} de ${money(fee)} — debe ${money(fee - paid)}`
+                          : `debe ${money(fee)}`}
+                    </div>
+                  )}
                 </div>
                 <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-                  {!isPaid && (
+                  {isMainProfe && paid === 0 && (
                     <button className="ghost small" disabled={busy === s.id} onClick={() => setPayStudentId(s.id)}>
-                      {isPartial ? "Registrar saldo" : "Marcar pagado"}
+                      Marcar pagado
                     </button>
                   )}
-                  {(isPaid || isPartial) && (
+                  {isMainProfe && isPartial && (
+                    <button className="ghost small" disabled={busy === s.id} onClick={() => setPayStudentId(s.id)}>
+                      Registrar saldo
+                    </button>
+                  )}
+                  {isMainProfe && (isPaid || isPartial) && (
                     <button className="ghost small" disabled={busy === s.id} onClick={() => removeUnpaid(s.id)}>
                       Quitar pago
                     </button>

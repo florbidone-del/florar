@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/session";
-import { requireProfe } from "@/lib/authz";
+import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { usernameCandidates, currentMonthKey } from "@/lib/domain";
 import type { ActionResult } from "@/lib/actions/auth";
 
@@ -77,12 +77,13 @@ export async function deleteStudentAction(id: string): Promise<ActionResult> {
 }
 
 /** Registra un pago a mano (efectivo/transferencia). Si ya había un pago parcial aprobado este
- *  mes, el monto se SUMA al que ya tenía — no lo reemplaza — para poder cobrar el saldo en partes. */
+ *  mes, el monto se SUMA al que ya tenía — no lo reemplaza — para poder cobrar el saldo en partes.
+ *  Solo la profe principal: el estado de cuotas es un tema de plata que no ven las demás profes. */
 export async function markPaidManuallyAction(
   studentId: string,
   amount: number
 ): Promise<ActionResult> {
-  const session = await requireProfe();
+  const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
   if (!Number.isFinite(amount) || amount <= 0) return { error: "Monto inválido." };
   const mk = currentMonthKey();
@@ -100,7 +101,7 @@ export async function markPaidManuallyAction(
 }
 
 export async function unmarkPaidAction(studentId: string): Promise<ActionResult> {
-  const session = await requireProfe();
+  const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
   const mk = currentMonthKey();
   await prisma.payment.deleteMany({ where: { studentId, monthKey: mk } });
