@@ -42,27 +42,60 @@ export async function POST(req: NextRequest) {
 
     const [studentId, monthKey] = externalReference.split("__");
     const status = mapMpStatus(payment.status);
+    const mpAmount = Math.round(payment.transaction_amount || 0);
 
     const previous = await prisma.payment.findUnique({
       where: { studentId_monthKey: { studentId, monthKey } },
     });
 
-    await prisma.payment.upsert({
-      where: { studentId_monthKey: { studentId, monthKey } },
-      create: {
-        studentId,
-        monthKey,
-        amount: Math.round(payment.transaction_amount || 0),
-        status,
-        source: "mercadopago",
-        mpPaymentId: String(payment.id),
-      },
-      update: {
-        status,
-        source: "mercadopago",
-        mpPaymentId: String(payment.id),
-      },
-    });
+    if (status === "approved") {
+      // Si ya había un pago aprobado este mes (a mano o por un cobro de Mercado Pago anterior),
+      // este nuevo monto aprobado se suma en vez de reemplazarlo — el botón de Mercado Pago
+      // cobra el saldo restante, así que lo que llega acá es justo la parte que faltaba.
+      const baseApproved = previous?.status === "approved" ? previous.amount : 0;
+      await prisma.payment.upsert({
+        where: { studentId_monthKey: { studentId, monthKey } },
+        create: {
+          studentId,
+          monthKey,
+          amount: mpAmount,
+          status: "approved",
+          source: "mercadopago",
+          mpPaymentId: String(payment.id),
+        },
+        update: {
+          amount: baseApproved + mpAmount,
+          status: "approved",
+          source: "mercadopago",
+          mpPaymentId: String(payment.id),
+        },
+      });
+    } else if (previous?.status === "approved") {
+      // Ya había un pago confirmado y este intento nuevo quedó pendiente/rechazado: no lo tocamos,
+      // solo guardamos la referencia por si hace falta para depurar.
+      await prisma.payment.update({
+        where: { studentId_monthKey: { studentId, monthKey } },
+        data: { mpPaymentId: String(payment.id) },
+      });
+    } else {
+      await prisma.payment.upsert({
+        where: { studentId_monthKey: { studentId, monthKey } },
+        create: {
+          studentId,
+          monthKey,
+          amount: mpAmount,
+          status,
+          source: "mercadopago",
+          mpPaymentId: String(payment.id),
+        },
+        update: {
+          amount: mpAmount,
+          status,
+          source: "mercadopago",
+          mpPaymentId: String(payment.id),
+        },
+      });
+    }
 
     if (status === "approved" && previous?.status !== "approved") {
       const student = await prisma.student.findUnique({ where: { id: studentId } });
@@ -71,7 +104,7 @@ export async function POST(req: NextRequest) {
           data: {
             forProfe: null,
             message: `${student.name} pagó la cuota de ${fmtMonthName(`${monthKey}-01`)} (${money(
-              Math.round(payment.transaction_amount || 0)
+              mpAmount
             )}) por Mercado Pago.`,
           },
         });

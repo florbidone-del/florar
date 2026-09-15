@@ -10,7 +10,8 @@ export async function saveConfigAction(input: {
   swapsPerMonth: number;
   paymentWindowStart: number;
   paymentWindowEnd: number;
-  monthlyFee: number;
+  cashFee: number;
+  mpFee: number;
   lateFeePercent: number;
   announcementVisibleDays: number;
   defaultStudentPin: string;
@@ -27,7 +28,8 @@ export async function saveConfigAction(input: {
       swapsPerMonth: input.swapsPerMonth,
       paymentWindowStart: input.paymentWindowStart,
       paymentWindowEnd: input.paymentWindowEnd,
-      monthlyFee: input.monthlyFee,
+      cashFee: input.cashFee,
+      mpFee: input.mpFee,
       lateFeePercent: input.lateFeePercent,
       announcementVisibleDays: input.announcementVisibleDays,
       defaultStudentPin: input.defaultStudentPin.trim() || "0000",

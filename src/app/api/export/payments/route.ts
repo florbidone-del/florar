@@ -48,8 +48,8 @@ export async function GET() {
   const mk = currentMonthKey();
   const isLate = new Date().getDate() > config.paymentWindowEnd;
   const currentFee = isLate
-    ? Math.round(config.monthlyFee * (1 + config.lateFeePercent / 100))
-    : config.monthlyFee;
+    ? Math.round(config.cashFee * (1 + config.lateFeePercent / 100))
+    : config.cashFee;
 
   // Origen y fecha solo tienen sentido para un pago efectivamente concretado (aprobado): un link de
   // Mercado Pago abierto pero no pagado ya crea la fila en estado "pending", y no queremos que

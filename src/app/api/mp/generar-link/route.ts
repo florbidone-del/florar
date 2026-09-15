@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
-import { currentMonthKey, studentFee } from "@/lib/domain";
+import { currentMonthKey, studentFee, paidAmountThisMonth } from "@/lib/domain";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
 import { appBaseUrl, mpAccessToken } from "@/lib/mp";
 
@@ -19,7 +19,12 @@ export async function POST(req: NextRequest) {
   }
 
   const monthKey = currentMonthKey();
-  const amount = studentFee(snap);
+  const fee = studentFee(snap, "mp");
+  const alreadyPaid = paidAmountThisMonth(snap, student.id);
+  const amount = fee - alreadyPaid;
+  if (amount <= 0) {
+    return NextResponse.json({ error: "Ya no debés nada este mes." }, { status: 400 });
+  }
   const externalReference = `${student.id}__${monthKey}`;
   const baseUrl = appBaseUrl(req.url);
 
@@ -68,23 +73,36 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await prisma.payment.upsert({
+  // Si ya hay un pago aprobado este mes (por ejemplo, una seña en efectivo), no lo pisamos:
+  // solo guardamos la referencia de esta preferencia para poder identificarla cuando llegue
+  // el webhook, que va a sumarle este monto al ya confirmado en vez de reemplazarlo.
+  const existing = await prisma.payment.findUnique({
     where: { studentId_monthKey: { studentId: student.id, monthKey } },
-    create: {
-      studentId: student.id,
-      monthKey,
-      amount,
-      status: "pending",
-      source: "mercadopago",
-      mpPreferenceId: data.id,
-    },
-    update: {
-      amount,
-      status: "pending",
-      source: "mercadopago",
-      mpPreferenceId: data.id,
-    },
   });
+  if (existing?.status === "approved") {
+    await prisma.payment.update({
+      where: { studentId_monthKey: { studentId: student.id, monthKey } },
+      data: { mpPreferenceId: data.id },
+    });
+  } else {
+    await prisma.payment.upsert({
+      where: { studentId_monthKey: { studentId: student.id, monthKey } },
+      create: {
+        studentId: student.id,
+        monthKey,
+        amount,
+        status: "pending",
+        source: "mercadopago",
+        mpPreferenceId: data.id,
+      },
+      update: {
+        amount,
+        status: "pending",
+        source: "mercadopago",
+        mpPreferenceId: data.id,
+      },
+    });
+  }
 
   return NextResponse.json({ init_point: data.init_point });
 }

@@ -39,7 +39,8 @@ export function ConfigTab({
   const [swapsPerMonth, setSwapsPerMonth] = useState(c.swapsPerMonth);
   const [paymentWindowStart, setPaymentWindowStart] = useState(c.paymentWindowStart);
   const [paymentWindowEnd, setPaymentWindowEnd] = useState(c.paymentWindowEnd);
-  const [monthlyFee, setMonthlyFee] = useState(c.monthlyFee);
+  const [cashFee, setCashFee] = useState(c.cashFee);
+  const [mpFee, setMpFee] = useState(c.mpFee);
   const [lateFeePercent, setLateFeePercent] = useState(c.lateFeePercent);
   const [announcementVisibleDays, setAnnouncementVisibleDays] = useState(c.announcementVisibleDays);
   const [defaultStudentPin, setDefaultStudentPin] = useState(c.defaultStudentPin);
@@ -84,7 +85,8 @@ export function ConfigTab({
       swapsPerMonth,
       paymentWindowStart,
       paymentWindowEnd,
-      monthlyFee,
+      cashFee,
+      mpFee,
       lateFeePercent,
       announcementVisibleDays,
       defaultStudentPin,
@@ -212,8 +214,14 @@ export function ConfigTab({
             />
           </div>
         </div>
-        <label>Cuota mensual por defecto</label>
-        <input type="number" value={monthlyFee} onChange={(e) => setMonthlyFee(Number(e.target.value))} />
+        <label>Cuota en efectivo</label>
+        <input type="number" value={cashFee} onChange={(e) => setCashFee(Number(e.target.value))} />
+        <label>Cuota por Mercado Pago</label>
+        <input type="number" value={mpFee} onChange={(e) => setMpFee(Number(e.target.value))} />
+        <p className="hint">
+          El botón de Mercado Pago siempre cobra el saldo restante: si el alumno ya pagó una parte (por
+          ejemplo en efectivo), solo le cobra la diferencia hasta esta cuota.
+        </p>
         <label>Recargo por pago fuera de fecha (%)</label>
         <input
           type="number"
@@ -221,8 +229,8 @@ export function ConfigTab({
           onChange={(e) => setLateFeePercent(Number(e.target.value))}
         />
         <p className="hint">
-          Pasado el día {paymentWindowEnd} sin pagar, la cuota le aparece al alumno con este recargo ya
-          sumado (y el link de Mercado Pago cobra ese monto directo).
+          Pasado el día {paymentWindowEnd} sin pagar, ambas cuotas le aparecen al alumno con este recargo
+          ya sumado.
         </p>
         <label>Los avisos se muestran a los alumnos durante (días)</label>
         <input

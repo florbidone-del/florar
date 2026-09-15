@@ -42,7 +42,8 @@ model Config {
   swapsPerMonth          Int      @default(1)
   paymentWindowStart     Int      @default(1)
   paymentWindowEnd       Int      @default(10)
-  monthlyFee             Int      @default(15000)
+  cashFee                Int      @default(15000)
+  mpFee                  Int      @default(15000)
   lateFeePercent         Int      @default(20)
   mpLink                 String?
   theme                  String   @default("florar")

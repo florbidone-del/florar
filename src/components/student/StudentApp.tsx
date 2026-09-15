@@ -241,20 +241,21 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           </strong>
           {data.payment.isPartial ? (
             <>
-              Ya pagaste {data.payment.paidAmount} de {data.payment.fee}. Te faltan {data.payment.remaining}.
+              Ya pagaste {data.payment.paidAmount} de {data.payment.cashFee}. Te faltan{" "}
+              {data.payment.remainingCash} en efectivo.
             </>
           ) : (
-            <>Cuota de {data.payment.monthName}: {data.payment.fee}.</>
+            <>Cuota de {data.payment.monthName} en efectivo: {data.payment.cashFee}.</>
           )}{" "}
           {data.payment.isLate
             ? `Te pasaste de la fecha de pago (día ${data.payment.paymentWindowEnd}) — tiene un recargo del ${data.payment.lateFeePercent}%, ya incluido en el monto.`
             : data.payment.withinWindow
               ? `El pago se hace entre el día ${data.payment.paymentWindowStart} y el ${data.payment.paymentWindowEnd}.`
               : `El pago se habilita a partir del día ${data.payment.paymentWindowStart}.`}
-          {data.payment.isPartial && (
+          {(data.payment.isPartial || data.payment.mpFee !== data.payment.cashFee) && (
             <p className="hint" style={{ marginTop: 6 }}>
-              Ojo: el botón de Mercado Pago cobra la cuota completa, no el saldo. Para pagar solo lo que
-              falta, coordiná con la profe.
+              Por Mercado Pago se cobra {data.payment.remainingMp}
+              {data.payment.isPartial ? " (el saldo que te queda)" : ""}.
             </p>
           )}
           <PayButton fallbackLink={data.payment.mpLink} />

@@ -151,7 +151,8 @@ export type ConfigDTO = {
   swapsPerMonth: number;
   paymentWindowStart: number;
   paymentWindowEnd: number;
-  monthlyFee: number;
+  cashFee: number;
+  mpFee: number;
   lateFeePercent: number;
   mpLink: string | null;
   theme: string;
@@ -416,8 +417,10 @@ export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {
 export function isPastPaymentWindow(snap: WorkshopSnapshot) {
   return new Date().getDate() > snap.config.paymentWindowEnd;
 }
-export function studentFee(snap: WorkshopSnapshot) {
-  const base = snap.config.monthlyFee;
+/** "cash" es la cuota en efectivo/transferencia (la que se usa para "debe"/"pagó" en general);
+ *  "mp" es la que cobra el botón de Mercado Pago — pueden ser distintas. */
+export function studentFee(snap: WorkshopSnapshot, method: "cash" | "mp" = "cash") {
+  const base = method === "mp" ? snap.config.mpFee : snap.config.cashFee;
   return isPastPaymentWindow(snap)
     ? Math.round(base * (1 + snap.config.lateFeePercent / 100))
     : base;
