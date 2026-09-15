@@ -8,6 +8,7 @@ import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
+import { NewItemCard } from "@/components/shared/NewItemCard";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { addStudentPostAction, removeStudentPostAction } from "@/lib/actions/studentPosts";
 import type { StudentPanelData } from "@/lib/views/student";
@@ -20,6 +21,7 @@ export function StudentBitacoraTab({
   communityPosts: StudentPanelData["communityPosts"];
 }) {
   const router = useRouter();
+  const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [imageData, setImageData] = useState<string | null>(null);
@@ -43,6 +45,7 @@ export function StudentBitacoraTab({
     setTitle("");
     setBody("");
     setImageData(null);
+    setShowForm(false);
     router.refresh();
   }
 
@@ -53,7 +56,7 @@ export function StudentBitacoraTab({
 
   return (
     <>
-      <div className="card">
+      <NewItemCard label="Nueva publicación" open={showForm} onOpen={() => setShowForm(true)}>
         <h3>Nueva publicación</h3>
         <p className="muted">
           Subí una pieza, un avance o una idea con foto y descripción. Queda privada — solo la ven las
@@ -81,7 +84,7 @@ export function StudentBitacoraTab({
         <button className="primary block" style={{ marginTop: 14 }} disabled={pending} onClick={publish}>
           Publicar
         </button>
-      </div>
+      </NewItemCard>
 
       <div className="card">
         <h3>Mi bitácora</h3>

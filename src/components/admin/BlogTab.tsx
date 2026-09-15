@@ -7,6 +7,7 @@ import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
+import { NewItemCard } from "@/components/shared/NewItemCard";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import type { BlogPostDTO } from "@/lib/views/admin";
@@ -14,6 +15,7 @@ import { addBlogPostAction, removeBlogPostAction } from "@/lib/actions/content";
 
 export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
   const router = useRouter();
+  const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [imageData, setImageData] = useState<string | null>(null);
@@ -37,6 +39,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
     setTitle("");
     setBody("");
     setImageData(null);
+    setShowForm(false);
     router.refresh();
   }
 
@@ -47,7 +50,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
 
   return (
     <>
-      <div className="card">
+      <NewItemCard label="Nuevo post" open={showForm} onOpen={() => setShowForm(true)}>
         <h3>Nuevo post</h3>
         <p className="muted">
           Compartí links, fotos de piezas terminadas, técnicas o ideas — los alumnos lo ven en su pestaña
@@ -75,7 +78,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
         <button className="primary block" style={{ marginTop: 14 }} disabled={pending} onClick={publish}>
           Publicar
         </button>
-      </div>
+      </NewItemCard>
       <div className="card">
         <h3>Posts publicados</h3>
         <ShowMoreList

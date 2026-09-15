@@ -190,6 +190,14 @@ label:first-child{margin-top:0;}
   padding:16px;
   margin-bottom:14px;
 }
+.new-toggle{
+  border:1.5px dashed var(--glaze);
+  color:var(--glaze-dark);
+  background:var(--surface-2);
+  font-weight:600;
+  padding:12px;
+  margin-bottom:14px;
+}
 .card h3{font-size:1rem;}
 .collapsible{padding:0; overflow:hidden;}
 .collapsible-header{

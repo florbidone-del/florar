@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { fmtLong, todayISO } from "@/lib/domain";
 import type { HolidayDTO } from "@/lib/domain";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
+import { NewItemCard } from "@/components/shared/NewItemCard";
 import { addHolidayAction, removeHolidayAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
 
 export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[]; isMainProfe: boolean }) {
   const router = useRouter();
+  const [showAdd, setShowAdd] = useState(false);
   const [date, setDate] = useState("");
   const [label, setLabel] = useState("");
   const [pending, setPending] = useState(false);
@@ -30,6 +32,7 @@ export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[];
     setPending(false);
     setDate("");
     setLabel("");
+    setShowAdd(false);
     router.refresh();
   }
   async function remove(d: string) {
@@ -74,7 +77,7 @@ export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[];
           {officialResult && <p className="hint">{officialResult}</p>}
         </div>
       )}
-      <div className="card">
+      <NewItemCard label="Nuevo feriado" open={showAdd} onOpen={() => setShowAdd(true)}>
         <h3>Agregar feriado</h3>
         <div className="row">
           <div>
@@ -89,7 +92,7 @@ export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[];
         <button className="primary block" style={{ marginTop: 12 }} disabled={pending} onClick={add}>
           Agregar
         </button>
-      </div>
+      </NewItemCard>
       <div className="card">
         <h3>Feriados cargados</h3>
         <ShowMoreList
