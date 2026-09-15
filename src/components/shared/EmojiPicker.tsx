@@ -65,7 +65,6 @@ export function EmojiPicker({
               className="emoji-picker-item"
               onClick={() => {
                 onPick(e);
-                setOpen(false);
                 targetRef?.current?.focus();
               }}
             >

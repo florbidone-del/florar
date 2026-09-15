@@ -39,7 +39,7 @@ const TAB_LABELS: Record<Tab, string> = {
   chat: "Chat",
   blog: "CeramiBlog",
   bitacora: "Mi bitácora",
-  info: "Información del taller",
+  info: "Info del Taller",
   cuenta: "Mi cuenta",
 };
 const SECTION_TAB: Record<string, Tab> = {
