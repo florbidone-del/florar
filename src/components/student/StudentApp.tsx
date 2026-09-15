@@ -24,8 +24,10 @@ import {
 } from "@/lib/actions/auth";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
-const TABS = ["calendario", "chat", "blog", "info", "cuenta"] as const;
-type Tab = (typeof TABS)[number];
+const ALL_TABS = ["calendario", "chat", "blog", "info", "cuenta"] as const;
+type Tab = (typeof ALL_TABS)[number];
+// "chat" no está acá: tiene su propio botón (globito) junto a "salir", no ocupa lugar de pestaña.
+const PILL_TABS: Tab[] = ["calendario", "blog", "info", "cuenta"];
 const TAB_LABELS: Record<Tab, string> = {
   calendario: "Calendario",
   chat: "Chat",
@@ -195,9 +197,20 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             {data.profeName ? ` · profe: ${data.profeName}` : ""}
           </div>
         </div>
-        <button className="ghost" onClick={logout}>
-          salir
-        </button>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button
+            type="button"
+            className={`icon-button ghost ${tab === "chat" ? "active" : ""}`}
+            onClick={() => setTab("chat")}
+            aria-label="Chat"
+            title="Chat"
+          >
+            💬
+          </button>
+          <button className="ghost" onClick={logout}>
+            salir
+          </button>
+        </div>
       </div>
 
       {data.payment.unpaid && (
@@ -228,7 +241,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       )}
 
       <div className="tabs">
-        {TABS.map((t) => (
+        {PILL_TABS.map((t) => (
           <button
             type="button"
             key={t}

@@ -140,9 +140,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const router = useRouter();
   const isOwner = session.role === "owner";
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
-  const tabs = isOwner
-    ? ["profes"]
-    : ["semana", "alumnos", "chat", "avisos", "actividades", "blog", "config"];
+  const tabs = isOwner ? ["profes"] : ["semana", "alumnos", "avisos", "actividades", "blog"];
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
@@ -171,9 +169,33 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
             <span className="badge-role">{isOwner ? "dueño/a" : "profe"}</span>
           </div>
         </div>
-        <button className="ghost" onClick={logout}>
-          salir
-        </button>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {!isOwner && (
+            <>
+              <button
+                type="button"
+                className={`icon-button ghost ${tab === "chat" ? "active" : ""}`}
+                onClick={() => setTab("chat")}
+                aria-label="Chat"
+                title="Chat"
+              >
+                💬
+              </button>
+              <button
+                type="button"
+                className={`icon-button ghost ${tab === "config" ? "active" : ""}`}
+                onClick={() => setTab("config")}
+                aria-label="Configuración"
+                title="Configuración"
+              >
+                ⚙️
+              </button>
+            </>
+          )}
+          <button className="ghost" onClick={logout}>
+            salir
+          </button>
+        </div>
       </div>
       {isOwner && (
         <p className="muted" style={{ marginBottom: 14 }}>
@@ -201,7 +223,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         {!isOwner && tab === "avisos" && (
           <>
             <AnnouncementsTab announcements={bundle.announcements} />
-            <HolidaysTab holidays={bundle.snapshot.holidays} />
+            <HolidaysTab holidays={bundle.snapshot.holidays} isMainProfe={isMainProfe} />
           </>
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}

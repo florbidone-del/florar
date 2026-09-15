@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireProfe } from "@/lib/authz";
+import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { dateInputToUTC } from "@/lib/snapshot";
 import type { ActionResult } from "@/lib/actions/auth";
 
@@ -25,6 +25,43 @@ export async function removeHolidayAction(date: string): Promise<ActionResult> {
   if (!session) return { error: "No autorizado." };
   await prisma.holiday.deleteMany({ where: { date: dateInputToUTC(date) } });
   return { ok: true };
+}
+
+type OfficialHoliday = { fecha: string; nombre: string };
+
+/** Trae los feriados nacionales oficiales (api.argentinadatos.com) para uno o más años, más el
+ *  25 de julio (fijo del taller, no está en la fuente oficial). Nunca pisa un feriado que ya
+ *  esté cargado — así se puede apretar el botón de nuevo sin duplicar ni perder ediciones. */
+export async function loadOfficialHolidaysAction(
+  years: number[]
+): Promise<ActionResult & { added?: number }> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+
+  const toAdd: { date: string; label: string }[] = [];
+  for (const year of years) {
+    let data: OfficialHoliday[];
+    try {
+      const res = await fetch(`https://api.argentinadatos.com/v1/feriados/${year}`);
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      data = await res.json();
+    } catch {
+      return { error: `No se pudo traer los feriados de ${year}. Probá de nuevo en un rato.` };
+    }
+    for (const h of data) {
+      toAdd.push({ date: h.fecha, label: h.nombre });
+    }
+    toAdd.push({ date: `${year}-07-25`, label: "Feriado del taller" });
+  }
+
+  let added = 0;
+  for (const h of toAdd) {
+    const existing = await prisma.holiday.findUnique({ where: { date: dateInputToUTC(h.date) } });
+    if (existing) continue;
+    await prisma.holiday.create({ data: { date: dateInputToUTC(h.date), label: h.label } });
+    added++;
+  }
+  return { ok: true, added };
 }
 
 export async function addActivityAction(input: {

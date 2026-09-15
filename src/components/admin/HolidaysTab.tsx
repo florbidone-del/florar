@@ -5,13 +5,16 @@ import { useRouter } from "next/navigation";
 import { fmtLong, todayISO } from "@/lib/domain";
 import type { HolidayDTO } from "@/lib/domain";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
-import { addHolidayAction, removeHolidayAction } from "@/lib/actions/content";
+import { addHolidayAction, removeHolidayAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
 
-export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
+export function HolidaysTab({ holidays, isMainProfe }: { holidays: HolidayDTO[]; isMainProfe: boolean }) {
   const router = useRouter();
   const [date, setDate] = useState("");
   const [label, setLabel] = useState("");
   const [pending, setPending] = useState(false);
+  const [loadingOfficial, setLoadingOfficial] = useState(false);
+  const [officialResult, setOfficialResult] = useState<string | null>(null);
+  const currentYear = new Date().getFullYear();
 
   // Los próximos primero (lo más útil de ver de entrada), y los que ya pasaron después,
   // del más reciente al más viejo — así "mostrar más" no obliga a scrollear años de historial.
@@ -33,9 +36,44 @@ export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
     await removeHolidayAction(d);
     router.refresh();
   }
+  async function loadOfficial() {
+    setLoadingOfficial(true);
+    setOfficialResult(null);
+    const res = await loadOfficialHolidaysAction([currentYear, currentYear + 1]);
+    setLoadingOfficial(false);
+    if ("error" in res) {
+      setOfficialResult(res.error!);
+      return;
+    }
+    setOfficialResult(
+      res.added === 0
+        ? "Ya estaban todos cargados — no había nada nuevo para agregar."
+        : `Se agregaron ${res.added} feriados nuevos.`
+    );
+    router.refresh();
+  }
 
   return (
     <>
+      {isMainProfe && (
+        <div className="card">
+          <h3>Cargar feriados oficiales</h3>
+          <p className="muted">
+            Trae los feriados nacionales de {currentYear} y {currentYear + 1} desde la fuente oficial
+            (api.argentinadatos.com), más el 25 de julio, fijo del taller. No pisa los que ya tengas
+            cargados — podés apretarlo todos los años sin duplicar nada.
+          </p>
+          <button
+            className="primary block"
+            style={{ marginTop: 10 }}
+            disabled={loadingOfficial}
+            onClick={loadOfficial}
+          >
+            {loadingOfficial ? "Cargando…" : `Cargar feriados oficiales (${currentYear} y ${currentYear + 1})`}
+          </button>
+          {officialResult && <p className="hint">{officialResult}</p>}
+        </div>
+      )}
       <div className="card">
         <h3>Agregar feriado</h3>
         <div className="row">
