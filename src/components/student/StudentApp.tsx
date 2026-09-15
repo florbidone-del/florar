@@ -11,6 +11,7 @@ import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen";
 import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
+import { StudentBitacoraTab } from "@/components/student/StudentBitacoraTab";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
 import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
@@ -25,17 +26,19 @@ import {
   setMyNickAction,
   dismissStudentTutorialAction,
 } from "@/lib/actions/auth";
+import { markSeenAction } from "@/lib/actions/notifications";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
 
-const ALL_TABS = ["calendario", "chat", "blog", "info", "cuenta"] as const;
+const ALL_TABS = ["calendario", "chat", "blog", "bitacora", "info", "cuenta"] as const;
 type Tab = (typeof ALL_TABS)[number];
 // "chat" y "cuenta" no están acá: tienen su propio botón (globito / rueda) junto a "salir", no
 // ocupan lugar de pestaña.
-const PILL_TABS: Tab[] = ["calendario", "blog", "info"];
+const PILL_TABS: Tab[] = ["calendario", "blog", "bitacora", "info"];
 const TAB_LABELS: Record<Tab, string> = {
   calendario: "Calendario",
   chat: "Chat",
   blog: "CeramiBlog",
+  bitacora: "Mi bitácora",
   info: "Información del taller",
   cuenta: "Mi cuenta",
 };
@@ -140,6 +143,28 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const [isRefreshing, startRefresh] = useTransition();
   const [savingNick, setSavingNick] = useState(false);
   const pullDistance = usePullToRefresh(() => startRefresh(() => router.refresh()));
+  const [seenOverride, setSeenOverride] = useState<{ avisos?: boolean; chat?: boolean; blog?: boolean }>({});
+  const unread = {
+    avisos: data.unread.avisos && !seenOverride.avisos,
+    chat: data.unread.chat && !seenOverride.chat,
+    blog: data.unread.blog && !seenOverride.blog,
+  };
+
+  function openTab(t: Tab) {
+    setTab(t);
+    if (t === "calendario" && unread.avisos) {
+      setSeenOverride((o) => ({ ...o, avisos: true }));
+      markSeenAction("avisos");
+    }
+    if (t === "chat" && unread.chat) {
+      setSeenOverride((o) => ({ ...o, chat: true }));
+      markSeenAction("chat");
+    }
+    if (t === "blog" && unread.blog) {
+      setSeenOverride((o) => ({ ...o, blog: true }));
+      markSeenAction("blog");
+    }
+  }
 
   // "Atrás" en el celular vuelve a Calendario en vez de salir de la app, mientras no estés ahí.
   useBackToClose(() => setTab("calendario"), tab !== "calendario");
@@ -208,12 +233,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           <button
             type="button"
-            className={`icon-button solid ${tab === "chat" ? "active" : ""}`}
-            onClick={() => setTab("chat")}
+            className={`icon-button solid ${tab === "chat" ? "active" : ""} ${unread.chat ? "has-unread" : ""}`}
+            onClick={() => openTab("chat")}
             aria-label="Chat"
             title="Chat"
           >
             <ChatIcon />
+            {unread.chat && <span className="unread-dot" />}
           </button>
           <button
             type="button"
@@ -259,16 +285,20 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       )}
 
       <div className="tabs">
-        {PILL_TABS.map((t) => (
-          <button
-            type="button"
-            key={t}
-            className={`tab ${t === tab ? "active" : ""}`}
-            onClick={() => setTab(t)}
-          >
-            {TAB_LABELS[t]}
-          </button>
-        ))}
+        {PILL_TABS.map((t) => {
+          const isUnread = (t === "calendario" && unread.avisos) || (t === "blog" && unread.blog);
+          return (
+            <button
+              type="button"
+              key={t}
+              className={`tab ${t === tab ? "active" : ""} ${isUnread ? "has-unread" : ""}`}
+              onClick={() => openTab(t)}
+            >
+              {TAB_LABELS[t]}
+              {isUnread && <span className="unread-dot" />}
+            </button>
+          );
+        })}
       </div>
 
       {tab === "calendario" && (
@@ -357,6 +387,11 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                   {fmtLong(p.date)}
                   {p.authorName ? ` — ${p.authorName}` : ""}
                 </div>
+                {p.featured && (
+                  <div className="tag ok" style={{ marginTop: 4 }}>
+                    ⭐ Destacado{p.studentAuthorName ? ` de ${p.studentAuthorName}` : ""}
+                  </div>
+                )}
                 {p.title && <h3>{p.title}</h3>}
                 {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
                 {p.body && (
@@ -367,6 +402,12 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {tab === "bitacora" && (
+        <div id="bitacora-section">
+          <StudentBitacoraTab myPosts={data.myPosts} communityPosts={data.communityPosts} />
         </div>
       )}
 

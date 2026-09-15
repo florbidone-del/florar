@@ -82,6 +82,9 @@ model Admin {
   tutorialSeen Boolean   @default(false)
   displayName  String?
   createdAt    DateTime  @default(now())
+  avisosSeenAt DateTime?
+  chatSeenAt   DateTime?
+  blogSeenAt   DateTime?
 
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
   substitutions   Substitution[]   @relation("AdminSubstitutions")
@@ -101,11 +104,15 @@ model Student {
   mustChangePin   Boolean  @default(true)
   tutorialSeen    Boolean  @default(false)
   createdAt       DateTime @default(now())
+  avisosSeenAt    DateTime?
+  chatSeenAt      DateTime?
+  blogSeenAt      DateTime?
 
   scheduleChanges ScheduleChange[]
   payments        Payment[]
   pinResets       PinResetRequest[]
   chatMessages    ChatMessage[]
+  posts           StudentPost[]
 
   @@index([defaultWeekday, defaultSlotId])
 }
@@ -194,13 +201,34 @@ model Announcement {
 
 // Posts tipo blog de la profe: links, fotos e ideas — a diferencia de Announcement,
 // no es urgente ni se filtra por antigüedad, queda como un registro permanente.
+// "featured"+"sourceStudentPostId" son para cuando una profe retuitea una publicación de la
+// bitácora de un alumno hacia acá: queda con crédito al alumno y marcada como destacada.
 model BlogPost {
-  id             String   @id @default(cuid())
-  title          String?
-  body           String
-  imageData      String?
-  authorUsername String?
-  createdAt      DateTime @default(now())
+  id                  String   @id @default(cuid())
+  title               String?
+  body                String
+  imageData           String?
+  authorUsername      String?
+  featured            Boolean  @default(false)
+  studentAuthorName   String?
+  sourceStudentPostId String?
+  createdAt           DateTime @default(now())
+}
+
+// Bitácora personal del alumno: sus propias piezas/avances, con foto y descripción. Privada por
+// defecto (solo la ve el alumno dueño y las profes); una profe puede marcarla "pública" para que
+// la vean también otros alumnos, y/o destacarla en el CeramiBlog (crea un BlogPost vinculado).
+model StudentPost {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title     String?
+  body      String
+  imageData String?
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([studentId, createdAt])
 }
 
 // Chat del turno: solo lo ven los alumnos de ese día+horario fijo y el profe asignado (o la

@@ -84,11 +84,30 @@ export type StudentPanelData = {
     imageData: string | null;
     date: string;
     authorName: string | null;
+    featured: boolean;
+    studentAuthorName: string | null;
+  }[];
+  myPosts: {
+    id: string;
+    title: string | null;
+    body: string;
+    imageData: string | null;
+    date: string;
+    isPublic: boolean;
+  }[];
+  communityPosts: {
+    id: string;
+    studentName: string;
+    title: string | null;
+    body: string;
+    imageData: string | null;
+    date: string;
   }[];
   activitiesThisMonth: { title: string; description: string | null; range: string }[];
   calendar: CalendarDay[];
   leadingBlanks: number;
   todayISO: string;
+  unread: { avisos: boolean; chat: boolean; blog: boolean };
 };
 
 export async function buildStudentPanelData(
@@ -177,11 +196,26 @@ export async function buildStudentPanelData(
     });
   }
 
-  const [allAnnouncements, allBlogPosts, admins] = await Promise.all([
-    prisma.announcement.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
-    prisma.admin.findMany({ select: { username: true, displayName: true } }),
-  ]);
+  const [allAnnouncements, allBlogPosts, admins, allStudentPosts, seenAt, latestChatMsg] =
+    await Promise.all([
+      prisma.announcement.findMany({ orderBy: { createdAt: "asc" } }),
+      prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
+      prisma.admin.findMany({ select: { username: true, displayName: true } }),
+      prisma.studentPost.findMany({ orderBy: { createdAt: "desc" } }),
+      prisma.student.findUnique({
+        where: { id: studentId },
+        select: { avisosSeenAt: true, chatSeenAt: true, blogSeenAt: true },
+      }),
+      prisma.chatMessage.findFirst({
+        where: {
+          weekday: student.defaultWeekday,
+          slotId: student.defaultSlotId,
+          NOT: { authorStudentId: studentId },
+        },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      }),
+    ]);
   // Nombre a mostrar para cada profe: su nick si se puso uno, si no el usuario con mayúscula.
   const authorNameByUsername = new Map(
     admins.map((a) => [a.username, a.displayName || capitalize(a.username)])
@@ -196,6 +230,14 @@ export async function buildStudentPanelData(
     .filter((a) => daysSince(a.date) <= snap.config.announcementVisibleDays)
     .slice(-8)
     .reverse();
+  const latestVisibleAvisoAt = allAnnouncements
+    .filter((a) => daysSince(isoDate(a.createdAt)) <= snap.config.announcementVisibleDays)
+    .at(-1)?.createdAt;
+  const unread = {
+    avisos: !!latestVisibleAvisoAt && (!seenAt?.avisosSeenAt || seenAt.avisosSeenAt < latestVisibleAvisoAt),
+    chat: !!latestChatMsg && (!seenAt?.chatSeenAt || seenAt.chatSeenAt < latestChatMsg.createdAt),
+    blog: !!allBlogPosts[0] && (!seenAt?.blogSeenAt || seenAt.blogSeenAt < allBlogPosts[0].createdAt),
+  };
   const blogPosts = allBlogPosts.map((p) => ({
     id: p.id,
     title: p.title,
@@ -203,7 +245,29 @@ export async function buildStudentPanelData(
     imageData: p.imageData,
     date: isoDate(p.createdAt),
     authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
+    featured: p.featured,
+    studentAuthorName: p.studentAuthorName,
   }));
+  const myPosts = allStudentPosts
+    .filter((p) => p.studentId === studentId)
+    .map((p) => ({
+      id: p.id,
+      title: p.title,
+      body: p.body,
+      imageData: p.imageData,
+      date: isoDate(p.createdAt),
+      isPublic: p.isPublic,
+    }));
+  const communityPosts = allStudentPosts
+    .filter((p) => p.isPublic && p.studentId !== studentId)
+    .map((p) => ({
+      id: p.id,
+      studentName: snap.students.find((s) => s.id === p.studentId)?.name || "?",
+      title: p.title,
+      body: p.body,
+      imageData: p.imageData,
+      date: isoDate(p.createdAt),
+    }));
 
   return {
     studioName: snap.config.studioName,
@@ -242,9 +306,12 @@ export async function buildStudentPanelData(
     studentInfo: snap.config.studentInfo,
     announcements,
     blogPosts,
+    myPosts,
+    communityPosts,
     activitiesThisMonth,
     calendar,
     leadingBlanks,
     todayISO: today,
+    unread,
   };
 }

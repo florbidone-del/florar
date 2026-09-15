@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { logoutAction, dismissAdminTutorialAction } from "@/lib/actions/auth";
+import { markSeenAction } from "@/lib/actions/notifications";
 import { capitalize } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import type { AdminSession } from "@/lib/session";
@@ -12,6 +13,7 @@ import { HolidaysTab } from "@/components/admin/HolidaysTab";
 import { ActivitiesTab } from "@/components/admin/ActivitiesTab";
 import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
 import { BlogTab } from "@/components/admin/BlogTab";
+import { StudentPostsTab } from "@/components/admin/StudentPostsTab";
 import { ChatTab } from "@/components/admin/ChatTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
 import { ProfesTab } from "@/components/admin/ProfesTab";
@@ -135,6 +137,7 @@ const TAB_LABELS: Record<string, string> = {
   actividades: "Actividades",
   avisos: "Avisos",
   blog: "CeramiBlog",
+  bitacoras: "Bitácoras",
   config: "Configuración",
   profes: "Profes",
 };
@@ -143,12 +146,34 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const router = useRouter();
   const isOwner = session.role === "owner";
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
-  const tabs = isOwner ? ["profes"] : ["semana", "alumnos", "avisos", "actividades", "blog"];
+  const tabs = isOwner ? ["profes"] : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras"];
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
   const [isRefreshing, startRefresh] = useTransition();
   const pullDistance = usePullToRefresh(() => startRefresh(() => router.refresh()));
+  const [seenOverride, setSeenOverride] = useState<{ avisos?: boolean; chat?: boolean; blog?: boolean }>({});
+  const unread = {
+    avisos: bundle.unread.avisos && !seenOverride.avisos,
+    chat: bundle.unread.chat && !seenOverride.chat,
+    blog: bundle.unread.blog && !seenOverride.blog,
+  };
+
+  function openTab(t: string) {
+    setTab(t);
+    if (t === "avisos" && unread.avisos) {
+      setSeenOverride((o) => ({ ...o, avisos: true }));
+      markSeenAction("avisos");
+    }
+    if (t === "chat" && unread.chat) {
+      setSeenOverride((o) => ({ ...o, chat: true }));
+      markSeenAction("chat");
+    }
+    if (t === "blog" && unread.blog) {
+      setSeenOverride((o) => ({ ...o, blog: true }));
+      markSeenAction("blog");
+    }
+  }
 
   // "Atrás" en el celular vuelve a la pestaña inicial en vez de salir de la app.
   useBackToClose(() => setTab(tabs[0]), tab !== tabs[0]);
@@ -180,12 +205,13 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
             <>
               <button
                 type="button"
-                className={`icon-button solid ${tab === "chat" ? "active" : ""}`}
-                onClick={() => setTab("chat")}
+                className={`icon-button solid ${tab === "chat" ? "active" : ""} ${unread.chat ? "has-unread" : ""}`}
+                onClick={() => openTab("chat")}
                 aria-label="Chat"
                 title="Chat"
               >
                 <ChatIcon />
+                {unread.chat && <span className="unread-dot" />}
               </button>
               <button
                 type="button"
@@ -210,11 +236,19 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         </p>
       )}
       <div className="tabs">
-        {tabs.map((t) => (
-          <div key={t} className={`tab ${t === tab ? "active" : ""}`} onClick={() => setTab(t)}>
-            {TAB_LABELS[t]}
-          </div>
-        ))}
+        {tabs.map((t) => {
+          const isUnread = (t === "avisos" && unread.avisos) || (t === "blog" && unread.blog);
+          return (
+            <div
+              key={t}
+              className={`tab ${t === tab ? "active" : ""} ${isUnread ? "has-unread" : ""}`}
+              onClick={() => openTab(t)}
+            >
+              {TAB_LABELS[t]}
+              {isUnread && <span className="unread-dot" />}
+            </div>
+          );
+        })}
       </div>
       <div>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
@@ -233,6 +267,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           </>
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
+        {!isOwner && tab === "bitacoras" && <StudentPostsTab posts={bundle.studentPosts} />}
         {!isOwner && tab === "config" && (
           <ConfigTab bundle={bundle} isMainProfe={isMainProfe} myUsername={session.username} />
         )}

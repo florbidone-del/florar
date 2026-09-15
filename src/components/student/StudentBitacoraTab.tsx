@@ -6,13 +6,19 @@ import { fmtLong } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
-import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
+import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
-import type { BlogPostDTO } from "@/lib/views/admin";
-import { addBlogPostAction, removeBlogPostAction } from "@/lib/actions/content";
+import { addStudentPostAction, removeStudentPostAction } from "@/lib/actions/studentPosts";
+import type { StudentPanelData } from "@/lib/views/student";
 
-export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
+export function StudentBitacoraTab({
+  myPosts,
+  communityPosts,
+}: {
+  myPosts: StudentPanelData["myPosts"];
+  communityPosts: StudentPanelData["communityPosts"];
+}) {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -28,7 +34,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
       return;
     }
     setPending(true);
-    const res = await addBlogPostAction({ title, body, imageData });
+    const res = await addStudentPostAction({ title, body, imageData });
     setPending(false);
     if ("error" in res) {
       setError(res.error!);
@@ -41,28 +47,28 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
   }
 
   async function remove(id: string) {
-    await removeBlogPostAction(id);
+    await removeStudentPostAction(id);
     router.refresh();
   }
 
   return (
     <>
       <div className="card">
-        <h3>Nuevo post</h3>
+        <h3>Nueva publicación</h3>
         <p className="muted">
-          Compartí links, fotos de piezas terminadas, técnicas o ideas — los alumnos lo ven en su pestaña
-          CeramiBlog.
+          Subí una pieza, un avance o una idea con foto y descripción. Queda privada — solo la ven las
+          profes y vos — salvo que una profe decida hacerla pública o destacarla en el CeramiBlog.
         </p>
         <div className="field" style={{ marginTop: 10 }}>
           <label>Título (opcional)</label>
-          <input placeholder="Ej: Esmaltado con óxidos" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input placeholder="Ej: Mi primer bowl" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="field" style={{ marginTop: 10 }}>
-          <label>Texto</label>
+          <label>Descripción</label>
           <AutoTextarea
             ref={bodyRef}
             rows={3}
-            placeholder="Escribí la idea, contá algo, pegá un link…"
+            placeholder="Contá cómo lo hiciste, con qué técnica, cómo te fue…"
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
@@ -76,24 +82,19 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
           Publicar
         </button>
       </div>
+
       <div className="card">
-        <h3>Posts publicados</h3>
+        <h3>Mi bitácora</h3>
         <ShowMoreList
-          items={posts}
+          items={myPosts}
           initialCount={3}
-          itemLabelPlural="posts"
-          emptyMessage="Todavía no hay posts."
+          itemLabelPlural="publicaciones"
+          emptyMessage="Todavía no publicaste nada en tu bitácora."
           renderItem={(p) => (
             <div className="blog-post" key={p.id}>
               <div className="muted">
-                {fmtLong(p.createdAt)}
-                {p.authorName ? ` — ${p.authorName}` : ""}
+                {fmtLong(p.date)} — <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
               </div>
-              {p.featured && (
-                <div className="tag ok" style={{ marginTop: 4 }}>
-                  ⭐ Destacado{p.studentAuthorName ? ` de ${p.studentAuthorName}` : ""}
-                </div>
-              )}
               {p.title && <h4>{p.title}</h4>}
               {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
               {p.body && (
@@ -104,6 +105,31 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
               <button className="ghost" onClick={() => remove(p.id)}>
                 quitar
               </button>
+            </div>
+          )}
+        />
+      </div>
+
+      <div className="card">
+        <h3>Bitácoras del taller</h3>
+        <p className="muted">Publicaciones que otros compañeros hicieron públicas.</p>
+        <ShowMoreList
+          items={communityPosts}
+          initialCount={3}
+          itemLabelPlural="publicaciones"
+          emptyMessage="Todavía no hay publicaciones públicas de otros compañeros."
+          renderItem={(p) => (
+            <div className="blog-post" key={p.id}>
+              <div className="muted">
+                {fmtLong(p.date)} — {p.studentName}
+              </div>
+              {p.title && <h4>{p.title}</h4>}
+              {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+              {p.body && (
+                <p>
+                  <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
+                </p>
+              )}
             </div>
           )}
         />
