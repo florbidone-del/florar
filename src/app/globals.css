@@ -22,6 +22,7 @@ body{
   font-size:16px;
   line-height:1.5;
   min-height:100vh;
+  min-height:100dvh;
   overflow-x:hidden;
 }
 a{overflow-wrap:anywhere; word-break:break-word;}
@@ -38,8 +39,12 @@ h1,h2,h3{
 .app-shell{
   max-width:640px;
   margin:0 auto;
-  padding:20px 16px 60px 16px;
+  padding-top:max(20px, env(safe-area-inset-top));
+  padding-right:max(16px, env(safe-area-inset-right));
+  padding-bottom:max(60px, env(safe-area-inset-bottom));
+  padding-left:max(16px, env(safe-area-inset-left));
   min-height:100vh;
+  min-height:100dvh;
 }
 @media (min-width:760px){
   body{
@@ -61,14 +66,18 @@ h1,h2,h3{
 }
 .topbar{
   display:flex;
-  align-items:baseline;
+  align-items:flex-start;
   justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
   margin-bottom:22px;
   padding-bottom:14px;
   border-bottom:2px solid var(--ink);
 }
-.topbar h1{font-size:1.35rem;}
-.topbar .sub{color:var(--ink-soft); font-size:0.85rem;}
+.topbar > div:first-child{min-width:0; flex:1 1 160px;}
+.topbar > div:last-child{flex-shrink:0;}
+.topbar h1{font-size:1.35rem; overflow-wrap:anywhere;}
+.topbar .sub{color:var(--ink-soft); font-size:0.85rem; overflow-wrap:anywhere;}
 button{
   font-family:var(--font-work-sans), sans-serif;
   font-size:0.95rem;
@@ -123,9 +132,22 @@ button.block{width:100%;}
 @keyframes florar-spin{to{transform:rotate(360deg);}}
 .icon-button.solid{background:var(--glaze); border-color:var(--glaze-dark); color:#fff;}
 .icon-button.solid.active{background:var(--glaze-dark);}
+.has-unread{position:relative;}
+.unread-dot{
+  position:absolute;
+  top:-2px;
+  right:-2px;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#D6362E;
+  border:2px solid var(--surface-2);
+}
+.tab.has-unread{padding-right:18px;}
+.tab .unread-dot{top:6px; right:2px;}
 .pull-refresh-indicator{
   position:fixed;
-  top:0;
+  top:env(safe-area-inset-top, 0px);
   left:50%;
   z-index:60;
   width:38px;
@@ -201,6 +223,7 @@ label:first-child{margin-top:0;}
   align-items:center;
   justify-content:center;
   min-height:70vh;
+  min-height:70dvh;
   text-align:center;
   gap:18px;
 }
@@ -536,6 +559,7 @@ td.holiday{background:var(--oxide-soft);}
   flex-direction:column;
   gap:8px;
   max-height:52vh;
+  max-height:52dvh;
   overflow-y:auto;
   padding-right:2px;
 }

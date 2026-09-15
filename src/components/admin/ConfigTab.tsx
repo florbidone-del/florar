@@ -325,7 +325,7 @@ function SlotAssignmentGrid({
                   <td key={wd}>
                     <select
                       defaultValue={current}
-                      style={{ fontSize: "0.72rem", padding: "6px 4px" }}
+                      style={{ fontSize: "16px", padding: "6px 4px" }}
                       onChange={(e) => assign(wd, slot.id, e.target.value)}
                     >
                       <option value="">—</option>

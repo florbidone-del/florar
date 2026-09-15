@@ -39,6 +39,11 @@ export const THEMES: Record<string, Theme> = {
     ink: "#23281D", inkSoft: "#6E7259", line: "#CFCDB4",
     glaze: "#566B3D", glazeDark: "#3E4E2C", oxide: "#B4622E", oxideSoft: "#F1DFC9", okBg: "#DEE6D2",
   },
+  azulyoro: {
+    name: "Azul y Oro", bg: "#F5EFDA", surface: "#FAF6E9", surface2: "#FFFDF6",
+    ink: "#13253F", inkSoft: "#54627A", line: "#E1D6AE",
+    glaze: "#1E4C8C", glazeDark: "#123563", oxide: "#9C7A1E", oxideSoft: "#F3E6BE", okBg: "#DCE6F5",
+  },
 };
 
 export function themeCssVars(key: string): Record<string, string> {
