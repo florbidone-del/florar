@@ -16,6 +16,7 @@ import { ChatTab } from "@/components/admin/ChatTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
 import { ProfesTab } from "@/components/admin/ProfesTab";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
+import { useBackToClose } from "@/lib/useBackToClose";
 
 function ownerTourSteps(): TourStep[] {
   return [
@@ -145,6 +146,9 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
+
+  // "Atrás" en el celular vuelve a la pestaña inicial en vez de salir de la app.
+  useBackToClose(() => setTab(tabs[0]), tab !== tabs[0]);
 
   async function logout() {
     await logoutAction();

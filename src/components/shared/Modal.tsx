@@ -1,5 +1,7 @@
 "use client";
 
+import { useBackToClose } from "@/lib/useBackToClose";
+
 export function Modal({
   children,
   onClose,
@@ -7,6 +9,8 @@ export function Modal({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  useBackToClose(onClose);
+
   return (
     <div
       className="modal-backdrop"

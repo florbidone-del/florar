@@ -15,6 +15,7 @@ import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { fmtLong } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
+import { useBackToClose } from "@/lib/useBackToClose";
 import {
   logoutAction,
   setMyThemeAction,
@@ -130,6 +131,9 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const [tab, setTab] = useState<Tab>("calendario");
   const [nick, setNick] = useState(data.nick || "");
   const [savingNick, setSavingNick] = useState(false);
+
+  // "Atrás" en el celular vuelve a Calendario en vez de salir de la app, mientras no estés ahí.
+  useBackToClose(() => setTab("calendario"), tab !== "calendario");
 
   async function finishTour() {
     setShowTour(false);
