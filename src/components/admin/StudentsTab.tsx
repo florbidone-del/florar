@@ -119,6 +119,9 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
               (p) => p.studentId === s.id && p.monthKey === mk && p.status === "approved"
             );
             const fee = studentFee(snap);
+            const paid = payment?.amount || 0;
+            const isPartial = paid > 0 && paid < fee;
+            const isPaid = paid >= fee;
             const profe = profeForSlot(snap, s.defaultWeekday, s.defaultSlotId);
             return (
               <div className="list-item" key={s.id}>
@@ -131,18 +134,28 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
                     {DIAS[s.defaultWeekday]} {slot ? `${slot.start}–${slot.end}` : ""}
                     {profe ? ` · profe: ${capitalize(profe)}` : ""}
                   </div>
-                  <div className={`tag ${payment ? "ok" : "warn"}`} style={{ marginTop: 4 }}>
-                    {payment ? `pagó ${money(payment.amount)}` : `debe ${money(fee)}`}
+                  <div
+                    className={`tag ${isPaid ? "ok" : isPartial ? "partial" : "warn"}`}
+                    style={{ marginTop: 4 }}
+                  >
+                    {isPaid
+                      ? `pagó ${money(paid)}`
+                      : isPartial
+                        ? `pagó ${money(paid)} de ${money(fee)} — debe ${money(fee - paid)}`
+                        : `debe ${money(fee)}`}
                   </div>
                 </div>
                 <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-                  <button
-                    className="ghost small"
-                    disabled={busy === s.id}
-                    onClick={() => (payment ? removeUnpaid(s.id) : setPayStudentId(s.id))}
-                  >
-                    {payment ? "Quitar pago" : "Marcar pagado"}
-                  </button>
+                  {!isPaid && (
+                    <button className="ghost small" disabled={busy === s.id} onClick={() => setPayStudentId(s.id)}>
+                      {isPartial ? "Registrar saldo" : "Marcar pagado"}
+                    </button>
+                  )}
+                  {(isPaid || isPartial) && (
+                    <button className="ghost small" disabled={busy === s.id} onClick={() => removeUnpaid(s.id)}>
+                      Quitar pago
+                    </button>
+                  )}
                   <button className="ghost small" onClick={() => setFormStudentId(s.id)}>
                     Editar
                   </button>
@@ -166,29 +179,43 @@ export function StudentsTab({ bundle, me }: { bundle: AdminBundle; me: string })
           }}
         />
       )}
-      {payStudentId && (
-        <MarkPaidModal
-          studentName={snap.students.find((s) => s.id === payStudentId)?.name || ""}
-          defaultAmount={studentFee(snap)}
-          onClose={() => setPayStudentId(null)}
-          onConfirm={async (amount) => {
-            await markPaidManuallyAction(payStudentId, amount);
-            setPayStudentId(null);
-            router.refresh();
-          }}
-        />
-      )}
+      {payStudentId && (() => {
+        const payingFor = snap.students.find((s) => s.id === payStudentId);
+        const existingPayment = snap.payments.find(
+          (p) => p.studentId === payStudentId && p.monthKey === mk && p.status === "approved"
+        );
+        const alreadyPaid = existingPayment?.amount || 0;
+        const fee = studentFee(snap);
+        return (
+          <MarkPaidModal
+            studentName={payingFor?.name || ""}
+            alreadyPaid={alreadyPaid}
+            fee={fee}
+            defaultAmount={Math.max(0, fee - alreadyPaid)}
+            onClose={() => setPayStudentId(null)}
+            onConfirm={async (amount) => {
+              await markPaidManuallyAction(payStudentId, amount);
+              setPayStudentId(null);
+              router.refresh();
+            }}
+          />
+        );
+      })()}
     </>
   );
 }
 
 function MarkPaidModal({
   studentName,
+  alreadyPaid,
+  fee,
   defaultAmount,
   onClose,
   onConfirm,
 }: {
   studentName: string;
+  alreadyPaid: number;
+  fee: number;
   defaultAmount: number;
   onClose: () => void;
   onConfirm: (amount: number) => Promise<void>;
@@ -198,12 +225,19 @@ function MarkPaidModal({
 
   return (
     <Modal onClose={onClose}>
-      <h3>Marcar pagado — {studentName}</h3>
-      <label>Monto recibido</label>
+      <h3>{alreadyPaid > 0 ? "Registrar saldo" : "Marcar pagado"} — {studentName}</h3>
+      {alreadyPaid > 0 && (
+        <p className="hint">
+          Ya registraste {money(alreadyPaid)} de {money(fee)} este mes. Lo que cargues acá se suma a
+          eso, no lo reemplaza.
+        </p>
+      )}
+      <label>Monto recibido ahora</label>
       <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
       <p className="hint">
-        Por defecto es la cuota calculada del mes. Cambialo si cobraste otra cosa (ej. descuento por
-        pago en efectivo).
+        {alreadyPaid > 0
+          ? `Por defecto es el saldo que falta (${money(fee - alreadyPaid)}). Cambialo si cobraste otra cosa o solo una parte.`
+          : "Por defecto es la cuota calculada del mes. Cambialo si cobraste otra cosa, o solo una parte (podés completar el resto después)."}
       </p>
       <div className="row" style={{ marginTop: 16 }}>
         <button className="ghost block" onClick={onClose}>

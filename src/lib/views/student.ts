@@ -11,6 +11,7 @@ import {
   isHoliday,
   isoDate,
   isUnpaid,
+  paidAmountThisMonth,
   money,
   parseISO,
   profeForDateSlot,
@@ -59,6 +60,9 @@ export type StudentPanelData = {
   capacity: number;
   payment: {
     unpaid: boolean;
+    isPartial: boolean;
+    paidAmount: string;
+    remaining: string;
     fee: string;
     mpLink: string | null;
     withinWindow: boolean;
@@ -102,6 +106,7 @@ export async function buildStudentPanelData(
   const swapsLeft = snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId);
   const defaultSlot = snap.config.slots.find((s) => s.id === student.defaultSlotId) || null;
   const profeName = capitalize(profeForSlot(snap, student.defaultWeekday, student.defaultSlotId));
+  const paidThisMonth = paidAmountThisMonth(snap, studentId);
 
   const today = todayISO();
   const mk = currentMonthKey();
@@ -216,6 +221,9 @@ export async function buildStudentPanelData(
     capacity: snap.config.capacity,
     payment: {
       unpaid: isUnpaid(snap, studentId),
+      isPartial: paidThisMonth > 0 && paidThisMonth < studentFee(snap),
+      paidAmount: money(paidThisMonth),
+      remaining: money(Math.max(0, studentFee(snap) - paidThisMonth)),
       fee: money(studentFee(snap)),
       mpLink: snap.config.mpLink,
       withinWindow: withinPaymentWindow(snap),

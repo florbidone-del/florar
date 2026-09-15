@@ -421,12 +421,16 @@ export function studentFee(snap: WorkshopSnapshot) {
     ? Math.round(base * (1 + snap.config.lateFeePercent / 100))
     : base;
 }
-export function isUnpaid(snap: WorkshopSnapshot, studentId: string) {
+/** Suma lo que ya pagó (aprobado) este mes — con pagos parciales, puede ser menos que la cuota. */
+export function paidAmountThisMonth(snap: WorkshopSnapshot, studentId: string) {
   const mk = currentMonthKey();
   const payment = snap.payments.find(
-    (p) => p.studentId === studentId && p.monthKey === mk
+    (p) => p.studentId === studentId && p.monthKey === mk && p.status === "approved"
   );
-  return !(payment && payment.status === "approved");
+  return payment?.amount || 0;
+}
+export function isUnpaid(snap: WorkshopSnapshot, studentId: string) {
+  return paidAmountThisMonth(snap, studentId) < studentFee(snap);
 }
 export function withinPaymentWindow(snap: WorkshopSnapshot) {
   const day = new Date().getDate();

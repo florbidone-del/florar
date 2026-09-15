@@ -193,13 +193,27 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
 
       {data.payment.unpaid && (
         <div className="banner">
-          <strong>Debés la cuota de este mes</strong>
-          Cuota de {data.payment.monthName}: {data.payment.fee}.{" "}
+          <strong>
+            {data.payment.isPartial ? "Te falta completar la cuota de este mes" : "Debés la cuota de este mes"}
+          </strong>
+          {data.payment.isPartial ? (
+            <>
+              Ya pagaste {data.payment.paidAmount} de {data.payment.fee}. Te faltan {data.payment.remaining}.
+            </>
+          ) : (
+            <>Cuota de {data.payment.monthName}: {data.payment.fee}.</>
+          )}{" "}
           {data.payment.isLate
             ? `Te pasaste de la fecha de pago (día ${data.payment.paymentWindowEnd}) — tiene un recargo del ${data.payment.lateFeePercent}%, ya incluido en el monto.`
             : data.payment.withinWindow
               ? `El pago se hace entre el día ${data.payment.paymentWindowStart} y el ${data.payment.paymentWindowEnd}.`
               : `El pago se habilita a partir del día ${data.payment.paymentWindowStart}.`}
+          {data.payment.isPartial && (
+            <p className="hint" style={{ marginTop: 6 }}>
+              Ojo: el botón de Mercado Pago cobra la cuota completa, no el saldo. Para pagar solo lo que
+              falta, coordiná con la profe.
+            </p>
+          )}
           <PayButton fallbackLink={data.payment.mpLink} />
         </div>
       )}

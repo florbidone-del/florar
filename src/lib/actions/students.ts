@@ -76,19 +76,25 @@ export async function deleteStudentAction(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Marcar pagado a mano, con el monto que haya recibido la profe (ej. con descuento por efectivo). */
+/** Registra un pago a mano (efectivo/transferencia). Si ya había un pago parcial aprobado este
+ *  mes, el monto se SUMA al que ya tenía — no lo reemplaza — para poder cobrar el saldo en partes. */
 export async function markPaidManuallyAction(
   studentId: string,
   amount: number
 ): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
-  if (!Number.isFinite(amount) || amount < 0) return { error: "Monto inválido." };
+  if (!Number.isFinite(amount) || amount <= 0) return { error: "Monto inválido." };
   const mk = currentMonthKey();
+  const existing = await prisma.payment.findUnique({
+    where: { studentId_monthKey: { studentId, monthKey: mk } },
+  });
+  const alreadyPaid = existing?.status === "approved" ? existing.amount : 0;
+  const total = alreadyPaid + Math.round(amount);
   await prisma.payment.upsert({
     where: { studentId_monthKey: { studentId, monthKey: mk } },
-    create: { studentId, monthKey: mk, amount: Math.round(amount), status: "approved", source: "manual" },
-    update: { status: "approved", source: "manual", amount: Math.round(amount) },
+    create: { studentId, monthKey: mk, amount: total, status: "approved", source: "manual" },
+    update: { status: "approved", source: "manual", amount: total },
   });
   return { ok: true };
 }

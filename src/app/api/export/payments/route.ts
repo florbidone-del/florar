@@ -45,27 +45,32 @@ export async function GET() {
     loadConfig(),
   ]);
 
-  // Origen y fecha solo tienen sentido para un pago efectivamente concretado (aprobado): un link de
-  // Mercado Pago abierto pero no pagado ya crea la fila en estado "pending", y no queremos que
-  // parezca que el pago se hizo con esos datos.
-  const rows: Row[] = payments.map((p) => ({
-    alumno: p.student.name,
-    usuario: p.studentId,
-    mes: p.monthKey,
-    monto: p.amount,
-    estado: STATUS_ES[p.status] || p.status,
-    origen: p.status === "approved" ? SOURCE_ES[p.source] || p.source : "—",
-    fecha: p.status === "approved" ? isoDate(p.updatedAt) : "—",
-  }));
-
-  // Alumnos que todavía no tienen ningún pago registrado este mes (por ej. recién agregados):
-  // no aparecen en la tabla Payment, así que se agrega una fila "pendiente" para que no falten.
   const mk = currentMonthKey();
-  const hasCurrentMonthPayment = new Set(payments.filter((p) => p.monthKey === mk).map((p) => p.studentId));
   const isLate = new Date().getDate() > config.paymentWindowEnd;
   const currentFee = isLate
     ? Math.round(config.monthlyFee * (1 + config.lateFeePercent / 100))
     : config.monthlyFee;
+
+  // Origen y fecha solo tienen sentido para un pago efectivamente concretado (aprobado): un link de
+  // Mercado Pago abierto pero no pagado ya crea la fila en estado "pending", y no queremos que
+  // parezca que el pago se hizo con esos datos. Un pago aprobado del mes actual por menos de la
+  // cuota es un pago parcial: todavía falta el saldo, aunque la fila diga "approved" en la base.
+  const rows: Row[] = payments.map((p) => {
+    const isCurrentPartial = p.status === "approved" && p.monthKey === mk && p.amount < currentFee;
+    return {
+      alumno: p.student.name,
+      usuario: p.studentId,
+      mes: p.monthKey,
+      monto: p.amount,
+      estado: isCurrentPartial ? "parcial" : STATUS_ES[p.status] || p.status,
+      origen: p.status === "approved" ? SOURCE_ES[p.source] || p.source : "—",
+      fecha: p.status === "approved" ? isoDate(p.updatedAt) : "—",
+    };
+  });
+
+  // Alumnos que todavía no tienen ningún pago registrado este mes (por ej. recién agregados):
+  // no aparecen en la tabla Payment, así que se agrega una fila "pendiente" para que no falten.
+  const hasCurrentMonthPayment = new Set(payments.filter((p) => p.monthKey === mk).map((p) => p.studentId));
   for (const s of students) {
     if (hasCurrentMonthPayment.has(s.id)) continue;
     rows.push({
@@ -101,8 +106,8 @@ export async function GET() {
       estadoCell.fill = GREEN_FILL;
       estadoCell.font = GREEN_FONT;
     } else {
-      // "pendiente" y "rechazado" son lo mismo: todavía no cobraste. Se distingue por fecha límite:
-      // amarillo si ese mes todavía está dentro de la ventana de pago, rojo si ya se pasó.
+      // "pendiente", "rechazado" y "parcial" son todos "todavía falta cobrar algo". Se distingue por
+      // fecha límite: amarillo si ese mes todavía está dentro de la ventana de pago, rojo si ya se pasó.
       const overdue = row.mes < mk || (row.mes === mk && isLate);
       estadoCell.fill = overdue ? RED_FILL : YELLOW_FILL;
       estadoCell.font = overdue ? RED_FONT : YELLOW_FONT;
