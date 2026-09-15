@@ -40,9 +40,9 @@ export const THEMES: Record<string, Theme> = {
     glaze: "#566B3D", glazeDark: "#3E4E2C", oxide: "#B4622E", oxideSoft: "#F1DFC9", okBg: "#DEE6D2",
   },
   azulyoro: {
-    name: "Azul y Oro", bg: "#F5EFDA", surface: "#FAF6E9", surface2: "#FFFDF6",
-    ink: "#13253F", inkSoft: "#54627A", line: "#E1D6AE",
-    glaze: "#1E4C8C", glazeDark: "#123563", oxide: "#9C7A1E", oxideSoft: "#F3E6BE", okBg: "#DCE6F5",
+    name: "Azul y Oro", bg: "#D7E3F5", surface: "#E6EFFA", surface2: "#F3F8FD",
+    ink: "#0F2540", inkSoft: "#4C6483", line: "#B4C8E4",
+    glaze: "#123563", glazeDark: "#081A33", oxide: "#B8912A", oxideSoft: "#F5E7BE", okBg: "#C9DEF5",
   },
 };
 
