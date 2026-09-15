@@ -8,7 +8,6 @@ import type { ActionResult } from "@/lib/actions/auth";
 
 export async function createStudentAction(input: {
   name: string;
-  pin: string;
   defaultWeekday: number;
   defaultSlotId: string;
 }): Promise<ActionResult> {
@@ -16,7 +15,6 @@ export async function createStudentAction(input: {
   if (!session) return { error: "No autorizado." };
   const name = input.name.trim();
   if (name.length < 2) return { error: "Ingresá el nombre." };
-  if (!input.pin.trim()) return { error: "Ingresá un PIN." };
   if (input.defaultWeekday === null || !input.defaultSlotId)
     return { error: "Elegí día y horario." };
   let id: string | null = null;
@@ -33,11 +31,13 @@ export async function createStudentAction(input: {
         'Ya existe un alumno con ese nombre. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").',
     };
   }
+  const config = await prisma.config.findUniqueOrThrow({ where: { id: 1 } });
   await prisma.student.create({
     data: {
       id,
       name,
-      pin: input.pin.trim(),
+      pin: config.defaultStudentPin,
+      mustChangePin: true,
       defaultWeekday: input.defaultWeekday,
       defaultSlotId: input.defaultSlotId,
     },
@@ -48,24 +48,36 @@ export async function createStudentAction(input: {
 export async function updateStudentAction(
   id: string,
   input: {
-    pin: string;
     defaultWeekday: number;
     defaultSlotId: string;
   }
 ): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
-  if (!input.pin.trim()) return { error: "Ingresá un PIN." };
   if (input.defaultWeekday === null || !input.defaultSlotId)
     return { error: "Elegí día y horario." };
   await prisma.student.update({
     where: { id },
     data: {
-      pin: input.pin.trim(),
       defaultWeekday: input.defaultWeekday,
       defaultSlotId: input.defaultSlotId,
     },
   });
+  return { ok: true };
+}
+
+/** Restablece el PIN al default del taller sin que la profe llegue a ver cuál era — solo
+ *  puede resetearlo, nunca leerlo (con el chat de por medio, ver el PIN sería ver la
+ *  identidad de otra persona). Fuerza a cambiarlo de nuevo en el próximo ingreso. */
+export async function resetStudentPinAction(studentId: string): Promise<ActionResult> {
+  const session = await requireProfe();
+  if (!session) return { error: "No autorizado." };
+  const config = await prisma.config.findUniqueOrThrow({ where: { id: 1 } });
+  await prisma.student.update({
+    where: { id: studentId },
+    data: { pin: config.defaultStudentPin, mustChangePin: true },
+  });
+  await prisma.pinResetRequest.deleteMany({ where: { studentId } });
   return { ok: true };
 }
 
@@ -120,7 +132,7 @@ export async function resolvePinResetAction(
     const config = await prisma.config.findUniqueOrThrow({ where: { id: 1 } });
     await prisma.student.update({
       where: { id: req.studentId },
-      data: { pin: config.defaultStudentPin },
+      data: { pin: config.defaultStudentPin, mustChangePin: true },
     });
     await prisma.pinResetRequest.delete({ where: { id: requestId } });
   }

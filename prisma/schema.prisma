@@ -97,6 +97,7 @@ model Student {
   defaultSlot     Slot     @relation(fields: [defaultSlotId], references: [id])
   theme           String?
   nick            String?
+  mustChangePin   Boolean  @default(true)
   tutorialSeen    Boolean  @default(false)
   createdAt       DateTime @default(now())
 

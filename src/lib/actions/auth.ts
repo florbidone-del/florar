@@ -45,9 +45,11 @@ export async function studentChangePinAction(input: {
     return { error: "El PIN nuevo debe tener 4 dígitos." };
   if (input.next.trim() !== input.next2.trim())
     return { error: "Los PIN nuevos no coinciden." };
+  if (input.next.trim() === input.current.trim())
+    return { error: "Elegí un PIN distinto al actual." };
   await prisma.student.update({
     where: { id: session.studentId },
-    data: { pin: input.next.trim() },
+    data: { pin: input.next.trim(), mustChangePin: false },
   });
   return { ok: true };
 }

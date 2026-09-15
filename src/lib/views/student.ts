@@ -45,6 +45,7 @@ export type StudentPanelData = {
   studioName: string;
   theme: string;
   tutorialSeen: boolean;
+  mustChangePin: boolean;
   studentId: string;
   studentName: string;
   firstName: string;
@@ -206,6 +207,7 @@ export async function buildStudentPanelData(
     studioName: snap.config.studioName,
     theme: student.theme || snap.config.theme,
     tutorialSeen: student.tutorialSeen,
+    mustChangePin: student.mustChangePin,
     studentId: student.id,
     studentName: student.name,
     firstName: student.name.split(" ")[0],

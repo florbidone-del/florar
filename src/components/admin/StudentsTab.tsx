@@ -17,6 +17,7 @@ import {
   unmarkPaidAction,
   deleteStudentAction,
   resolvePinResetAction,
+  resetStudentPinAction,
   dismissNotificationAction,
 } from "@/lib/actions/students";
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
@@ -64,6 +65,14 @@ export function StudentsTab({
   }
   async function resolveReset(id: string) {
     await resolvePinResetAction(id);
+    router.refresh();
+  }
+  async function resetPin(id: string, name: string) {
+    if (!confirm(`¿Restablecer el PIN de ${name} al default del taller (${snap.config.defaultStudentPin})?`))
+      return;
+    setBusy(id);
+    await resetStudentPinAction(id);
+    setBusy(null);
     router.refresh();
   }
 
@@ -135,9 +144,7 @@ export function StudentsTab({
               <div className="list-item" key={s.id}>
                 <div>
                   <div style={{ fontWeight: 600 }}>{s.name}</div>
-                  <div className="muted">
-                    usuario: {s.id} · PIN {s.pin}
-                  </div>
+                  <div className="muted">usuario: {s.id}</div>
                   <div className="muted">
                     {DIAS[s.defaultWeekday]} {slot ? `${slot.start}–${slot.end}` : ""}
                     {profe ? ` · profe: ${capitalize(profe)}` : ""}
@@ -175,6 +182,9 @@ export function StudentsTab({
                   )}
                   <button className="ghost small" onClick={() => setFormStudentId(s.id)}>
                     Editar
+                  </button>
+                  <button className="ghost small" disabled={busy === s.id} onClick={() => resetPin(s.id, s.name)}>
+                    Restablecer PIN
                   </button>
                   <button className="danger small" disabled={busy === s.id} onClick={() => remove(s.id, s.name)}>
                     Eliminar

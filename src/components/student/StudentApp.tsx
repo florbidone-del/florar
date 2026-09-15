@@ -8,6 +8,7 @@ import { OwnSessionModal } from "@/components/student/OwnSessionModal";
 import { DayInfoModal } from "@/components/student/DayInfoModal";
 import { SwapModal } from "@/components/student/SwapModal";
 import { ChangePinModal } from "@/components/student/ChangePinModal";
+import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen";
 import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
@@ -174,6 +175,10 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   }
 
   const originalDay = modal?.kind === "swap" ? data.calendar.find((d) => d.date === modal.originalDate) : null;
+
+  if (data.mustChangePin) {
+    return <ForcePinChangeScreen studentName={data.firstName} onDone={() => router.refresh()} />;
+  }
 
   return (
     <>

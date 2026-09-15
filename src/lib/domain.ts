@@ -170,6 +170,7 @@ export type StudentDTO = {
   defaultSlotId: string;
   theme: string | null;
   nick: string | null;
+  mustChangePin: boolean;
   tutorialSeen: boolean;
   createdAt: string;
 };

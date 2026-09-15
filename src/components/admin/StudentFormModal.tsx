@@ -23,7 +23,6 @@ export function StudentFormModal({
   const student = editing ? snap.students.find((s) => s.id === studentId) || null : null;
 
   const [name, setName] = useState(student?.name || "");
-  const [pin, setPin] = useState(student?.pin || snap.config.defaultStudentPin);
   const [selDay, setSelDay] = useState<number | null>(student?.defaultWeekday ?? null);
   const [selSlot, setSelSlot] = useState<string | null>(student?.defaultSlotId ?? null);
   const [error, setError] = useState("");
@@ -32,13 +31,12 @@ export function StudentFormModal({
   async function save() {
     setError("");
     if (!editing && name.trim().length < 2) return setError("Ingresá el nombre.");
-    if (!pin.trim()) return setError("Ingresá un PIN.");
     if (selDay === null || !selSlot) return setError("Elegí día y horario.");
 
     setPending(true);
     const res = editing
-      ? await updateStudentAction(studentId!, { pin, defaultWeekday: selDay, defaultSlotId: selSlot })
-      : await createStudentAction({ name, pin, defaultWeekday: selDay, defaultSlotId: selSlot });
+      ? await updateStudentAction(studentId!, { defaultWeekday: selDay, defaultSlotId: selSlot })
+      : await createStudentAction({ name, defaultWeekday: selDay, defaultSlotId: selSlot });
     setPending(false);
     if ("error" in res) {
       setError(res.error!);
@@ -60,11 +58,12 @@ export function StudentFormModal({
         </div>
       )}
       {editing && <div className="hint">Usuario: {student?.id}</div>}
-      <label>PIN</label>
-      <input value={pin} onChange={(e) => setPin(e.target.value)} inputMode="numeric" maxLength={4} />
-      <p className="hint">
-        Por defecto se crea con PIN {snap.config.defaultStudentPin}; cambialo si querés uno distinto.
-      </p>
+      {!editing && (
+        <p className="hint">
+          Se crea con el PIN por defecto del taller ({snap.config.defaultStudentPin}) — el alumno va a
+          tener que cambiarlo la primera vez que entre.
+        </p>
+      )}
       <div style={{ marginTop: 14 }}>
         <WeekdaySlotPicker
           snap={snap}

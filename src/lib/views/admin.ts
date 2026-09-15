@@ -65,8 +65,12 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     admins.map((a) => [a.username, a.displayName || capitalize(a.username)])
   );
 
+  // El PIN nunca debe llegar al navegador de ninguna profe (ni siquiera oculto en el HTML/props):
+  // con el chat de por medio, tenerlo permitiría loguearse como el alumno y leer sus mensajes.
+  const sanitizedSnapshot = { ...snapshot, students: snapshot.students.map((s) => ({ ...s, pin: "" })) };
+
   return {
-    snapshot,
+    snapshot: sanitizedSnapshot,
     admins: admins.map((a) => ({
       username: a.username,
       role: a.role,
