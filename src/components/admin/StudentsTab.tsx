@@ -23,7 +23,7 @@ import {
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
 import { Modal } from "@/components/shared/Modal";
 
-type Turno = { weekday: number; slotId: string; label: string };
+type Turno = { weekday: number; slotId: string; label: string; start: string; end: string };
 
 function turnoKey(weekday: number, slotId: string) {
   return `${weekday}_${slotId}`;
@@ -53,6 +53,8 @@ export function StudentsTab({
       .map((t) => ({
         weekday: t.weekday,
         slotId: t.slotId,
+        start: t.start,
+        end: t.end,
         label: `${capitalize(DIAS[t.weekday])} ${t.start}–${t.end}`,
       }));
   }
@@ -157,20 +159,31 @@ export function StudentsTab({
           <h3 style={{ margin: 0 }}>Estudiantes ({baseStudents.length})</h3>
         </div>
         {turnoOptions.length > 0 && (
-          <div className="chip-row" style={{ marginTop: 10 }}>
-            <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
-              Todos
+          <>
+            <div className="chip-row" style={{ marginTop: 10 }}>
+              <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
+                Todos
+              </div>
             </div>
-            {turnoOptions.map((t) => (
-              <div
-                key={turnoKey(t.weekday, t.slotId)}
-                className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
-                onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
-              >
-                {t.label}
+            {Array.from(new Set(turnoOptions.map((t) => t.weekday))).map((weekday) => (
+              <div key={weekday} style={{ marginTop: 10 }}>
+                <div className="step-label" style={{ marginBottom: 4 }}>{capitalize(DIAS[weekday])}</div>
+                <div className="chip-row">
+                  {turnoOptions
+                    .filter((t) => t.weekday === weekday)
+                    .map((t) => (
+                      <div
+                        key={turnoKey(t.weekday, t.slotId)}
+                        className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
+                        onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
+                      >
+                        {t.start}–{t.end}
+                      </div>
+                    ))}
+                </div>
               </div>
             ))}
-          </div>
+          </>
         )}
       </div>
       <div className="card">
