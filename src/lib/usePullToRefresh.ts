@@ -15,6 +15,7 @@ export function usePullToRefresh(onTrigger: () => void, disabled = false) {
   const [pullDistance, setPullDistance] = useState(0);
   const startY = useRef<number | null>(null);
   const active = useRef(false);
+  const startedInsideScrollable = useRef(false);
 
   useEffect(() => {
     if (disabled) return;
@@ -23,11 +24,15 @@ export function usePullToRefresh(onTrigger: () => void, disabled = false) {
       if (window.scrollY > 0) return;
       const target = e.target as HTMLElement;
       if (target.closest(".modal-backdrop")) return;
+      // El chat (y cualquier otra lista con su propio scroll) tiene que poder scrollear para
+      // arriba/abajo sin que el gesto de refrescar la página se lo pise en el medio.
+      startedInsideScrollable.current = !!target.closest(".chat-messages");
       startY.current = e.touches[0].clientY;
       active.current = true;
     }
     function onTouchMove(e: TouchEvent) {
       if (!active.current || startY.current === null) return;
+      if (startedInsideScrollable.current) return;
       if (window.scrollY > 0) {
         active.current = false;
         setPullDistance(0);

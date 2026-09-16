@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { sendChatMessageAction } from "@/lib/actions/chat";
-import { EmojiPicker } from "@/components/shared/EmojiPicker";
-import { GifPicker } from "@/components/shared/GifPicker";
+import { ChatAttachMenu } from "@/components/shared/ChatAttachMenu";
 import { resizeToDataUrl } from "@/lib/resizeImage";
 
 type ChatMsg = {
@@ -150,7 +149,6 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
             }
           }}
         />
-        <EmojiPicker onPick={(e) => setText((t) => t + e)} targetRef={inputRef} />
         <input
           ref={fileInputRef}
           type="file"
@@ -158,11 +156,10 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
           style={{ display: "none" }}
           onChange={(e) => pickImage(e.target.files?.[0])}
         />
-        <button type="button" className="ghost small" onClick={() => fileInputRef.current?.click()}>
-          📷
-        </button>
-        <GifPicker
-          onPick={(url) => {
+        <ChatAttachMenu
+          onPickEmoji={(e) => setText((t) => t + e)}
+          onPickPhoto={() => fileInputRef.current?.click()}
+          onPickGif={(url) => {
             setPendingGif(url);
             setPendingImage(null);
           }}

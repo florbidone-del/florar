@@ -1,21 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-
-const EMOJIS = [
-  "😀", "😊", "😍", "🥰", "😂", "😅", "🤔", "😉", "😎", "🙌",
-  "👏", "👍", "🙏", "💪", "✨", "🔥", "🎉", "❤️", "💜", "🧡",
-  "🏺", "🎨", "🖌️", "🧑‍🎨", "🌸", "🌿", "☀️", "🌙", "⭐", "✅",
-  "❌", "⏰", "📅", "💬", "📸", "👋", "🥲", "😴", "🫶", "🤝",
-  "😇", "🤩", "🥳", "🤗", "😌", "🙃", "😬", "🤷", "🙋", "👀",
-  "💥", "💦", "🌟", "🌺", "🌻", "🍃", "🐣", "🦋", "🌈", "❄️",
-  "🧉", "☕", "🍰", "🍫", "🎂", "🍓", "🎈", "🎁", "🏆", "📌",
-  "🔔", "💯", "🪴", "🕯️", "🧵", "🧱", "🪵", "🐶", "🐱", "🐝",
-  "🙈", "🙉", "🙊", "💫", "🌊", "🍀", "🌼", "🌷", "🧺", "🖼️",
-  "💛", "💚", "💙", "🩷", "🤍", "🖤", "🤎", "💗", "💖", "💘",
-  "🤣", "😜", "😝", "🤪", "🫠", "🥴", "🤯", "🥸", "🫡", "🤭",
-  "🍕", "🍔", "🍟", "🌮", "🍦", "🍩", "🥐", "🧁", "🍉", "🍣",
-];
+import { EmojiGrid } from "@/components/shared/EmojiGrid";
 
 const PANEL_WIDTH = 210;
 
@@ -58,19 +44,12 @@ export function EmojiPicker({
       </button>
       {open && (
         <div className={`emoji-picker-panel ${alignRight ? "align-right" : ""}`}>
-          {EMOJIS.map((e) => (
-            <button
-              type="button"
-              key={e}
-              className="emoji-picker-item"
-              onClick={() => {
-                onPick(e);
-                targetRef?.current?.focus();
-              }}
-            >
-              {e}
-            </button>
-          ))}
+          <EmojiGrid
+            onPick={(e) => {
+              onPick(e);
+              targetRef?.current?.focus();
+            }}
+          />
         </div>
       )}
     </div>
