@@ -101,9 +101,12 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
   // turno; si no, solo de los turnos que tiene asignados — y nunca cuenta sus propios mensajes.
   const me = admins.find((a) => a.username === username);
   let latestChatMsg: { createdAt: Date } | null = null;
+  // authorAdminUsername es null en los mensajes de estudiantes — "NOT: { authorAdminUsername: username }"
+  // los excluye a todos (NULL != username no es TRUE en SQL), por eso se arma como OR explícito.
+  const notMe = { OR: [{ authorAdminUsername: null }, { authorAdminUsername: { not: username } }] };
   if (me?.isMainProfe) {
     latestChatMsg = await prisma.chatMessage.findFirst({
-      where: { NOT: { authorAdminUsername: username } },
+      where: notMe,
       orderBy: { createdAt: "desc" },
       select: { createdAt: true },
     });
@@ -112,8 +115,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     if (myTurnos.length > 0) {
       latestChatMsg = await prisma.chatMessage.findFirst({
         where: {
-          NOT: { authorAdminUsername: username },
-          OR: myTurnos.map((t) => ({ weekday: t.weekday, slotId: t.slotId })),
+          AND: [notMe, { OR: myTurnos.map((t) => ({ weekday: t.weekday, slotId: t.slotId })) }],
         },
         orderBy: { createdAt: "desc" },
         select: { createdAt: true },

@@ -217,10 +217,12 @@ export async function buildStudentPanelData(
         select: { avisosSeenAt: true, chatSeenAt: true, blogSeenAt: true },
       }),
       prisma.chatMessage.findFirst({
+        // authorStudentId es null en los mensajes de las profes — "NOT: { authorStudentId: studentId }"
+        // los excluye a todos (NULL != studentId no es TRUE en SQL), por eso se arma como OR explícito.
         where: {
           weekday: student.defaultWeekday,
           slotId: student.defaultSlotId,
-          NOT: { authorStudentId: studentId },
+          OR: [{ authorStudentId: null }, { authorStudentId: { not: studentId } }],
         },
         orderBy: { createdAt: "desc" },
         select: { createdAt: true },
