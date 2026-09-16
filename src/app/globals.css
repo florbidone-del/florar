@@ -237,6 +237,16 @@ label:first-child{margin-top:0;}
 }
 .center-stage h1{font-size:1.8rem;}
 .center-stage p{color:var(--ink-soft); max-width:32ch;}
+.landing-logo{width:160px; height:160px; border-radius:50%; box-shadow:0 14px 40px -14px rgba(0,0,0,0.35);}
+.sr-only{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
 .landing-buttons{
   display:flex;
   flex-direction:column;
