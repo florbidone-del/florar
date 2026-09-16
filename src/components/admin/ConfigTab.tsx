@@ -17,7 +17,7 @@ import {
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
 import { resetAllTutorialsAction, setMyDisplayNameAction } from "@/lib/actions/auth";
-import { saveStudentInfoAction, clearOldImagesAction } from "@/lib/actions/content";
+import { saveStudentInfoAction, clearOldImagesAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
 
 export function ConfigTab({
   bundle,
@@ -57,6 +57,9 @@ export function ConfigTab({
   const [imagesBeforeDate, setImagesBeforeDate] = useState("");
   const [clearingImages, setClearingImages] = useState(false);
   const [clearResult, setClearResult] = useState<string | null>(null);
+  const [loadingOfficial, setLoadingOfficial] = useState(false);
+  const [officialResult, setOfficialResult] = useState<string | null>(null);
+  const currentYear = new Date().getFullYear();
 
   async function saveStudentInfo() {
     setSavingInfo(true);
@@ -97,6 +100,23 @@ export function ConfigTab({
       return;
     }
     setClearResult(`Listo — se borraron ${res.cleared} fotos.`);
+    router.refresh();
+  }
+
+  async function loadOfficial() {
+    setLoadingOfficial(true);
+    setOfficialResult(null);
+    const res = await loadOfficialHolidaysAction([currentYear]);
+    setLoadingOfficial(false);
+    if ("error" in res) {
+      setOfficialResult(res.error!);
+      return;
+    }
+    setOfficialResult(
+      res.added === 0
+        ? "Ya estaban todos cargados — no había nada nuevo para agregar."
+        : `Se agregaron ${res.added} feriados nuevos.`
+    );
     router.refresh();
   }
 
@@ -297,6 +317,17 @@ export function ConfigTab({
           {tutorialResetDone && (
             <p className="hint">Listo — la próxima vez que cada alumno o profe entre, va a ver el tutorial de nuevo.</p>
           )}
+
+          <label style={{ marginTop: 18 }}>Feriados</label>
+          <p className="hint" style={{ marginTop: 0 }}>
+            Trae los feriados nacionales de {currentYear} desde la fuente oficial (api.argentinadatos.com),
+            más el 25 de julio, fijo del taller. No pisa los que ya tengas cargados — podés apretarlo
+            todos los años sin duplicar nada.
+          </p>
+          <button className="ghost block" disabled={loadingOfficial} onClick={loadOfficial}>
+            {loadingOfficial ? "Cargando…" : "Cargar los feriados de este año"}
+          </button>
+          {officialResult && <p className="hint">{officialResult}</p>}
 
           <label style={{ marginTop: 18 }}>Fotos de CeramiBlog y bitácoras (antes de esta fecha)</label>
           <input type="date" value={imagesBeforeDate} onChange={(e) => setImagesBeforeDate(e.target.value)} />

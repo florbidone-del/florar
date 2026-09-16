@@ -268,7 +268,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
               myUsername={session.username}
               isMainProfe={isMainProfe}
             />
-            <HolidaysTab holidays={bundle.snapshot.holidays} isMainProfe={isMainProfe} />
+            <HolidaysTab holidays={bundle.snapshot.holidays} />
           </>
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
