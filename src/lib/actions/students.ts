@@ -11,7 +11,7 @@ export async function createStudentAction(input: {
   defaultWeekday: number;
   defaultSlotId: string;
 }): Promise<ActionResult> {
-  const session = await requireProfe();
+  const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
   const name = input.name.trim();
   if (name.length < 2) return { error: "Ingresá el nombre." };

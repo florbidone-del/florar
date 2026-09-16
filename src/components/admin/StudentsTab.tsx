@@ -45,16 +45,21 @@ export function StudentsTab({
   const [payStudentId, setPayStudentId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const myTurnos: Turno[] = snap.config.slots
-    .flatMap((slot) => slot.weekdays.map((weekday) => ({ weekday, slotId: slot.id, start: slot.start, end: slot.end })))
-    .filter((t) => profeForSlot(snap, t.weekday, t.slotId) === me)
-    .sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start))
-    .map((t) => ({
-      weekday: t.weekday,
-      slotId: t.slotId,
-      label: `${capitalize(DIAS[t.weekday])} ${t.start}–${t.end}`,
-    }));
-  const iTeachSomething = myTurnos.length > 0;
+  function buildTurnos(match?: (weekday: number, slotId: string) => boolean): Turno[] {
+    return snap.config.slots
+      .flatMap((slot) => slot.weekdays.map((weekday) => ({ weekday, slotId: slot.id, start: slot.start, end: slot.end })))
+      .filter((t) => !match || match(t.weekday, t.slotId))
+      .sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start))
+      .map((t) => ({
+        weekday: t.weekday,
+        slotId: t.slotId,
+        label: `${capitalize(DIAS[t.weekday])} ${t.start}–${t.end}`,
+      }));
+  }
+  // La profe principal ve a todo el mundo; el resto, solo a los estudiantes de sus propios turnos.
+  const myTurnos = buildTurnos((weekday, slotId) => profeForSlot(snap, weekday, slotId) === me);
+  const turnoOptions = isMainProfe ? buildTurnos() : myTurnos;
+  const myTurnoKeys = new Set(myTurnos.map((t) => turnoKey(t.weekday, t.slotId)));
   const mk = currentMonthKey();
 
   // Turno de cada estudiante (para agrupar cuando el filtro es "Todos"), en orden cronológico.
@@ -67,10 +72,14 @@ export function StudentsTab({
     return weekday * 10000 + (slot ? Number(slot.start.replace(":", "")) : 0);
   }
 
+  const baseStudents = isMainProfe
+    ? snap.students
+    : snap.students.filter((s) => myTurnoKeys.has(turnoKey(s.defaultWeekday, s.defaultSlotId)));
+
   const filteredStudents =
     filter === "all"
-      ? snap.students
-      : snap.students.filter((s) => turnoKey(s.defaultWeekday, s.defaultSlotId) === filter);
+      ? baseStudents
+      : baseStudents.filter((s) => turnoKey(s.defaultWeekday, s.defaultSlotId) === filter);
 
   const visibleStudents = [...filteredStudents].sort((a, b) => {
     if (filter === "all") {
@@ -145,27 +154,35 @@ export function StudentsTab({
       )}
       <div className="card">
         <div className="row" style={{ alignItems: "center" }}>
-          <h3 style={{ margin: 0 }}>Estudiantes ({snap.students.length})</h3>
+          <h3 style={{ margin: 0 }}>Estudiantes ({baseStudents.length})</h3>
         </div>
-        {iTeachSomething && (
-          <div className="chip-row" style={{ marginTop: 10 }}>
-            <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
-              Todos
-            </div>
-            {myTurnos.map((t) => (
-              <div
-                key={turnoKey(t.weekday, t.slotId)}
-                className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
-                onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
-              >
+        {isMainProfe ? (
+          <select style={{ marginTop: 10 }} value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="all">Todos</option>
+            {turnoOptions.map((t) => (
+              <option key={turnoKey(t.weekday, t.slotId)} value={turnoKey(t.weekday, t.slotId)}>
                 {t.label}
-              </div>
+              </option>
             ))}
-          </div>
+          </select>
+        ) : (
+          turnoOptions.length > 0 && (
+            <div className="chip-row" style={{ marginTop: 10 }}>
+              <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
+                Todos
+              </div>
+              {turnoOptions.map((t) => (
+                <div
+                  key={turnoKey(t.weekday, t.slotId)}
+                  className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
+                  onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
+                >
+                  {t.label}
+                </div>
+              ))}
+            </div>
+          )
         )}
-        <button className="primary block" style={{ marginTop: 10 }} onClick={() => setFormStudentId("new")}>
-          + Agregar estudiante
-        </button>
       </div>
       <div className="card">
         {visibleStudents.length === 0 ? (
@@ -280,6 +297,11 @@ export function StudentsTab({
           />
         );
       })()}
+      {isMainProfe && (
+        <button type="button" className="fab" aria-label="Agregar estudiante" title="Agregar estudiante" onClick={() => setFormStudentId("new")}>
+          +
+        </button>
+      )}
     </>
   );
 }

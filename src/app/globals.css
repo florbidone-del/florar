@@ -163,6 +163,26 @@ button.block{width:100%;}
   transition:opacity 0.15s;
 }
 .pull-refresh-indicator .spinning{animation:florar-spin 0.7s linear infinite;}
+.fab{
+  position:fixed;
+  right:max(20px, calc((100vw - 640px) / 2 + 20px));
+  bottom:max(20px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+  z-index:40;
+  width:56px;
+  height:56px;
+  padding:0;
+  border-radius:50%;
+  background:var(--glaze);
+  border-color:var(--glaze-dark);
+  color:#fff;
+  font-size:1.8rem;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 10px 30px -8px rgba(0,0,0,0.45);
+}
+.fab:active{transform:scale(0.96);}
 input, select, textarea{
   font-family:var(--font-work-sans), sans-serif;
   font-size:1rem;
