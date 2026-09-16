@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { sendChatMessageAction } from "@/lib/actions/chat";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { GifPicker } from "@/components/shared/GifPicker";
+import { resizeToDataUrl } from "@/lib/resizeImage";
 
 type ChatMsg = {
   id: string;
@@ -11,6 +13,8 @@ type ChatMsg = {
   authorStudentId: string | null;
   authorAdminUsername: string | null;
   body: string;
+  attachmentUrl: string | null;
+  attachmentType: string | null;
   createdAt: string;
 };
 
@@ -29,8 +33,11 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
   const [text, setText] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [pendingGif, setPendingGif] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     try {
@@ -57,17 +64,36 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
 
   async function send() {
     const body = text.trim();
-    if (!body || pending) return;
+    if ((!body && !pendingImage && !pendingGif) || pending) return;
     setPending(true);
     setError("");
-    const res = await sendChatMessageAction({ weekday, slotId, body });
+    const res = await sendChatMessageAction({
+      weekday,
+      slotId,
+      body,
+      imageData: pendingImage,
+      gifUrl: pendingGif,
+    });
     setPending(false);
     if ("error" in res) {
       setError(res.error!);
       return;
     }
     setText("");
+    setPendingImage(null);
+    setPendingGif(null);
     load();
+  }
+
+  async function pickImage(file: File | undefined) {
+    if (!file) return;
+    setError("");
+    try {
+      setPendingImage(await resizeToDataUrl(file));
+      setPendingGif(null);
+    } catch {
+      setError("No se pudo leer esa imagen.");
+    }
   }
 
   function isMine(m: ChatMsg) {
@@ -87,7 +113,8 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
           messages.map((m) => (
             <div key={m.id} className={`chat-bubble ${isMine(m) ? "mine" : ""}`}>
               <div className="chat-author">{m.authorName}</div>
-              <div>{m.body}</div>
+              {m.attachmentUrl && <img src={m.attachmentUrl} alt="" className="chat-attachment" />}
+              {m.body && <div>{m.body}</div>}
               <div className="chat-time">{fmtTime(m.createdAt)}</div>
             </div>
           ))
@@ -95,6 +122,21 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
         <div ref={bottomRef} />
       </div>
       {error && <p className="err">{error}</p>}
+      {(pendingImage || pendingGif) && (
+        <div className="chat-pending-attachment">
+          <img src={pendingImage || pendingGif || ""} alt="" />
+          <button
+            type="button"
+            className="ghost small"
+            onClick={() => {
+              setPendingImage(null);
+              setPendingGif(null);
+            }}
+          >
+            quitar
+          </button>
+        </div>
+      )}
       <div className="chat-input-row">
         <input
           ref={inputRef}
@@ -109,7 +151,28 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
           }}
         />
         <EmojiPicker onPick={(e) => setText((t) => t + e)} targetRef={inputRef} />
-        <button type="button" className="primary" disabled={pending || !text.trim()} onClick={send}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => pickImage(e.target.files?.[0])}
+        />
+        <button type="button" className="ghost small" onClick={() => fileInputRef.current?.click()}>
+          📷
+        </button>
+        <GifPicker
+          onPick={(url) => {
+            setPendingGif(url);
+            setPendingImage(null);
+          }}
+        />
+        <button
+          type="button"
+          className="primary"
+          disabled={pending || (!text.trim() && !pendingImage && !pendingGif)}
+          onClick={send}
+        >
           Enviar
         </button>
       </div>

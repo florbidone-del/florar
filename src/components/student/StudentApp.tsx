@@ -13,6 +13,7 @@ import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { StudentBitacoraTab } from "@/components/student/StudentBitacoraTab";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { PostInteractions } from "@/components/shared/PostInteractions";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
 import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 import { fmtLong } from "@/lib/domain";
@@ -399,6 +400,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                     <Linkify text={p.body} />
                   </p>
                 )}
+                <PostInteractions
+                  postType="blog"
+                  postId={p.id}
+                  likedByMe={p.likedByMe}
+                  likeCount={p.likeCount}
+                  comments={p.comments}
+                />
               </div>
             ))
           )}

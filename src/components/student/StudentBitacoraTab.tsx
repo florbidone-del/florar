@@ -10,6 +10,7 @@ import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { NewItemCard } from "@/components/shared/NewItemCard";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { PostInteractions } from "@/components/shared/PostInteractions";
 import { addStudentPostAction, removeStudentPostAction } from "@/lib/actions/studentPosts";
 import type { StudentPanelData } from "@/lib/views/student";
 
@@ -108,6 +109,13 @@ export function StudentBitacoraTab({
               <button className="ghost" onClick={() => remove(p.id)}>
                 quitar
               </button>
+              <PostInteractions
+                postType="studentpost"
+                postId={p.id}
+                likedByMe={p.likedByMe}
+                likeCount={p.likeCount}
+                comments={p.comments}
+              />
             </div>
           )}
         />
@@ -133,6 +141,13 @@ export function StudentBitacoraTab({
                   <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
                 </p>
               )}
+              <PostInteractions
+                postType="studentpost"
+                postId={p.id}
+                likedByMe={p.likedByMe}
+                likeCount={p.likeCount}
+                comments={p.comments}
+              />
             </div>
           )}
         />

@@ -1,7 +1,8 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
-import { isoDate, capitalize, type WorkshopSnapshot } from "@/lib/domain";
+import { isoDate, capitalize, DIAS, type WorkshopSnapshot } from "@/lib/domain";
+import { loadInteractions, visibleLikeCount, type CommentDTO } from "@/lib/postInteractionsData";
 
 export type AdminDTO = {
   username: string;
@@ -28,6 +29,9 @@ export type AnnouncementFullDTO = {
   message: string;
   authorName: string | null;
   createdAt: string;
+  weekday: number | null;
+  slotId: string | null;
+  turnoLabel: string | null;
 };
 export type BlogPostDTO = {
   id: string;
@@ -38,6 +42,9 @@ export type BlogPostDTO = {
   featured: boolean;
   studentAuthorName: string | null;
   createdAt: string;
+  likedByMe: boolean;
+  likeCount: number | null;
+  comments: CommentDTO[];
 };
 export type StudentPostDTO = {
   id: string;
@@ -49,6 +56,9 @@ export type StudentPostDTO = {
   isPublic: boolean;
   featured: boolean;
   createdAt: string;
+  likedByMe: boolean;
+  likeCount: number | null;
+  comments: CommentDTO[];
 };
 
 export type AdminBundle = {
@@ -118,6 +128,14 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     blog: !!latestBlogAt && (!me?.blogSeenAt || me.blogSeenAt < latestBlogAt),
   };
 
+  // Cualquier profe ve el conteo de likes de cualquier post acá (ya tienen acceso privilegiado
+  // de moderación sobre todo esto) — a diferencia de la vista del alumno, donde queda oculto.
+  const viewerKey = `admin:${username}`;
+  const [blogInteractions, studentPostInteractions] = await Promise.all([
+    loadInteractions("blog", blogPosts.map((p) => p.id), viewerKey, true),
+    loadInteractions("studentpost", studentPosts.map((p) => p.id), viewerKey, true),
+  ]);
+
   // El PIN nunca debe llegar al navegador de ninguna profe (ni siquiera oculto en el HTML/props):
   // con el chat de por medio, tenerlo permitiría loguearse como el alumno y leer sus mensajes.
   const sanitizedSnapshot = { ...snapshot, students: snapshot.students.map((s) => ({ ...s, pin: "" })) };
@@ -144,33 +162,54 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       studentName: r.student.name,
       requestedAt: isoDate(r.requestedAt),
     })),
-    announcements: announcements.map((a) => ({
-      id: a.id,
-      authorName: a.authorUsername ? authorNameByUsername.get(a.authorUsername) || null : null,
-      message: a.message,
-      createdAt: isoDate(a.createdAt),
-    })),
-    blogPosts: blogPosts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      body: p.body,
-      imageData: p.imageData,
-      authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
-      featured: p.featured,
-      studentAuthorName: p.studentAuthorName,
-      createdAt: isoDate(p.createdAt),
-    })),
-    studentPosts: studentPosts.map((p) => ({
-      id: p.id,
-      studentId: p.studentId,
-      studentName: p.student.name,
-      title: p.title,
-      body: p.body,
-      imageData: p.imageData,
-      isPublic: p.isPublic,
-      featured: featuredStudentPostIds.has(p.id),
-      createdAt: isoDate(p.createdAt),
-    })),
+    announcements: announcements.map((a) => {
+      const slot = a.slotId ? snapshot.config.slots.find((s) => s.id === a.slotId) : null;
+      return {
+        id: a.id,
+        authorName: a.authorUsername ? authorNameByUsername.get(a.authorUsername) || null : null,
+        message: a.message,
+        createdAt: isoDate(a.createdAt),
+        weekday: a.weekday,
+        slotId: a.slotId,
+        turnoLabel:
+          a.weekday !== null
+            ? `${capitalize(DIAS[a.weekday])}${slot ? ` ${slot.start}–${slot.end}` : ""}`
+            : null,
+      };
+    }),
+    blogPosts: blogPosts.map((p) => {
+      const interaction = blogInteractions.get(p.id)!;
+      return {
+        id: p.id,
+        title: p.title,
+        body: p.body,
+        imageData: p.imageData,
+        authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
+        featured: p.featured,
+        studentAuthorName: p.studentAuthorName,
+        createdAt: isoDate(p.createdAt),
+        likedByMe: interaction.likedByMe,
+        likeCount: visibleLikeCount(interaction, true, true),
+        comments: interaction.comments,
+      };
+    }),
+    studentPosts: studentPosts.map((p) => {
+      const interaction = studentPostInteractions.get(p.id)!;
+      return {
+        id: p.id,
+        studentId: p.studentId,
+        studentName: p.student.name,
+        title: p.title,
+        body: p.body,
+        imageData: p.imageData,
+        isPublic: p.isPublic,
+        featured: featuredStudentPostIds.has(p.id),
+        createdAt: isoDate(p.createdAt),
+        likedByMe: interaction.likedByMe,
+        likeCount: visibleLikeCount(interaction, true, true),
+        comments: interaction.comments,
+      };
+    }),
     unread,
   };
 }

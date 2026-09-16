@@ -262,7 +262,12 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         {!isOwner && tab === "actividades" && <ActivitiesTab activities={bundle.snapshot.activities} />}
         {!isOwner && tab === "avisos" && (
           <>
-            <AnnouncementsTab announcements={bundle.announcements} />
+            <AnnouncementsTab
+              announcements={bundle.announcements}
+              bundle={bundle}
+              myUsername={session.username}
+              isMainProfe={isMainProfe}
+            />
             <HolidaysTab holidays={bundle.snapshot.holidays} isMainProfe={isMainProfe} />
           </>
         )}

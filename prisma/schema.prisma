@@ -192,10 +192,14 @@ model Activity {
   createdAt   DateTime @default(now())
 }
 
+// weekday+slotId nulos = aviso para todos los alumnos; si están cargados, solo lo ven los
+// alumnos de ese turno puntual (mismo día+horario fijo que usa el chat).
 model Announcement {
   id             String   @id @default(cuid())
   message        String
   authorUsername String?
+  weekday        Int?
+  slotId         String?
   createdAt      DateTime @default(now())
 }
 
@@ -246,9 +250,39 @@ model ChatMessage {
   authorAdminUsername String?
   authorAdmin         Admin?         @relation(fields: [authorAdminUsername], references: [username], onDelete: SetNull)
   body                String
+  // Foto propia (subida a Vercel Blob) o GIF (alojado en Giphy, se guarda el link tal cual).
+  attachmentUrl       String?
+  attachmentType      String?
   createdAt           DateTime       @default(now())
 
   @@index([weekday, slotId, createdAt])
+}
+
+// "Me gusta" de un post de CeramiBlog o de bitácora. postType+postId es una referencia liviana
+// (sin FK) para no tener que declarar una relación separada por cada tipo de post.
+model PostLike {
+  id        String   @id @default(cuid())
+  postType  String
+  postId    String
+  actorKey  String
+  createdAt DateTime @default(now())
+
+  @@unique([postType, postId, actorKey])
+  @@index([postType, postId])
+}
+
+// Comentario de texto simple sobre un post de CeramiBlog o de bitácora — sin hilos, como en
+// Instagram. authorName queda fijo al momento de comentar, igual que en el chat.
+model PostComment {
+  id         String   @id @default(cuid())
+  postType   String
+  postId     String
+  authorName String
+  actorKey   String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([postType, postId, createdAt])
 }
 
 model Notification {

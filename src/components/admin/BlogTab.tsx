@@ -10,6 +10,7 @@ import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { NewItemCard } from "@/components/shared/NewItemCard";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { PostInteractions } from "@/components/shared/PostInteractions";
 import type { BlogPostDTO } from "@/lib/views/admin";
 import { addBlogPostAction, removeBlogPostAction } from "@/lib/actions/content";
 
@@ -107,6 +108,13 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
               <button className="ghost" onClick={() => remove(p.id)}>
                 quitar
               </button>
+              <PostInteractions
+                postType="blog"
+                postId={p.id}
+                likedByMe={p.likedByMe}
+                likeCount={p.likeCount}
+                comments={p.comments}
+              />
             </div>
           )}
         />

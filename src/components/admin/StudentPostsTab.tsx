@@ -6,6 +6,7 @@ import { fmtLong } from "@/lib/domain";
 import { Linkify } from "@/components/shared/Linkify";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
+import { PostInteractions } from "@/components/shared/PostInteractions";
 import {
   setStudentPostPublicAction,
   featureStudentPostAction,
@@ -78,6 +79,13 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
                 Borrar
               </button>
             </div>
+            <PostInteractions
+              postType="studentpost"
+              postId={p.id}
+              likedByMe={p.likedByMe}
+              likeCount={p.likeCount}
+              comments={p.comments}
+            />
           </div>
         )}
       />

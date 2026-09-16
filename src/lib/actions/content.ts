@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { dateInputToUTC } from "@/lib/snapshot";
 import { uploadImageDataUrl, deleteBlobImage } from "@/lib/blobStorage";
+import { deleteInteractionsFor } from "@/lib/postInteractionsData";
 import type { ActionResult } from "@/lib/actions/auth";
 
 export async function addHolidayAction(input: {
@@ -125,12 +126,24 @@ export async function saveStudentInfoAction(message: string): Promise<ActionResu
   return { ok: true };
 }
 
-export async function addAnnouncementAction(message: string): Promise<ActionResult> {
+/** `turno` en null es un aviso para todos los alumnos; si se pasa, solo lo ven los de ese
+ *  día+horario fijo puntual (el mismo turno que usa el chat). */
+export async function addAnnouncementAction(
+  message: string,
+  turno?: { weekday: number; slotId: string } | null
+): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
   const trimmed = message.trim();
   if (!trimmed) return { error: "Escribí un mensaje." };
-  await prisma.announcement.create({ data: { message: trimmed, authorUsername: session.username } });
+  await prisma.announcement.create({
+    data: {
+      message: trimmed,
+      authorUsername: session.username,
+      weekday: turno?.weekday ?? null,
+      slotId: turno?.slotId ?? null,
+    },
+  });
   return { ok: true };
 }
 
@@ -178,6 +191,7 @@ export async function removeBlogPostAction(id: string): Promise<ActionResult> {
   if (!session) return { error: "No autorizado." };
   const post = await prisma.blogPost.findUnique({ where: { id }, select: { imageData: true } });
   await deleteBlobImage(post?.imageData);
+  await deleteInteractionsFor("blog", id);
   await prisma.blogPost.deleteMany({ where: { id } });
   return { ok: true };
 }

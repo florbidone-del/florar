@@ -34,6 +34,8 @@ export async function GET(
       authorStudentId: m.authorStudentId,
       authorAdminUsername: m.authorAdminUsername,
       body: m.body,
+      attachmentUrl: m.attachmentUrl,
+      attachmentType: m.attachmentType,
       createdAt: m.createdAt.toISOString(),
     })),
   });

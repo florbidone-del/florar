@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
 import { requireProfe } from "@/lib/authz";
 import { uploadImageDataUrl, duplicateBlobImage, deleteBlobImage } from "@/lib/blobStorage";
+import { deleteInteractionsFor } from "@/lib/postInteractionsData";
 import type { ActionResult } from "@/lib/actions/auth";
 
 /** Publica en la bitácora personal del alumno logueado — arranca privada (solo la ve él/ella y
@@ -47,6 +48,7 @@ export async function removeStudentPostAction(id: string): Promise<ActionResult>
   const where = student ? { id, studentId: student.studentId } : { id };
   const post = await prisma.studentPost.findFirst({ where, select: { imageData: true } });
   await deleteBlobImage(post?.imageData);
+  await deleteInteractionsFor("studentpost", id);
   await prisma.studentPost.deleteMany({ where });
   return { ok: true };
 }

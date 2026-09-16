@@ -28,6 +28,7 @@ import {
   type WorkshopSnapshot,
   type SessionRow,
 } from "@/lib/domain";
+import { loadInteractions, visibleLikeCount, type CommentDTO } from "@/lib/postInteractionsData";
 
 export type CalendarDaySlot = { id: string; start: string; end: string; occ: number };
 export type CalendarDay = {
@@ -86,6 +87,9 @@ export type StudentPanelData = {
     authorName: string | null;
     featured: boolean;
     studentAuthorName: string | null;
+    likedByMe: boolean;
+    likeCount: number | null;
+    comments: CommentDTO[];
   }[];
   myPosts: {
     id: string;
@@ -94,6 +98,9 @@ export type StudentPanelData = {
     imageData: string | null;
     date: string;
     isPublic: boolean;
+    likedByMe: boolean;
+    likeCount: number | null;
+    comments: CommentDTO[];
   }[];
   communityPosts: {
     id: string;
@@ -102,6 +109,9 @@ export type StudentPanelData = {
     body: string;
     imageData: string | null;
     date: string;
+    likedByMe: boolean;
+    likeCount: number | null;
+    comments: CommentDTO[];
   }[];
   activitiesThisMonth: { title: string; description: string | null; range: string }[];
   calendar: CalendarDay[];
@@ -220,7 +230,12 @@ export async function buildStudentPanelData(
   const authorNameByUsername = new Map(
     admins.map((a) => [a.username, a.displayName || capitalize(a.username)])
   );
+  // Un aviso con turno cargado (weekday+slotId) solo es para los alumnos de ese turno puntual;
+  // sin turno cargado, es para todos.
+  const forMyTurno = (a: { weekday: number | null; slotId: string | null }) =>
+    a.weekday === null || (a.weekday === student.defaultWeekday && a.slotId === student.defaultSlotId);
   const announcements = allAnnouncements
+    .filter(forMyTurno)
     .map((a) => ({
       id: a.id,
       date: isoDate(a.createdAt),
@@ -231,43 +246,69 @@ export async function buildStudentPanelData(
     .slice(-8)
     .reverse();
   const latestVisibleAvisoAt = allAnnouncements
+    .filter(forMyTurno)
     .filter((a) => daysSince(isoDate(a.createdAt)) <= snap.config.announcementVisibleDays)
     .at(-1)?.createdAt;
+
+  const viewerKey = `student:${studentId}`;
+  const [blogInteractions, studentPostInteractions] = await Promise.all([
+    loadInteractions("blog", allBlogPosts.map((p) => p.id), viewerKey, false),
+    loadInteractions("studentpost", allStudentPosts.map((p) => p.id), viewerKey, false),
+  ]);
   const unread = {
     avisos: !!latestVisibleAvisoAt && (!seenAt?.avisosSeenAt || seenAt.avisosSeenAt < latestVisibleAvisoAt),
     chat: !!latestChatMsg && (!seenAt?.chatSeenAt || seenAt.chatSeenAt < latestChatMsg.createdAt),
     blog: !!allBlogPosts[0] && (!seenAt?.blogSeenAt || seenAt.blogSeenAt < allBlogPosts[0].createdAt),
   };
-  const blogPosts = allBlogPosts.map((p) => ({
-    id: p.id,
-    title: p.title,
-    body: p.body,
-    imageData: p.imageData,
-    date: isoDate(p.createdAt),
-    authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
-    featured: p.featured,
-    studentAuthorName: p.studentAuthorName,
-  }));
+  const blogPosts = allBlogPosts.map((p) => {
+    const interaction = blogInteractions.get(p.id)!;
+    const isOwner = !!p.authorUsername && `admin:${p.authorUsername}` === viewerKey;
+    return {
+      id: p.id,
+      title: p.title,
+      body: p.body,
+      imageData: p.imageData,
+      date: isoDate(p.createdAt),
+      authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
+      featured: p.featured,
+      studentAuthorName: p.studentAuthorName,
+      likedByMe: interaction.likedByMe,
+      likeCount: visibleLikeCount(interaction, isOwner, false),
+      comments: interaction.comments,
+    };
+  });
   const myPosts = allStudentPosts
     .filter((p) => p.studentId === studentId)
-    .map((p) => ({
-      id: p.id,
-      title: p.title,
-      body: p.body,
-      imageData: p.imageData,
-      date: isoDate(p.createdAt),
-      isPublic: p.isPublic,
-    }));
+    .map((p) => {
+      const interaction = studentPostInteractions.get(p.id)!;
+      return {
+        id: p.id,
+        title: p.title,
+        body: p.body,
+        imageData: p.imageData,
+        date: isoDate(p.createdAt),
+        isPublic: p.isPublic,
+        likedByMe: interaction.likedByMe,
+        likeCount: visibleLikeCount(interaction, true, false),
+        comments: interaction.comments,
+      };
+    });
   const communityPosts = allStudentPosts
     .filter((p) => p.isPublic && p.studentId !== studentId)
-    .map((p) => ({
-      id: p.id,
-      studentName: snap.students.find((s) => s.id === p.studentId)?.name || "?",
-      title: p.title,
-      body: p.body,
-      imageData: p.imageData,
-      date: isoDate(p.createdAt),
-    }));
+    .map((p) => {
+      const interaction = studentPostInteractions.get(p.id)!;
+      return {
+        id: p.id,
+        studentName: snap.students.find((s) => s.id === p.studentId)?.name || "?",
+        title: p.title,
+        body: p.body,
+        imageData: p.imageData,
+        date: isoDate(p.createdAt),
+        likedByMe: interaction.likedByMe,
+        likeCount: visibleLikeCount(interaction, false, false),
+        comments: interaction.comments,
+      };
+    });
 
   return {
     studioName: snap.config.studioName,
