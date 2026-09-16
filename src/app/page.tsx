@@ -16,7 +16,7 @@ export default async function LandingPage() {
       <p>Turnos, avisos y pagos del taller, en un solo lugar.</p>
       <div className="landing-buttons">
         <Link href="/alumno">
-          <button className="primary block">Soy alumno/a</button>
+          <button className="primary block">Soy alumna/o</button>
         </Link>
         <Link href="/profe">
           <button className="ghost block">Soy profe</button>
