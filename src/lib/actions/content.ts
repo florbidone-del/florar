@@ -167,3 +167,24 @@ export async function removeBlogPostAction(id: string): Promise<ActionResult> {
   await prisma.blogPost.deleteMany({ where: { id } });
   return { ok: true };
 }
+
+/** Borra solo la foto (no el texto ni la fecha) de los posts de CeramiBlog y bitácoras
+ *  anteriores a `before` — para liberar espacio después de exportarlas a un .zip. */
+export async function clearOldImagesAction(before: string): Promise<ActionResult & { cleared?: number }> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  if (!before) return { error: "Elegí una fecha límite." };
+  const beforeDate = new Date(`${before}T23:59:59.999Z`);
+
+  const [blogResult, postResult] = await Promise.all([
+    prisma.blogPost.updateMany({
+      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
+      data: { imageData: null },
+    }),
+    prisma.studentPost.updateMany({
+      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
+      data: { imageData: null },
+    }),
+  ]);
+  return { ok: true, cleared: blogResult.count + postResult.count };
+}

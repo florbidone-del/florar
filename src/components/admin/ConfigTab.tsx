@@ -17,7 +17,7 @@ import {
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
 import { resetAllTutorialsAction, setMyDisplayNameAction } from "@/lib/actions/auth";
-import { saveStudentInfoAction } from "@/lib/actions/content";
+import { saveStudentInfoAction, clearOldImagesAction } from "@/lib/actions/content";
 
 export function ConfigTab({
   bundle,
@@ -54,6 +54,9 @@ export function ConfigTab({
   const [displayName, setDisplayName] = useState(me?.displayName || "");
   const displayNameInputRef = useRef<HTMLInputElement>(null);
   const [savingDisplayName, setSavingDisplayName] = useState(false);
+  const [imagesBeforeDate, setImagesBeforeDate] = useState("");
+  const [clearingImages, setClearingImages] = useState(false);
+  const [clearResult, setClearResult] = useState<string | null>(null);
 
   async function saveStudentInfo() {
     setSavingInfo(true);
@@ -75,6 +78,26 @@ export function ConfigTab({
     await resetAllTutorialsAction();
     setResettingTutorial(false);
     setTutorialResetDone(true);
+  }
+
+  async function clearOldImages() {
+    if (!imagesBeforeDate) return;
+    if (
+      !confirm(
+        `¿Seguro? Esto borra para siempre las fotos de los posts anteriores al ${imagesBeforeDate} (el texto, título y fecha quedan igual). Asegurate de haber descargado el .zip antes.`
+      )
+    )
+      return;
+    setClearingImages(true);
+    setClearResult(null);
+    const res = await clearOldImagesAction(imagesBeforeDate);
+    setClearingImages(false);
+    if ("error" in res) {
+      setClearResult(res.error!);
+      return;
+    }
+    setClearResult(`Listo — se borraron ${res.cleared} fotos.`);
+    router.refresh();
   }
 
   async function saveRules() {
@@ -274,6 +297,28 @@ export function ConfigTab({
           {tutorialResetDone && (
             <p className="hint">Listo — la próxima vez que cada alumno o profe entre, va a ver el tutorial de nuevo.</p>
           )}
+
+          <label style={{ marginTop: 18 }}>Fotos de CeramiBlog y bitácoras (antes de esta fecha)</label>
+          <input type="date" value={imagesBeforeDate} onChange={(e) => setImagesBeforeDate(e.target.value)} />
+          <p className="hint">
+            Las fotos son lo que más pesa en la base. Dejá la fecha vacía para descargar todas, o
+            elegí una para descargar y después borrar solo las más viejas — el texto, título y
+            fecha de esos posts quedan igual, solo se saca la imagen.
+          </p>
+          <a href={`/api/export/images${imagesBeforeDate ? `?before=${imagesBeforeDate}` : ""}`}>
+            <button className="ghost block" style={{ marginTop: 4 }}>
+              Descargar fotos (.zip)
+            </button>
+          </a>
+          <button
+            className="danger block"
+            style={{ marginTop: 8 }}
+            disabled={!imagesBeforeDate || clearingImages}
+            onClick={clearOldImages}
+          >
+            Ya las descargué — borrar esas fotos de la base
+          </button>
+          {clearResult && <p className="hint">{clearResult}</p>}
         </Collapsible>
       )}
     </>
