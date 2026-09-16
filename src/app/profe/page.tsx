@@ -4,6 +4,7 @@ import { loadConfig } from "@/lib/snapshot";
 import { prisma } from "@/lib/prisma";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { OwnerSetupForm } from "@/components/admin/OwnerSetupForm";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 
 export default async function ProfeLoginPage() {
   const session = await getSession();
@@ -14,7 +15,15 @@ export default async function ProfeLoginPage() {
   const adminCount = await prisma.admin.count();
 
   if (adminCount === 0) {
-    return <OwnerSetupForm studioName={config.studioName} />;
+    return (
+      <PullToRefresh>
+        <OwnerSetupForm studioName={config.studioName} />
+      </PullToRefresh>
+    );
   }
-  return <AdminLoginForm studioName={config.studioName} />;
+  return (
+    <PullToRefresh>
+      <AdminLoginForm studioName={config.studioName} />
+    </PullToRefresh>
+  );
 }

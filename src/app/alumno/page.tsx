@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { loadConfig } from "@/lib/snapshot";
 import { StudentAuthForm } from "@/components/student/StudentAuthForm";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
 
 export default async function AlumnoLoginPage() {
   const session = await getSession();
@@ -9,5 +10,9 @@ export default async function AlumnoLoginPage() {
   if (session?.kind === "admin") redirect("/profe/panel");
 
   const config = await loadConfig();
-  return <StudentAuthForm studioName={config.studioName} />;
+  return (
+    <PullToRefresh>
+      <StudentAuthForm studioName={config.studioName} />
+    </PullToRefresh>
+  );
 }
