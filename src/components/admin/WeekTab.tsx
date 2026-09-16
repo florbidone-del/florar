@@ -5,7 +5,7 @@ import {
   DIAS_CORTO,
   addDays,
   capitalize,
-  fmtLong,
+  fmtShort,
   isHoliday,
   mondayOf,
   pad,
@@ -36,8 +36,8 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
         </button>
       </div>
       <div className="card" style={{ overflowX: "auto" }}>
-        <h3>
-          {fmtLong(week[0])} — {fmtLong(week[5])}
+        <h3 className="week-range">
+          {fmtShort(week[0])} — {fmtShort(week[5])}
         </h3>
         <table>
           <tbody>

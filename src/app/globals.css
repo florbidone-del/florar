@@ -338,7 +338,8 @@ th.row-head.slot-time{
   padding:8px 4px;
   line-height:1.3;
 }
-th.row-head.slot-time span{display:block;}
+th.row-head.slot-time span{display:block; white-space:nowrap;}
+.week-range{white-space:nowrap;}
 .slot-time-sep{font-size:0.62rem; font-weight:400; color:var(--ink-soft); font-family:var(--font-work-sans), sans-serif;}
 td.holiday{background:var(--oxide-soft);}
 .occ-count{font-family:var(--font-fraunces), serif; font-size:1.1rem;}
