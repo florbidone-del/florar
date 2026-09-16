@@ -29,10 +29,10 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
     <>
       <div className="row" style={{ marginBottom: 12 }}>
         <button className="ghost" onClick={() => setWeekBase(addDays(weekBase, -7))}>
-          ← semana anterior
+          ← anterior
         </button>
         <button className="ghost" onClick={() => setWeekBase(addDays(weekBase, 7))}>
-          semana siguiente →
+          siguiente →
         </button>
       </div>
       <div className="card" style={{ overflowX: "auto" }}>
