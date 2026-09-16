@@ -59,7 +59,7 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
         <h3>{editingId ? "Editar actividad" : "Marcar una actividad especial"}</h3>
         <p className="muted">
           Puede durar un solo día, una semana o lo que necesites — aparece marcada en el calendario de
-          todos los alumnos durante todo ese rango, sin afectar cupos ni clases normales.
+          todos los estudiantes durante todo ese rango, sin afectar cupos ni clases normales.
         </p>
         <label>Título / temática</label>
         <input

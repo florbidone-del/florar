@@ -47,7 +47,7 @@ export function StudentFormModal({
 
   return (
     <Modal onClose={onClose}>
-      <h3>{editing ? "Editar alumno" : "Nuevo alumno"}</h3>
+      <h3>{editing ? "Editar estudiante" : "Nuevo/a estudiante"}</h3>
       <label>Nombre y apellido</label>
       <input value={editing ? student?.name : name} disabled={editing} onChange={(e) => setName(e.target.value)} />
       {!editing && (
@@ -60,8 +60,8 @@ export function StudentFormModal({
       {editing && <div className="hint">Usuario: {student?.id}</div>}
       {!editing && (
         <p className="hint">
-          Se crea con el PIN por defecto del taller ({snap.config.defaultStudentPin}) — el alumno va a
-          tener que cambiarlo la primera vez que entre.
+          Se crea con el PIN por defecto del taller ({snap.config.defaultStudentPin}) — el/la estudiante va
+          a tener que cambiarlo la primera vez que entre.
         </p>
       )}
       <div style={{ marginTop: 14 }}>

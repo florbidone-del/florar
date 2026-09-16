@@ -28,7 +28,7 @@ export async function createStudentAction(input: {
   if (!id) {
     return {
       error:
-        'Ya existe un alumno con ese nombre. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").',
+        'Ya existe un/a estudiante con ese nombre. Agregá una inicial extra para diferenciarlo (ej: "Julia Gómez B").',
     };
   }
   const config = await prisma.config.findUniqueOrThrow({ where: { id: 1 } });

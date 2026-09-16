@@ -110,7 +110,7 @@ export function StudentsTab({
       )}
       <div className="card">
         <div className="row" style={{ alignItems: "center" }}>
-          <h3 style={{ margin: 0 }}>Alumnos ({snap.students.length})</h3>
+          <h3 style={{ margin: 0 }}>Estudiantes ({snap.students.length})</h3>
         </div>
         {iTeachSomething && (
           <div className="chip-row" style={{ marginTop: 10 }}>
@@ -123,12 +123,12 @@ export function StudentsTab({
           </div>
         )}
         <button className="primary block" style={{ marginTop: 10 }} onClick={() => setFormStudentId("new")}>
-          + Agregar alumno
+          + Agregar estudiante
         </button>
       </div>
       <div className="card">
         {visibleStudents.length === 0 ? (
-          <p className="muted">No hay alumnos para mostrar acá.</p>
+          <p className="muted">No hay estudiantes para mostrar acá.</p>
         ) : (
           visibleStudents.map((s) => {
             const slot = snap.config.slots.find((x) => x.id === s.defaultSlotId);

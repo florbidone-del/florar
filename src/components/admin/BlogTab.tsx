@@ -54,8 +54,8 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
       <NewItemCard label="Nuevo post" open={showForm} onOpen={() => setShowForm(true)}>
         <h3>Nuevo post</h3>
         <p className="muted">
-          Compartí links, fotos de piezas terminadas, técnicas o ideas — los alumnos lo ven en su pestaña
-          CeramiBlog.
+          Compartí links, fotos de piezas terminadas, técnicas o ideas — los estudiantes lo ven en su
+          pestaña CeramiBlog.
         </p>
         <div className="field" style={{ marginTop: 10 }}>
           <label>Título (opcional)</label>

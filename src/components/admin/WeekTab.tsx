@@ -103,7 +103,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
             })}
           </tbody>
         </table>
-        <p className="hint">Tocá un turno con alumnos para ver quiénes son.</p>
+        <p className="hint">Tocá un turno con estudiantes para ver quiénes son.</p>
       </div>
       {modalCell && (
         <OccupancyModal

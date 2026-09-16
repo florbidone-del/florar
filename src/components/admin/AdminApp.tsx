@@ -29,7 +29,7 @@ function ownerTourSteps(): TourStep[] {
       title: "¡Bienvenida/o!",
       body: (
         <p className="muted">
-          Esta cuenta de dueño/a solo gestiona el equipo docente — no ve turnos, alumnos ni cuotas.
+          Esta cuenta de dueño/a solo gestiona el equipo docente — no ve turnos, estudiantes ni cuotas.
         </p>
       ),
     },
@@ -65,19 +65,19 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "chat",
       body: isMainProfe ? (
         <p className="muted">
-          Un chat por turno entre esos alumnos y su profe. Como sos la profe principal, podés ver y
+          Un chat por turno entre esos estudiantes y su profe. Como sos la profe principal, podés ver y
           participar en el de cualquier turno.
         </p>
       ) : (
-        <p className="muted">Un chat con los alumnos de tu turno — no ven los de otros turnos.</p>
+        <p className="muted">Un chat con los estudiantes de tu turno — no ven los de otros turnos.</p>
       ),
     },
     {
-      title: "Alumnos",
+      title: "Estudiantes",
       focus: "alumnos",
       body: (
         <p className="muted">
-          Alta y baja de alumnos, marcar la cuota como pagada, y ahí mismo aparecen las novedades de
+          Alta y baja de estudiantes, marcar la cuota como pagada, y ahí mismo aparecen las novedades de
           cambios de turno y los pedidos de restablecer PIN.
         </p>
       ),
@@ -87,8 +87,8 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "avisos",
       body: (
         <p className="muted">
-          Publicá avisos para los alumnos y cargá los feriados del taller — un feriado cancela la clase
-          de ese día automáticamente. La información fija (la que no cambia seguido) se mudó a
+          Publicá avisos para los estudiantes y cargá los feriados del taller — un feriado cancela la
+          clase de ese día automáticamente. La información fija (la que no cambia seguido) se mudó a
           Configuración.
         </p>
       ),
@@ -98,7 +98,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "actividades",
       body: (
         <p className="muted">
-          Marcá actividades especiales en el calendario de todos los alumnos, con fechas y material.
+          Marcá actividades especiales en el calendario de todos los estudiantes, con fechas y material.
         </p>
       ),
     },
@@ -108,7 +108,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       body: (
         <p className="muted">
           Compartí links, fotos de piezas o técnicas e ideas — queda en una pestaña propia para los
-          alumnos, separado de los avisos urgentes.
+          estudiantes, separado de los avisos urgentes.
         </p>
       ),
     },
@@ -117,13 +117,13 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "config",
       body: isMainProfe ? (
         <p className="muted">
-          Turnos, información fija para alumnos, tema de colores y, como sos la profe principal, también
-          podés asignar qué profe da cada turno y ajustar las reglas y la cuota del taller.
+          Turnos, información fija para estudiantes, tema de colores y, como sos la profe principal,
+          también podés asignar qué profe da cada turno y ajustar las reglas y la cuota del taller.
         </p>
       ) : (
         <p className="muted">
-          Turnos, información fija para alumnos y tema de colores. La asignación de profes por turno y
-          las reglas/cuota las maneja la profe principal.
+          Turnos, información fija para estudiantes y tema de colores. La asignación de profes por turno
+          y las reglas/cuota las maneja la profe principal.
         </p>
       ),
     },
@@ -132,7 +132,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
 
 const TAB_LABELS: Record<string, string> = {
   semana: "Semana",
-  alumnos: "Alumnos",
+  alumnos: "Estudiantes",
   chat: "Chat",
   actividades: "Actividades",
   avisos: "Avisos",

@@ -479,7 +479,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           </div>
           <p className="hint">
             Esto solo cambia los colores de tu propia app — no afecta lo que ven la profe ni otros
-            alumnos.
+            estudiantes.
           </p>
         </div>
       )}

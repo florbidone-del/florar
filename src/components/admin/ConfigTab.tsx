@@ -76,7 +76,7 @@ export function ConfigTab({
   }
 
   async function resetTutorials() {
-    if (!confirm("¿Reiniciar el tutorial para todas las cuentas (alumnos y profes)?")) return;
+    if (!confirm("¿Reiniciar el tutorial para todas las cuentas (estudiantes y profes)?")) return;
     setResettingTutorial(true);
     await resetAllTutorialsAction();
     setResettingTutorial(false);
@@ -149,7 +149,7 @@ export function ConfigTab({
     <>
       <Collapsible title="Tu nick">
         <p className="muted">
-          Así te van a ver los alumnos en el chat, los avisos y el CeramiBlog, en vez de tu usuario de
+          Así te van a ver los estudiantes en el chat, los avisos y el CeramiBlog, en vez de tu usuario de
           acceso ({myUsername}). Podés agregarle emojis.
         </p>
         <div className="nick-row" style={{ marginTop: 10 }}>
@@ -198,9 +198,9 @@ export function ConfigTab({
         <SlotEditor slots={c.slots} onChanged={() => router.refresh()} />
       </Collapsible>
 
-      <Collapsible title="Información fija para alumnos">
+      <Collapsible title="Información fija para estudiantes">
         <p className="muted">
-          Esto queda siempre visible arriba de todo en el celular del alumno — a diferencia de los
+          Esto queda siempre visible arriba de todo en el celular del/de la estudiante — a diferencia de los
           avisos, no se acumula ni desaparece. Sirve para un link a un PDF, el material del mes, o algo
           que quieras que estén viendo siempre. Como no se toca seguido, vive acá en vez de en Avisos.
         </p>
@@ -218,8 +218,8 @@ export function ConfigTab({
       {isMainProfe && (
         <Collapsible title="Profe a cargo de cada turno">
           <p className="muted">
-            Así los alumnos ven quién les da clase, y cada profe ve solo sus alumnos en la pestaña Alumnos.
-            Opcional.
+            Así los estudiantes ven quién les da clase, y cada profe ve solo sus estudiantes en la pestaña
+            Estudiantes. Opcional.
           </p>
           {profes.length === 0 ? (
             <p className="muted">
@@ -262,8 +262,8 @@ export function ConfigTab({
         <label>Cuota por Mercado Pago</label>
         <input type="number" value={mpFee} onChange={(e) => setMpFee(Number(e.target.value))} />
         <p className="hint">
-          El botón de Mercado Pago siempre cobra el saldo restante: si el alumno ya pagó una parte (por
-          ejemplo en efectivo), solo le cobra la diferencia hasta esta cuota.
+          El botón de Mercado Pago siempre cobra el saldo restante: si el/la estudiante ya pagó una parte
+          (por ejemplo en efectivo), solo le cobra la diferencia hasta esta cuota.
         </p>
         <label>Recargo por pago fuera de fecha (%)</label>
         <input
@@ -272,32 +272,32 @@ export function ConfigTab({
           onChange={(e) => setLateFeePercent(Number(e.target.value))}
         />
         <p className="hint">
-          Pasado el día {paymentWindowEnd} sin pagar, ambas cuotas le aparecen al alumno con este recargo
-          ya sumado.
+          Pasado el día {paymentWindowEnd} sin pagar, ambas cuotas le aparecen al/a la estudiante con este
+          recargo ya sumado.
         </p>
-        <label>Los avisos se muestran a los alumnos durante (días)</label>
+        <label>Los avisos se muestran a los estudiantes durante (días)</label>
         <input
           type="number"
           value={announcementVisibleDays}
           onChange={(e) => setAnnouncementVisibleDays(Number(e.target.value))}
         />
         <p className="hint">
-          Pasados esos días, el aviso deja de aparecer en el home del alumno — pero vos seguís viéndolo en
-          esta pestaña.
+          Pasados esos días, el aviso deja de aparecer en el home del/de la estudiante — pero vos seguís
+          viéndolo en esta pestaña.
         </p>
-        <label>PIN por defecto para alumnos nuevos</label>
+        <label>PIN por defecto para estudiantes nuevos</label>
         <input value={defaultStudentPin} maxLength={4} onChange={(e) => setDefaultStudentPin(e.target.value)} />
         <label>Tu WhatsApp (para avisos rápidos, sin el +, ej: 5491122334455)</label>
         <input placeholder="5491122334455" value={profeWhatsapp} onChange={(e) => setProfeWhatsapp(e.target.value)} />
         <p className="hint">
-          Si lo cargás, cuando un alumno pida restablecer su PIN le va a aparecer un botón para avisarte
-          directo por WhatsApp.
+          Si lo cargás, cuando un/a estudiante pida restablecer su PIN le va a aparecer un botón para
+          avisarte directo por WhatsApp.
         </p>
         <label>Link de cobro de Mercado Pago (general)</label>
         <input placeholder="https://mpago.la/..." value={mpLink} onChange={(e) => setMpLink(e.target.value)} />
         <p className="hint">
           Se usa como respaldo si el cobro automático no está disponible, o como link general para
-          alumnos sin uno personalizado.
+          estudiantes sin uno personalizado.
         </p>
         <button className="primary block" style={{ marginTop: 14 }} disabled={savingRules} onClick={saveRules}>
           Guardar configuración
@@ -310,12 +310,12 @@ export function ConfigTab({
           <a href="/api/export/payments">
             <button className="ghost block">Exportar pagos (Excel)</button>
           </a>
-          <p className="hint">Descarga todos los pagos registrados (alumno, mes, monto, estado, origen y fecha) en un archivo .xlsx.</p>
+          <p className="hint">Descarga todos los pagos registrados (estudiante, mes, monto, estado, origen y fecha) en un archivo .xlsx.</p>
           <button className="ghost block" style={{ marginTop: 14 }} disabled={resettingTutorial} onClick={resetTutorials}>
             Reiniciar tutorial para todos los usuarios
           </button>
           {tutorialResetDone && (
-            <p className="hint">Listo — la próxima vez que cada alumno o profe entre, va a ver el tutorial de nuevo.</p>
+            <p className="hint">Listo — la próxima vez que cada estudiante o profe entre, va a ver el tutorial de nuevo.</p>
           )}
 
           <label style={{ marginTop: 18 }}>Feriados</label>

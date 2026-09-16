@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const snap = await loadWorkshopSnapshot();
   const student = snap.students.find((s) => s.id === session.studentId);
   if (!student) {
-    return NextResponse.json({ error: "Alumno no encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Estudiante no encontrado." }, { status: 404 });
   }
 
   const monthKey = currentMonthKey();

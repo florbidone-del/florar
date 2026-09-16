@@ -88,7 +88,7 @@ export async function GET() {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Pagos");
   sheet.columns = [
-    { header: "Alumno", key: "alumno", width: 26 },
+    { header: "Estudiante", key: "alumno", width: 26 },
     { header: "Usuario", key: "usuario", width: 16 },
     { header: "Mes", key: "mes", width: 10 },
     { header: "Monto", key: "monto", width: 12 },

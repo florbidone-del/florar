@@ -75,7 +75,7 @@ export function AnnouncementsTab({
         <AutoTextarea
           ref={messageRef}
           rows={3}
-          placeholder="Escribí el comunicado para los alumnos…"
+          placeholder="Escribí el comunicado para los estudiantes…"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
@@ -83,7 +83,7 @@ export function AnnouncementsTab({
           <>
             <label>Para</label>
             <select value={turnoKeySel} onChange={(e) => setTurnoKeySel(e.target.value)}>
-              <option value="">Todos los alumnos</option>
+              <option value="">Todos los estudiantes</option>
               {turnos.map((t) => (
                 <option key={turnoKey(t)} value={turnoKey(t)}>
                   Solo {t.label}
