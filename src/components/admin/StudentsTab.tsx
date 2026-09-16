@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   capitalize,
@@ -23,6 +23,12 @@ import {
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
 import { Modal } from "@/components/shared/Modal";
 
+type Turno = { weekday: number; slotId: string; label: string };
+
+function turnoKey(weekday: number, slotId: string) {
+  return `${weekday}_${slotId}`;
+}
+
 export function StudentsTab({
   bundle,
   me,
@@ -34,17 +40,46 @@ export function StudentsTab({
 }) {
   const router = useRouter();
   const snap = bundle.snapshot;
-  const [filter, setFilter] = useState<"all" | "mine">("all");
+  const [filter, setFilter] = useState<string>("all"); // "all" o turnoKey(weekday, slotId)
   const [formStudentId, setFormStudentId] = useState<string | null | "new">(null);
   const [payStudentId, setPayStudentId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const iTeachSomething = snap.slotAssignments.some((sa) => sa.profeUsername === me);
+  const myTurnos: Turno[] = snap.config.slots
+    .flatMap((slot) => slot.weekdays.map((weekday) => ({ weekday, slotId: slot.id, start: slot.start, end: slot.end })))
+    .filter((t) => profeForSlot(snap, t.weekday, t.slotId) === me)
+    .sort((a, b) => a.weekday - b.weekday || a.start.localeCompare(b.start))
+    .map((t) => ({
+      weekday: t.weekday,
+      slotId: t.slotId,
+      label: `${capitalize(DIAS[t.weekday])} ${t.start}–${t.end}`,
+    }));
+  const iTeachSomething = myTurnos.length > 0;
   const mk = currentMonthKey();
 
-  const visibleStudents = snap.students
-    .filter((s) => (filter === "mine" ? profeForSlot(snap, s.defaultWeekday, s.defaultSlotId) === me : true))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  // Turno de cada estudiante (para agrupar cuando el filtro es "Todos"), en orden cronológico.
+  function turnoLabelFor(weekday: number, slotId: string) {
+    const slot = snap.config.slots.find((s) => s.id === slotId);
+    return `${capitalize(DIAS[weekday])}${slot ? ` ${slot.start}–${slot.end}` : ""}`;
+  }
+  function turnoOrder(weekday: number, slotId: string) {
+    const slot = snap.config.slots.find((s) => s.id === slotId);
+    return weekday * 10000 + (slot ? Number(slot.start.replace(":", "")) : 0);
+  }
+
+  const filteredStudents =
+    filter === "all"
+      ? snap.students
+      : snap.students.filter((s) => turnoKey(s.defaultWeekday, s.defaultSlotId) === filter);
+
+  const visibleStudents = [...filteredStudents].sort((a, b) => {
+    if (filter === "all") {
+      const orderDiff =
+        turnoOrder(a.defaultWeekday, a.defaultSlotId) - turnoOrder(b.defaultWeekday, b.defaultSlotId);
+      if (orderDiff !== 0) return orderDiff;
+    }
+    return a.name.localeCompare(b.name);
+  });
 
   async function removeUnpaid(id: string) {
     setBusy(id);
@@ -117,9 +152,15 @@ export function StudentsTab({
             <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
               Todos
             </div>
-            <div className={`chip ${filter === "mine" ? "selected" : ""}`} onClick={() => setFilter("mine")}>
-              Solo los míos
-            </div>
+            {myTurnos.map((t) => (
+              <div
+                key={turnoKey(t.weekday, t.slotId)}
+                className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
+                onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
+              >
+                {t.label}
+              </div>
+            ))}
           </div>
         )}
         <button className="primary block" style={{ marginTop: 10 }} onClick={() => setFormStudentId("new")}>
@@ -130,7 +171,7 @@ export function StudentsTab({
         {visibleStudents.length === 0 ? (
           <p className="muted">No hay estudiantes para mostrar acá.</p>
         ) : (
-          visibleStudents.map((s) => {
+          visibleStudents.map((s, i) => {
             const slot = snap.config.slots.find((x) => x.id === s.defaultSlotId);
             const payment = snap.payments.find(
               (p) => p.studentId === s.id && p.monthKey === mk && p.status === "approved"
@@ -140,8 +181,18 @@ export function StudentsTab({
             const isPaid = paid >= fee;
             const isPartial = paid > 0 && paid < fee;
             const profe = profeForSlot(snap, s.defaultWeekday, s.defaultSlotId);
+            const prev = visibleStudents[i - 1];
+            const showGroupHeader =
+              filter === "all" &&
+              (!prev || turnoKey(prev.defaultWeekday, prev.defaultSlotId) !== turnoKey(s.defaultWeekday, s.defaultSlotId));
             return (
-              <div className="list-item" key={s.id}>
+              <Fragment key={s.id}>
+                {showGroupHeader && (
+                  <div className="roster-group-label" style={{ marginTop: i === 0 ? 0 : 14 }}>
+                    {turnoLabelFor(s.defaultWeekday, s.defaultSlotId)}
+                  </div>
+                )}
+              <div className="list-item">
                 <div>
                   <div style={{ fontWeight: 600 }}>{s.name}</div>
                   <div className="muted">usuario: {s.id}</div>
@@ -191,6 +242,7 @@ export function StudentsTab({
                   </button>
                 </div>
               </div>
+              </Fragment>
             );
           })
         )}
