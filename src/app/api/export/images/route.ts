@@ -4,9 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { requireMainProfe } from "@/lib/authz";
 import { isoDate, slugify } from "@/lib/domain";
 
-function dataUrlToBuffer(dataUrl: string): { buffer: Buffer; ext: string } {
-  const match = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
-  if (!match) return { buffer: Buffer.from(dataUrl, "base64"), ext: "jpg" };
+/** La imagen puede ser una URL de Vercel Blob (lo normal desde la migración) o, para posts viejos
+ *  de antes de eso, una data URL en base64 guardada directo en la base. */
+async function toImageBuffer(imageData: string): Promise<{ buffer: Buffer; ext: string }> {
+  if (imageData.startsWith("http")) {
+    const res = await fetch(imageData);
+    const arrayBuffer = await res.arrayBuffer();
+    const contentType = res.headers.get("content-type") || "image/jpeg";
+    const ext = contentType.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+    return { buffer: Buffer.from(arrayBuffer), ext };
+  }
+  const match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!match) return { buffer: Buffer.from(imageData, "base64"), ext: "jpg" };
   const [, type, base64] = match;
   return { buffer: Buffer.from(base64, "base64"), ext: type === "jpeg" ? "jpg" : type };
 }
@@ -42,13 +51,13 @@ export async function GET(req: NextRequest) {
 
   for (const p of blogPosts) {
     if (!p.imageData) continue;
-    const { buffer, ext } = dataUrlToBuffer(p.imageData);
+    const { buffer, ext } = await toImageBuffer(p.imageData);
     const name = `${isoDate(p.createdAt)}_${slugify(p.title || "post")}_${p.id.slice(-6)}.${ext}`;
     ceramiFolder?.file(name, buffer);
   }
   for (const p of studentPosts) {
     if (!p.imageData) continue;
-    const { buffer, ext } = dataUrlToBuffer(p.imageData);
+    const { buffer, ext } = await toImageBuffer(p.imageData);
     const name = `${isoDate(p.createdAt)}_${slugify(p.student.name)}_${slugify(p.title || "post")}_${p.id.slice(-6)}.${ext}`;
     bitacoraFolder?.file(name, buffer);
   }

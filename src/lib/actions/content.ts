@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { dateInputToUTC } from "@/lib/snapshot";
+import { uploadImageDataUrl, deleteBlobImage } from "@/lib/blobStorage";
 import type { ActionResult } from "@/lib/actions/auth";
 
 export async function addHolidayAction(input: {
@@ -140,7 +141,8 @@ export async function removeAnnouncementAction(id: string): Promise<ActionResult
   return { ok: true };
 }
 
-/** Post de CeramiBlog: texto (con links) y, opcionalmente, una foto ya redimensionada en base64. */
+/** Post de CeramiBlog: texto (con links) y, opcionalmente, una foto — se sube a Vercel Blob y en
+ *  la base solo queda guardado el link, para no inflar la base de datos con el archivo entero. */
 export async function addBlogPostAction(input: {
   title?: string;
   body: string;
@@ -150,11 +152,21 @@ export async function addBlogPostAction(input: {
   if (!session) return { error: "No autorizado." };
   const body = input.body.trim();
   if (!body && !input.imageData) return { error: "Escribí algo o subí una foto." };
+
+  let imageUrl: string | null = null;
+  if (input.imageData) {
+    try {
+      imageUrl = await uploadImageDataUrl(input.imageData, "ceramiblog");
+    } catch {
+      return { error: "No se pudo subir la foto. Probá de nuevo." };
+    }
+  }
+
   await prisma.blogPost.create({
     data: {
       title: input.title?.trim() || null,
       body,
-      imageData: input.imageData || null,
+      imageData: imageUrl,
       authorUsername: session.username,
     },
   });
@@ -164,25 +176,41 @@ export async function addBlogPostAction(input: {
 export async function removeBlogPostAction(id: string): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
+  const post = await prisma.blogPost.findUnique({ where: { id }, select: { imageData: true } });
+  await deleteBlobImage(post?.imageData);
   await prisma.blogPost.deleteMany({ where: { id } });
   return { ok: true };
 }
 
-/** Borra solo la foto (no el texto ni la fecha) de los posts de CeramiBlog y bitácoras
- *  anteriores a `before` — para liberar espacio después de exportarlas a un .zip. */
+/** Borra la foto (no el texto ni la fecha) de los posts de CeramiBlog y bitácoras anteriores a
+ *  `before` — para liberar espacio después de exportarlas a un .zip. Borra también el archivo de
+ *  Vercel Blob, no solo la referencia en la base. */
 export async function clearOldImagesAction(before: string): Promise<ActionResult & { cleared?: number }> {
   const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
   if (!before) return { error: "Elegí una fecha límite." };
   const beforeDate = new Date(`${before}T23:59:59.999Z`);
 
+  const [oldBlogs, oldPosts] = await Promise.all([
+    prisma.blogPost.findMany({
+      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
+      select: { id: true, imageData: true },
+    }),
+    prisma.studentPost.findMany({
+      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
+      select: { id: true, imageData: true },
+    }),
+  ]);
+
+  await Promise.all([...oldBlogs, ...oldPosts].map((p) => deleteBlobImage(p.imageData)));
+
   const [blogResult, postResult] = await Promise.all([
     prisma.blogPost.updateMany({
-      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
+      where: { id: { in: oldBlogs.map((p) => p.id) } },
       data: { imageData: null },
     }),
     prisma.studentPost.updateMany({
-      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
+      where: { id: { in: oldPosts.map((p) => p.id) } },
       data: { imageData: null },
     }),
   ]);
