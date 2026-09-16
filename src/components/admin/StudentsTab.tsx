@@ -156,32 +156,21 @@ export function StudentsTab({
         <div className="row" style={{ alignItems: "center" }}>
           <h3 style={{ margin: 0 }}>Estudiantes ({baseStudents.length})</h3>
         </div>
-        {isMainProfe ? (
-          <select style={{ marginTop: 10 }} value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="all">Todos</option>
-            {turnoOptions.map((t) => (
-              <option key={turnoKey(t.weekday, t.slotId)} value={turnoKey(t.weekday, t.slotId)}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          turnoOptions.length > 0 && (
-            <div className="chip-row" style={{ marginTop: 10 }}>
-              <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
-                Todos
-              </div>
-              {turnoOptions.map((t) => (
-                <div
-                  key={turnoKey(t.weekday, t.slotId)}
-                  className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
-                  onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
-                >
-                  {t.label}
-                </div>
-              ))}
+        {turnoOptions.length > 0 && (
+          <div className="chip-row" style={{ marginTop: 10 }}>
+            <div className={`chip ${filter === "all" ? "selected" : ""}`} onClick={() => setFilter("all")}>
+              Todos
             </div>
-          )
+            {turnoOptions.map((t) => (
+              <div
+                key={turnoKey(t.weekday, t.slotId)}
+                className={`chip ${filter === turnoKey(t.weekday, t.slotId) ? "selected" : ""}`}
+                onClick={() => setFilter(turnoKey(t.weekday, t.slotId))}
+              >
+                {t.label}
+              </div>
+            ))}
+          </div>
         )}
       </div>
       <div className="card">
