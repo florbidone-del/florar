@@ -70,6 +70,7 @@ export type AdminBundle = {
   blogPosts: BlogPostDTO[];
   studentPosts: StudentPostDTO[];
   unread: { avisos: boolean; chat: boolean; blog: boolean };
+  chatUnreadByTurno: Record<string, boolean>;
 };
 
 export async function loadAdminBundle(username: string): Promise<AdminBundle> {
@@ -97,36 +98,43 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
     admins.map((a) => [a.username, a.displayName || capitalize(a.username)])
   );
 
-  // Último mensaje de chat que le puede interesar a esta profe: si es la principal, de cualquier
-  // turno; si no, solo de los turnos que tiene asignados — y nunca cuenta sus propios mensajes.
+  // El chat es por turno (la principal ve varios a la vez), así que lo no-leído también se calcula
+  // por turno: turnos que le interesan a esta profe (todos si es la principal, si no los asignados).
   const me = admins.find((a) => a.username === username);
-  let latestChatMsg: { createdAt: Date } | null = null;
-  // authorAdminUsername es null en los mensajes de estudiantes — "NOT: { authorAdminUsername: username }"
-  // los excluye a todos (NULL != username no es TRUE en SQL), por eso se arma como OR explícito.
-  const notMe = { OR: [{ authorAdminUsername: null }, { authorAdminUsername: { not: username } }] };
-  if (me?.isMainProfe) {
-    latestChatMsg = await prisma.chatMessage.findFirst({
-      where: notMe,
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
-    });
-  } else {
-    const myTurnos = snapshot.slotAssignments.filter((sa) => sa.profeUsername === username);
-    if (myTurnos.length > 0) {
-      latestChatMsg = await prisma.chatMessage.findFirst({
-        where: {
-          AND: [notMe, { OR: myTurnos.map((t) => ({ weekday: t.weekday, slotId: t.slotId })) }],
-        },
-        orderBy: { createdAt: "desc" },
-        select: { createdAt: true },
-      });
+  const turnoKey = (t: { weekday: number; slotId: string }) => `${t.weekday}_${t.slotId}`;
+  const relevantTurnos = me?.isMainProfe
+    ? snapshot.config.slots.flatMap((slot) => slot.weekdays.map((weekday) => ({ weekday, slotId: slot.id })))
+    : snapshot.slotAssignments
+        .filter((sa) => sa.profeUsername === username)
+        .map((sa) => ({ weekday: sa.weekday, slotId: sa.slotId }));
+
+  const chatUnreadByTurno: Record<string, boolean> = {};
+  if (relevantTurnos.length > 0) {
+    // authorAdminUsername es null en los mensajes de estudiantes — "NOT: { authorAdminUsername: username }"
+    // los excluye a todos (NULL != username no es TRUE en SQL), por eso se arma como OR explícito.
+    const [lastMsgsByTurno, seenByTurno] = await Promise.all([
+      prisma.chatMessage.groupBy({
+        by: ["weekday", "slotId"],
+        where: { OR: [{ authorAdminUsername: null }, { authorAdminUsername: { not: username } }] },
+        _max: { createdAt: true },
+      }),
+      prisma.adminChatSeen.findMany({ where: { adminUsername: username } }),
+    ]);
+    const lastMsgMap = new Map(lastMsgsByTurno.map((r) => [turnoKey(r), r._max.createdAt]));
+    const seenMap = new Map(seenByTurno.map((s) => [turnoKey(s), s.seenAt]));
+    for (const t of relevantTurnos) {
+      const key = turnoKey(t);
+      const last = lastMsgMap.get(key);
+      const seen = seenMap.get(key);
+      chatUnreadByTurno[key] = !!last && (!seen || seen < last);
     }
   }
+
   const latestAvisoAt = announcements.at(-1)?.createdAt;
   const latestBlogAt = blogPosts[0]?.createdAt;
   const unread = {
     avisos: !!latestAvisoAt && (!me?.avisosSeenAt || me.avisosSeenAt < latestAvisoAt),
-    chat: !!latestChatMsg && (!me?.chatSeenAt || me.chatSeenAt < latestChatMsg.createdAt),
+    chat: Object.values(chatUnreadByTurno).some(Boolean),
     blog: !!latestBlogAt && (!me?.blogSeenAt || me.blogSeenAt < latestBlogAt),
   };
 
@@ -213,5 +221,6 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       };
     }),
     unread,
+    chatUnreadByTurno,
   };
 }

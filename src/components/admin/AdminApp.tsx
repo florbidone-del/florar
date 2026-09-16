@@ -152,10 +152,16 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const [showTour, setShowTour] = useState(!tutorialSeen);
   const [isRefreshing, startRefresh] = useTransition();
   const pullDistance = usePullToRefresh(() => startRefresh(() => router.refresh()));
-  const [seenOverride, setSeenOverride] = useState<{ avisos?: boolean; chat?: boolean; blog?: boolean }>({});
+  const [seenOverride, setSeenOverride] = useState<{ avisos?: boolean; blog?: boolean }>({});
+  // El chat es por turno (la principal ve varios), así que su "visto" se lleva turno por turno en
+  // vez de con un único override — lo marca ChatTab cuando la profe abre/selecciona cada uno.
+  const [chatSeenOverride, setChatSeenOverride] = useState<Record<string, true>>({});
+  const chatUnreadByTurno: Record<string, boolean> = Object.fromEntries(
+    Object.entries(bundle.chatUnreadByTurno).map(([k, v]) => [k, v && !chatSeenOverride[k]])
+  );
   const unread = {
     avisos: bundle.unread.avisos && !seenOverride.avisos,
-    chat: bundle.unread.chat && !seenOverride.chat,
+    chat: Object.values(chatUnreadByTurno).some(Boolean),
     blog: bundle.unread.blog && !seenOverride.blog,
   };
 
@@ -164,10 +170,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
     if (t === "avisos" && unread.avisos) {
       setSeenOverride((o) => ({ ...o, avisos: true }));
       markSeenAction("avisos");
-    }
-    if (t === "chat" && unread.chat) {
-      setSeenOverride((o) => ({ ...o, chat: true }));
-      markSeenAction("chat");
     }
     if (t === "blog" && unread.blog) {
       setSeenOverride((o) => ({ ...o, blog: true }));
@@ -257,7 +259,13 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           <StudentsTab bundle={bundle} me={session.username} isMainProfe={isMainProfe} />
         )}
         {!isOwner && tab === "chat" && (
-          <ChatTab bundle={bundle} myUsername={session.username} isMainProfe={isMainProfe} />
+          <ChatTab
+            bundle={bundle}
+            myUsername={session.username}
+            isMainProfe={isMainProfe}
+            chatUnreadByTurno={chatUnreadByTurno}
+            onMarkTurnoSeen={(key) => setChatSeenOverride((o) => ({ ...o, [key]: true }))}
+          />
         )}
         {!isOwner && tab === "actividades" && <ActivitiesTab activities={bundle.snapshot.activities} />}
         {!isOwner && tab === "avisos" && (

@@ -23,3 +23,16 @@ export async function markSeenAction(section: SeenSection): Promise<ActionResult
   }
   return { ok: true };
 }
+
+/** El chat es por turno (la profe principal ve varios a la vez), así que a diferencia de avisos/blog
+ *  el "visto" también se marca por turno en vez de con un timestamp único de la cuenta. */
+export async function markChatSeenAction(weekday: number, slotId: string): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  if (!admin) return { error: "No autorizado." };
+  await prisma.adminChatSeen.upsert({
+    where: { adminUsername_weekday_slotId: { adminUsername: admin.username, weekday, slotId } },
+    create: { adminUsername: admin.username, weekday, slotId },
+    update: { seenAt: new Date() },
+  });
+  return { ok: true };
+}

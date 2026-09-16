@@ -67,6 +67,7 @@ model Slot {
   fromChanges      ScheduleChange[] @relation("FromSlot")
   toChanges        ScheduleChange[] @relation("ToSlot")
   chatMessages     ChatMessage[]
+  adminChatSeens   AdminChatSeen[]
 }
 
 model Holiday {
@@ -83,13 +84,26 @@ model Admin {
   displayName  String?
   createdAt    DateTime  @default(now())
   avisosSeenAt DateTime?
-  chatSeenAt   DateTime?
   blogSeenAt   DateTime?
 
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
   substitutions   Substitution[]   @relation("AdminSubstitutions")
   notifications   Notification[]
   chatMessages    ChatMessage[]
+  chatSeens       AdminChatSeen[]
+}
+
+// Última vez que una profe vio el chat de un turno puntual — a diferencia de avisos/blog, el chat
+// es por turno (la profe principal ve varios), así que el "visto" también tiene que serlo.
+model AdminChatSeen {
+  adminUsername String
+  admin         Admin    @relation(fields: [adminUsername], references: [username], onDelete: Cascade)
+  weekday       Int
+  slotId        String
+  slot          Slot     @relation(fields: [slotId], references: [id])
+  seenAt        DateTime @default(now())
+
+  @@id([adminUsername, weekday, slotId])
 }
 
 model Student {
