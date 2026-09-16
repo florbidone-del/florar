@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { fmtLong, todayISO } from "@/lib/domain";
 import type { HolidayDTO } from "@/lib/domain";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
-import { NewItemCard } from "@/components/shared/NewItemCard";
+import { Modal } from "@/components/shared/Modal";
 import { addHolidayAction, removeHolidayAction } from "@/lib/actions/content";
 
 export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
@@ -36,22 +36,6 @@ export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
 
   return (
     <>
-      <NewItemCard label="Nuevo feriado" open={showAdd} onOpen={() => setShowAdd(true)}>
-        <h3>Agregar feriado</h3>
-        <div className="row">
-          <div>
-            <label>Fecha</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-          <div>
-            <label>Motivo (opcional)</label>
-            <input placeholder="Ej: Feriado nacional" value={label} onChange={(e) => setLabel(e.target.value)} />
-          </div>
-        </div>
-        <button className="primary block" style={{ marginTop: 12 }} disabled={pending} onClick={add}>
-          Agregar
-        </button>
-      </NewItemCard>
       <div className="card">
         <h3>Feriados cargados</h3>
         <ShowMoreList
@@ -71,6 +55,38 @@ export function HolidaysTab({ holidays }: { holidays: HolidayDTO[] }) {
           )}
         />
       </div>
+      {showAdd && (
+        <Modal onClose={() => setShowAdd(false)}>
+          <h3>Agregar feriado</h3>
+          <div className="row">
+            <div>
+              <label>Fecha</label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label>Motivo (opcional)</label>
+              <input placeholder="Ej: Feriado nacional" value={label} onChange={(e) => setLabel(e.target.value)} />
+            </div>
+          </div>
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="ghost block" onClick={() => setShowAdd(false)}>
+              Cancelar
+            </button>
+            <button className="primary block" disabled={pending} onClick={add}>
+              Agregar
+            </button>
+          </div>
+        </Modal>
+      )}
+      <button
+        type="button"
+        className="fab fab-secondary"
+        aria-label="Agregar feriado"
+        title="Agregar feriado"
+        onClick={() => setShowAdd(true)}
+      >
+        +
+      </button>
     </>
   );
 }

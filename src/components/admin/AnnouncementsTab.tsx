@@ -7,6 +7,7 @@ import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { Modal } from "@/components/shared/Modal";
 import type { AnnouncementFullDTO } from "@/lib/views/admin";
 import type { AdminBundle } from "@/lib/views/admin";
 import { addAnnouncementAction, removeAnnouncementAction } from "@/lib/actions/content";
@@ -29,6 +30,7 @@ export function AnnouncementsTab({
   isMainProfe: boolean;
 }) {
   const router = useRouter();
+  const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [turnoKeySel, setTurnoKeySel] = useState(""); // "" = todos
@@ -61,6 +63,7 @@ export function AnnouncementsTab({
     await addAnnouncementAction(message, turno ? { weekday: turno.weekday, slotId: turno.slotId } : null);
     setPending(false);
     setMessage("");
+    setShowForm(false);
     router.refresh();
   }
   async function remove(id: string) {
@@ -70,35 +73,6 @@ export function AnnouncementsTab({
 
   return (
     <>
-      <div className="card">
-        <h3>Nuevo aviso</h3>
-        <AutoTextarea
-          ref={messageRef}
-          rows={3}
-          placeholder="Escribí el comunicado para los estudiantes…"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        {turnos.length > 0 && (
-          <>
-            <label>Para</label>
-            <select value={turnoKeySel} onChange={(e) => setTurnoKeySel(e.target.value)}>
-              <option value="">Todos los estudiantes</option>
-              {turnos.map((t) => (
-                <option key={turnoKey(t)} value={turnoKey(t)}>
-                  Solo {t.label}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-          <EmojiPicker onPick={(e) => setMessage((m) => m + e)} targetRef={messageRef} />
-          <button className="primary block" style={{ flex: 1 }} disabled={pending} onClick={publish}>
-            Publicar
-          </button>
-        </div>
-      </div>
       <div className="card">
         <h3>Avisos publicados</h3>
         <ShowMoreList
@@ -123,6 +97,45 @@ export function AnnouncementsTab({
           )}
         />
       </div>
+      {showForm && (
+        <Modal onClose={() => setShowForm(false)}>
+          <h3>Nuevo aviso</h3>
+          <AutoTextarea
+            ref={messageRef}
+            rows={3}
+            placeholder="Escribí el comunicado para los estudiantes…"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+          {turnos.length > 0 && (
+            <>
+              <label>Para</label>
+              <select value={turnoKeySel} onChange={(e) => setTurnoKeySel(e.target.value)}>
+                <option value="">Todos los estudiantes</option>
+                {turnos.map((t) => (
+                  <option key={turnoKey(t)} value={turnoKey(t)}>
+                    Solo {t.label}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <EmojiPicker onPick={(e) => setMessage((m) => m + e)} targetRef={messageRef} />
+          </div>
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="ghost block" onClick={() => setShowForm(false)}>
+              Cancelar
+            </button>
+            <button className="primary block" disabled={pending} onClick={publish}>
+              Publicar
+            </button>
+          </div>
+        </Modal>
+      )}
+      <button type="button" className="fab" aria-label="Nuevo aviso" title="Nuevo aviso" onClick={() => setShowForm(true)}>
+        +
+      </button>
     </>
   );
 }

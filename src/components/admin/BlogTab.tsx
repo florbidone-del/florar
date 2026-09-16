@@ -7,7 +7,7 @@ import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
-import { NewItemCard } from "@/components/shared/NewItemCard";
+import { Modal } from "@/components/shared/Modal";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { PostInteractions } from "@/components/shared/PostInteractions";
@@ -51,35 +51,6 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
 
   return (
     <>
-      <NewItemCard label="Nuevo post" open={showForm} onOpen={() => setShowForm(true)}>
-        <h3>Nuevo post</h3>
-        <p className="muted">
-          Compartí links, fotos de piezas terminadas, técnicas o ideas — los estudiantes lo ven en su
-          pestaña CeramiBlog.
-        </p>
-        <div className="field" style={{ marginTop: 10 }}>
-          <label>Título (opcional)</label>
-          <input placeholder="Ej: Esmaltado con óxidos" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
-        <div className="field" style={{ marginTop: 10 }}>
-          <label>Texto</label>
-          <AutoTextarea
-            ref={bodyRef}
-            rows={3}
-            placeholder="Escribí la idea, contá algo, pegá un link…"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
-          <div style={{ marginTop: 6 }}>
-            <EmojiPicker onPick={(e) => setBody((b) => b + e)} targetRef={bodyRef} />
-          </div>
-        </div>
-        <ImagePicker value={imageData} onChange={setImageData} />
-        {error && <p className="err">{error}</p>}
-        <button className="primary block" style={{ marginTop: 14 }} disabled={pending} onClick={publish}>
-          Publicar
-        </button>
-      </NewItemCard>
       <div className="card">
         <h3>Posts publicados</h3>
         <ShowMoreList
@@ -119,6 +90,45 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
           )}
         />
       </div>
+      {showForm && (
+        <Modal onClose={() => setShowForm(false)}>
+          <h3>Nuevo post</h3>
+          <p className="muted">
+            Compartí links, fotos de piezas terminadas, técnicas o ideas — los estudiantes lo ven en su
+            pestaña CeramiBlog.
+          </p>
+          <div className="field" style={{ marginTop: 10 }}>
+            <label>Título (opcional)</label>
+            <input placeholder="Ej: Esmaltado con óxidos" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="field" style={{ marginTop: 10 }}>
+            <label>Texto</label>
+            <AutoTextarea
+              ref={bodyRef}
+              rows={3}
+              placeholder="Escribí la idea, contá algo, pegá un link…"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+            <div style={{ marginTop: 6 }}>
+              <EmojiPicker onPick={(e) => setBody((b) => b + e)} targetRef={bodyRef} />
+            </div>
+          </div>
+          <ImagePicker value={imageData} onChange={setImageData} />
+          {error && <p className="err">{error}</p>}
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="ghost block" onClick={() => setShowForm(false)}>
+              Cancelar
+            </button>
+            <button className="primary block" disabled={pending} onClick={publish}>
+              Publicar
+            </button>
+          </div>
+        </Modal>
+      )}
+      <button type="button" className="fab" aria-label="Nuevo post" title="Nuevo post" onClick={() => setShowForm(true)}>
+        +
+      </button>
     </>
   );
 }

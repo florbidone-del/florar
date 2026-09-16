@@ -7,10 +7,12 @@ import type { ActivityDTO } from "@/lib/domain";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { Linkify } from "@/components/shared/Linkify";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
+import { Modal } from "@/components/shared/Modal";
 import { addActivityAction, removeActivityAction, updateActivityAction } from "@/lib/actions/content";
 
 export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
   const router = useRouter();
+  const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [date, setDate] = useState("");
   const [end, setEnd] = useState("");
@@ -26,6 +28,7 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
     setEnd(a.endDate);
     setTitle(a.title);
     setDescription(a.description || "");
+    setShowForm(true);
   }
   function cancelEdit() {
     setEditingId(null);
@@ -33,6 +36,7 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
     setEnd("");
     setTitle("");
     setDescription("");
+    setShowForm(false);
   }
 
   async function save() {
@@ -55,47 +59,6 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
 
   return (
     <>
-      <div className="card">
-        <h3>{editingId ? "Editar actividad" : "Marcar una actividad especial"}</h3>
-        <p className="muted">
-          Puede durar un solo día, una semana o lo que necesites — aparece marcada en el calendario de
-          todos los estudiantes durante todo ese rango, sin afectar cupos ni clases normales.
-        </p>
-        <label>Título / temática</label>
-        <input
-          placeholder="Ej: Semana de esmaltado a mano"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <div className="row">
-          <div>
-            <label>Desde</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-          <div>
-            <label>Hasta (opcional)</label>
-            <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
-          </div>
-        </div>
-        <p className="hint">Si dejás &quot;Hasta&quot; vacío, la actividad dura solo ese día.</p>
-        <label>Descripción / link (opcional)</label>
-        <AutoTextarea
-          rows={2}
-          placeholder="Detalles, o pegá un link a un PDF, fotos, etc."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div className="row" style={{ marginTop: 12 }}>
-          {editingId && (
-            <button className="ghost block" onClick={cancelEdit}>
-              Cancelar
-            </button>
-          )}
-          <button className="primary block" disabled={pending} onClick={save}>
-            {editingId ? "Guardar cambios" : "Agregar"}
-          </button>
-        </div>
-      </div>
       <div className="card">
         <h3>Actividades cargadas</h3>
         {sorted.length === 0 ? (
@@ -127,6 +90,50 @@ export function ActivitiesTab({ activities }: { activities: ActivityDTO[] }) {
           ))
         )}
       </div>
+      {showForm && (
+        <Modal onClose={cancelEdit}>
+          <h3>{editingId ? "Editar actividad" : "Marcar una actividad especial"}</h3>
+          <p className="muted">
+            Puede durar un solo día, una semana o lo que necesites — aparece marcada en el calendario de
+            todos los estudiantes durante todo ese rango, sin afectar cupos ni clases normales.
+          </p>
+          <label>Título / temática</label>
+          <input
+            placeholder="Ej: Semana de esmaltado a mano"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <div className="row">
+            <div>
+              <label>Desde</label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label>Hasta (opcional)</label>
+              <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
+            </div>
+          </div>
+          <p className="hint">Si dejás &quot;Hasta&quot; vacío, la actividad dura solo ese día.</p>
+          <label>Descripción / link (opcional)</label>
+          <AutoTextarea
+            rows={2}
+            placeholder="Detalles, o pegá un link a un PDF, fotos, etc."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <div className="row" style={{ marginTop: 12 }}>
+            <button className="ghost block" onClick={cancelEdit}>
+              Cancelar
+            </button>
+            <button className="primary block" disabled={pending} onClick={save}>
+              {editingId ? "Guardar cambios" : "Agregar"}
+            </button>
+          </div>
+        </Modal>
+      )}
+      <button type="button" className="fab" aria-label="Nueva actividad" title="Nueva actividad" onClick={() => setShowForm(true)}>
+        +
+      </button>
     </>
   );
 }

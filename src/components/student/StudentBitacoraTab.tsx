@@ -8,7 +8,7 @@ import { ImagePicker } from "@/components/shared/ImagePicker";
 import { Linkify } from "@/components/shared/Linkify";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
-import { NewItemCard } from "@/components/shared/NewItemCard";
+import { Modal } from "@/components/shared/Modal";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { PostInteractions } from "@/components/shared/PostInteractions";
 import { addStudentPostAction, removeStudentPostAction } from "@/lib/actions/studentPosts";
@@ -57,36 +57,6 @@ export function StudentBitacoraTab({
 
   return (
     <>
-      <NewItemCard label="Nueva publicación" open={showForm} onOpen={() => setShowForm(true)}>
-        <h3>Nueva publicación</h3>
-        <p className="muted">
-          Subí una pieza, un avance o una idea con foto y descripción. Queda privada — solo la ven las
-          profes y vos — salvo que una profe decida hacerla pública o destacarla en el CeramiBlog.
-        </p>
-        <div className="field" style={{ marginTop: 10 }}>
-          <label>Título (opcional)</label>
-          <input placeholder="Ej: Mi primer bowl" value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
-        <div className="field" style={{ marginTop: 10 }}>
-          <label>Descripción</label>
-          <AutoTextarea
-            ref={bodyRef}
-            rows={3}
-            placeholder="Contá cómo lo hiciste, con qué técnica, cómo te fue…"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
-          <div style={{ marginTop: 6 }}>
-            <EmojiPicker onPick={(e) => setBody((b) => b + e)} targetRef={bodyRef} />
-          </div>
-        </div>
-        <ImagePicker value={imageData} onChange={setImageData} />
-        {error && <p className="err">{error}</p>}
-        <button className="primary block" style={{ marginTop: 14 }} disabled={pending} onClick={publish}>
-          Publicar
-        </button>
-      </NewItemCard>
-
       <div className="card">
         <h3>Mi bitácora</h3>
         <ShowMoreList
@@ -152,6 +122,45 @@ export function StudentBitacoraTab({
           )}
         />
       </div>
+      {showForm && (
+        <Modal onClose={() => setShowForm(false)}>
+          <h3>Nueva publicación</h3>
+          <p className="muted">
+            Subí una pieza, un avance o una idea con foto y descripción. Queda privada — solo la ven las
+            profes y vos — salvo que una profe decida hacerla pública o destacarla en el CeramiBlog.
+          </p>
+          <div className="field" style={{ marginTop: 10 }}>
+            <label>Título (opcional)</label>
+            <input placeholder="Ej: Mi primer bowl" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div className="field" style={{ marginTop: 10 }}>
+            <label>Descripción</label>
+            <AutoTextarea
+              ref={bodyRef}
+              rows={3}
+              placeholder="Contá cómo lo hiciste, con qué técnica, cómo te fue…"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+            <div style={{ marginTop: 6 }}>
+              <EmojiPicker onPick={(e) => setBody((b) => b + e)} targetRef={bodyRef} />
+            </div>
+          </div>
+          <ImagePicker value={imageData} onChange={setImageData} />
+          {error && <p className="err">{error}</p>}
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="ghost block" onClick={() => setShowForm(false)}>
+              Cancelar
+            </button>
+            <button className="primary block" disabled={pending} onClick={publish}>
+              Publicar
+            </button>
+          </div>
+        </Modal>
+      )}
+      <button type="button" className="fab" aria-label="Nueva publicación" title="Nueva publicación" onClick={() => setShowForm(true)}>
+        +
+      </button>
     </>
   );
 }

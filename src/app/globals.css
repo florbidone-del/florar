@@ -183,6 +183,14 @@ button.block{width:100%;}
   box-shadow:0 10px 30px -8px rgba(0,0,0,0.45);
 }
 .fab:active{transform:scale(0.96);}
+.fab-secondary{
+  width:46px;
+  height:46px;
+  font-size:1.4rem;
+  bottom:max(84px, calc(env(safe-area-inset-bottom, 0px) + 80px));
+  background:var(--surface-2);
+  color:var(--glaze-dark);
+}
 input, select, textarea{
   font-family:var(--font-work-sans), sans-serif;
   font-size:1rem;
@@ -208,14 +216,6 @@ label:first-child{margin-top:0;}
   border:1.5px solid var(--line);
   border-radius:var(--radius);
   padding:16px;
-  margin-bottom:14px;
-}
-.new-toggle{
-  border:1.5px dashed var(--glaze);
-  color:var(--glaze-dark);
-  background:var(--surface-2);
-  font-weight:600;
-  padding:12px;
   margin-bottom:14px;
 }
 .card h3{font-size:1rem;}
