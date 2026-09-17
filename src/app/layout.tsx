@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 // Elegido para calzar con la letra fina de "taller de cerámica" en el isologo real (logo florar.png).
 const cormorant = Cormorant({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["600", "700"],
   variable: "--font-heading",
   display: "swap",
 });
