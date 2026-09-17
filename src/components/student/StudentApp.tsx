@@ -22,6 +22,7 @@ import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTou
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
 import { useSwipeTabs } from "@/lib/useSwipeTabs";
+import { useTabSlideDirection } from "@/lib/useTabSlideDirection";
 import {
   logoutAction,
   setMyThemeAction,
@@ -185,6 +186,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   }
 
   useSwipeTabs(PILL_TABS, tab, (t) => openTab(t as Tab));
+  const slideDir = useTabSlideDirection(ALL_TABS, tab);
 
   // "Atrás" en el celular vuelve a Calendario en vez de salir de la app, mientras no estés ahí.
   useBackToClose(() => setTab("calendario"), tab !== "calendario");
@@ -319,6 +321,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         })}
       </div>
 
+      <div key={tab} className={`tab-panel-enter-${slideDir}`}>
       {tab === "calendario" && (
         <div>
           <div className="card" id="announcements-section">
@@ -497,6 +500,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           </p>
         </div>
       )}
+      </div>
 
       <p className="footer-note">
         Florar - Taller y Escuela de Cerámica

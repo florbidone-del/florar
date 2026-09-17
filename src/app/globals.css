@@ -333,6 +333,13 @@ label:first-child{margin-top:0;}
   border-radius:0;
 }
 .tab.active{color:var(--ink); border-bottom-color:var(--glaze); font-weight:600;}
+@keyframes tab-panel-from-right{from{opacity:0; transform:translateX(18px);} to{opacity:1; transform:translateX(0);}}
+@keyframes tab-panel-from-left{from{opacity:0; transform:translateX(-18px);} to{opacity:1; transform:translateX(0);}}
+.tab-panel-enter-right{animation:tab-panel-from-right 0.22s ease-out;}
+.tab-panel-enter-left{animation:tab-panel-from-left 0.22s ease-out;}
+@media (prefers-reduced-motion: reduce){
+  .tab-panel-enter-right, .tab-panel-enter-left{animation:none;}
+}
 table{width:100%; border-collapse:collapse; font-size:0.82rem;}
 th,td{
   border:1px solid var(--line);

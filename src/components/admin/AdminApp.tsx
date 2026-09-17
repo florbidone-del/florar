@@ -22,6 +22,7 @@ import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTou
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
 import { useSwipeTabs } from "@/lib/useSwipeTabs";
+import { useTabSlideDirection } from "@/lib/useTabSlideDirection";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
 import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 
@@ -202,6 +203,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   }
 
   useSwipeTabs(tabs, tab, openTab, isOwner);
+  const slideDir = useTabSlideDirection(tabs, tab);
 
   // "Atrás" en el celular vuelve a la pestaña inicial en vez de salir de la app.
   useBackToClose(() => setTab(tabs[0]), tab !== tabs[0]);
@@ -278,7 +280,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           );
         })}
       </div>
-      <div>
+      <div key={tab} className={`tab-panel-enter-${slideDir}`}>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
         {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
         {!isOwner && tab === "alumnos" && (
