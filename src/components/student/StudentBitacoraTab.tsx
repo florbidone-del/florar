@@ -22,6 +22,7 @@ export function StudentBitacoraTab({
   communityPosts: StudentPanelData["communityPosts"];
 }) {
   const router = useRouter();
+  const [subTab, setSubTab] = useState<"mine" | "community">("mine");
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -57,71 +58,82 @@ export function StudentBitacoraTab({
 
   return (
     <>
-      <div className="card">
-        <h3>Mi bitácora</h3>
-        <ShowMoreList
-          items={myPosts}
-          initialCount={3}
-          itemLabelPlural="publicaciones"
-          emptyMessage="Todavía no publicaste nada en tu bitácora."
-          renderItem={(p) => (
-            <div className="blog-post" key={p.id}>
-              <div className="muted">
-                {fmtLong(p.date)} — <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
-              </div>
-              {p.title && <h4>{p.title}</h4>}
-              {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
-              {p.body && (
-                <p>
-                  <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
-                </p>
-              )}
-              <button className="ghost" onClick={() => remove(p.id)}>
-                quitar
-              </button>
-              <PostInteractions
-                postType="studentpost"
-                postId={p.id}
-                likedByMe={p.likedByMe}
-                likeCount={p.likeCount}
-                comments={p.comments}
-              />
-            </div>
-          )}
-        />
+      <div className="tabs">
+        <div className={`tab ${subTab === "mine" ? "active" : ""}`} onClick={() => setSubTab("mine")}>
+          Mi bitácora
+        </div>
+        <div className={`tab ${subTab === "community" ? "active" : ""}`} onClick={() => setSubTab("community")}>
+          Bitácora del taller
+        </div>
       </div>
 
-      <div className="card">
-        <h3>Bitácoras del taller</h3>
-        <p className="muted">Publicaciones que otros compañeros hicieron públicas.</p>
-        <ShowMoreList
-          items={communityPosts}
-          initialCount={3}
-          itemLabelPlural="publicaciones"
-          emptyMessage="Todavía no hay publicaciones públicas de otros compañeros."
-          renderItem={(p) => (
-            <div className="blog-post" key={p.id}>
-              <div className="muted">
-                {fmtLong(p.date)} — {p.studentName}
+      {subTab === "mine" && (
+        <div className="card">
+          <ShowMoreList
+            items={myPosts}
+            initialCount={3}
+            itemLabelPlural="publicaciones"
+            emptyMessage="Todavía no publicaste nada en tu bitácora."
+            renderItem={(p) => (
+              <div className="blog-post" key={p.id}>
+                <div className="muted">
+                  {fmtLong(p.date)} — <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
+                </div>
+                {p.title && <h4>{p.title}</h4>}
+                {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+                {p.body && (
+                  <p>
+                    <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
+                  </p>
+                )}
+                <button className="ghost" onClick={() => remove(p.id)}>
+                  quitar
+                </button>
+                <PostInteractions
+                  postType="studentpost"
+                  postId={p.id}
+                  likedByMe={p.likedByMe}
+                  likeCount={p.likeCount}
+                  comments={p.comments}
+                />
               </div>
-              {p.title && <h4>{p.title}</h4>}
-              {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
-              {p.body && (
-                <p>
-                  <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
-                </p>
-              )}
-              <PostInteractions
-                postType="studentpost"
-                postId={p.id}
-                likedByMe={p.likedByMe}
-                likeCount={p.likeCount}
-                comments={p.comments}
-              />
-            </div>
-          )}
-        />
-      </div>
+            )}
+          />
+        </div>
+      )}
+
+      {subTab === "community" && (
+        <div className="card">
+          <p className="muted">Publicaciones que otros compañeros hicieron públicas.</p>
+          <ShowMoreList
+            items={communityPosts}
+            initialCount={3}
+            itemLabelPlural="publicaciones"
+            emptyMessage="Todavía no hay publicaciones públicas de otros compañeros."
+            renderItem={(p) => (
+              <div className="blog-post" key={p.id}>
+                <div className="muted">
+                  {fmtLong(p.date)} — {p.studentName}
+                </div>
+                {p.title && <h4>{p.title}</h4>}
+                {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+                {p.body && (
+                  <p>
+                    <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
+                  </p>
+                )}
+                <PostInteractions
+                  postType="studentpost"
+                  postId={p.id}
+                  likedByMe={p.likedByMe}
+                  likeCount={p.likeCount}
+                  comments={p.comments}
+                />
+              </div>
+            )}
+          />
+        </div>
+      )}
       {showForm && (
         <Modal onClose={() => setShowForm(false)}>
           <h3>Nueva publicación</h3>
