@@ -60,7 +60,7 @@ export function SwapCalendar({
           <span className="dot full" /> lleno
         </span>
         <span>
-          <span className="dot holiday" /> feriado
+          <span className="dot holiday" /> sin clases
         </span>
       </div>
     </div>

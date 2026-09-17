@@ -338,11 +338,11 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             <div className="banner">
               <strong>
                 {data.pendingHolidays === 1
-                  ? "Tenés 1 feriado por reprogramar"
-                  : `Tenés ${data.pendingHolidays} feriados por reprogramar`}
+                  ? "Tenés 1 clase cancelada por reprogramar"
+                  : `Tenés ${data.pendingHolidays} clases canceladas por reprogramar`}
               </strong>
-              Buscá el día marcado como feriado en tu calendario y tocalo para elegir una nueva fecha. No
-              te gasta el cambio del mes.
+              Buscá el día marcado en tu calendario y tocalo para elegir una nueva fecha. No te gasta el
+              cambio del mes.
             </div>
           )}
 

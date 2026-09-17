@@ -71,7 +71,7 @@ export function OwnSessionModal({
         <p className="muted">
           {own.start}–{own.end}
         </p>
-        <span className="tag warn">feriado — a reprogramar</span>
+        <span className="tag warn">{day.holiday?.label || "sin clases"} — a reprogramar</span>
       </>
     );
     actionLabel = "Reprogramar";

@@ -33,7 +33,7 @@ export function DayInfoModal({
       )}
       {day.holiday ? (
         <p className="muted">
-          Feriado{day.holiday.label ? `: ${day.holiday.label}` : ""}. No hay clases este día.
+          {day.holiday.label ? `${day.holiday.label} — no hay clase este día.` : "Sin clases este día."}
         </p>
       ) : (
         day.slots.map((slot) => {
