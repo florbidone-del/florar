@@ -9,6 +9,7 @@ import {
   deleteProfeAction,
   resetProfePasswordAction,
   setMainProfeAction,
+  updateProfeCupoAction,
 } from "@/lib/actions/admins";
 import { Modal } from "@/components/shared/Modal";
 
@@ -20,9 +21,21 @@ export function ProfesTab({ admins, me }: { admins: AdminDTO[]; me: string }) {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [resetTarget, setResetTarget] = useState<string | null>(null);
+  const [cupoValues, setCupoValues] = useState<Record<string, number>>(() =>
+    Object.fromEntries(admins.map((a) => [a.username, a.cupo]))
+  );
+  const [savingCupo, setSavingCupo] = useState<string | null>(null);
 
   const sorted = [...admins].sort((a, b) => a.username.localeCompare(b.username));
   const hasMainProfe = admins.some((a) => a.role === "profe" && a.isMainProfe);
+
+  async function saveCupo(u: string, value: number) {
+    if (!Number.isFinite(value) || value < 1) return;
+    setSavingCupo(u);
+    await updateProfeCupoAction(u, value);
+    setSavingCupo(null);
+    router.refresh();
+  }
 
   async function create() {
     setError("");
@@ -85,6 +98,22 @@ export function ProfesTab({ admins, me }: { admins: AdminDTO[]; me: string }) {
                 {a.role === "profe" && a.isMainProfe && <span className="badge-role">principal</span>}
               </div>
               <div className="muted">creado {a.createdAt}</div>
+              {a.role === "profe" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
+                  <label style={{ margin: 0, whiteSpace: "nowrap" }}>Cupo por clase</label>
+                  <input
+                    type="number"
+                    min={1}
+                    style={{ width: 70 }}
+                    disabled={savingCupo === a.username}
+                    value={cupoValues[a.username] ?? a.cupo}
+                    onChange={(e) =>
+                      setCupoValues((v) => ({ ...v, [a.username]: Number(e.target.value) }))
+                    }
+                    onBlur={(e) => saveCupo(a.username, Number(e.target.value))}
+                  />
+                </div>
+              )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
               {a.role === "profe" && (

@@ -38,19 +38,6 @@ export async function saveConfigAction(input: {
   return { ok: true };
 }
 
-/** El cupo máximo de una clase es propio de cada profe (reemplaza al viejo cupo único del
- *  taller), así que lo fija la profe principal, igual que a quién le toca cada turno. */
-export async function updateProfeCupoAction(username: string, cupo: number): Promise<ActionResult> {
-  const session = await requireMainProfe();
-  if (!session) return { error: "No autorizado." };
-  if (!Number.isFinite(cupo) || cupo < 1) return { error: "El cupo tiene que ser un número mayor a 0." };
-  await prisma.admin.updateMany({
-    where: { username, role: "profe" },
-    data: { cupo: Math.round(cupo) },
-  });
-  return { ok: true };
-}
-
 export async function setThemeAction(theme: string): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };

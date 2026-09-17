@@ -69,3 +69,15 @@ export async function deleteProfeAction(username: string): Promise<ActionResult>
   await prisma.admin.deleteMany({ where: { username } });
   return { ok: true };
 }
+
+/** Cuántos estudiantes entran en una clase de esta profe — determina cuándo se marca lleno un turno. */
+export async function updateProfeCupoAction(username: string, cupo: number): Promise<ActionResult> {
+  const session = await requireOwner();
+  if (!session) return { error: "No autorizado." };
+  if (!Number.isFinite(cupo) || cupo < 1) return { error: "El cupo tiene que ser un número mayor a 0." };
+  await prisma.admin.updateMany({
+    where: { username, role: "profe" },
+    data: { cupo: Math.round(cupo) },
+  });
+  return { ok: true };
+}
