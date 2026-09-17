@@ -32,7 +32,7 @@ a{overflow-wrap:anywhere; word-break:break-word;}
 button{overflow-wrap:normal; word-break:normal;}
 h1,h2,h3{
   font-family:var(--font-heading), Georgia, serif;
-  font-weight:700;
+  font-weight:600;
   margin:0 0 4px 0;
   letter-spacing:-0.01em;
 }
@@ -279,7 +279,7 @@ label:first-child{margin-top:0;}
   border-radius:var(--radius);
   padding:14px;
 }
-.stat .num{font-family:var(--font-heading), serif; font-size:1.7rem; font-weight:700; line-height:1;}
+.stat .num{font-family:var(--font-heading), serif; font-size:1.7rem; line-height:1;}
 .stat .label{font-size:0.78rem; color:var(--ink-soft); margin-top:4px;}
 .banner{
   background:var(--oxide-soft);
@@ -354,7 +354,7 @@ th.row-head.slot-time span{display:block; white-space:nowrap;}
 .week-range{white-space:nowrap;}
 .slot-time-sep{font-size:0.62rem; font-weight:400; color:var(--ink-soft); font-family:var(--font-work-sans), sans-serif;}
 td.holiday{background:var(--oxide-soft);}
-.occ-count{font-family:var(--font-heading), serif; font-size:1.1rem; font-weight:600;}
+.occ-count{font-family:var(--font-heading), serif; font-size:1.1rem;}
 .names{font-size:0.62rem; color:var(--ink-soft); margin-top:2px; word-break:break-word;}
 .occ-cell{
   width:100%;
@@ -362,7 +362,6 @@ td.holiday{background:var(--oxide-soft);}
   background:transparent;
   font-family:var(--font-heading), serif;
   font-size:1.05rem;
-  font-weight:600;
   color:var(--ink-soft);
   padding:10px 2px;
   border-radius:6px;
@@ -406,7 +405,7 @@ td.holiday{background:var(--oxide-soft);}
   gap:8px;
   margin-bottom:4px;
 }
-.occupancy-time{font-family:var(--font-heading), serif; font-size:1.4rem; font-weight:700; color:var(--ink);}
+.occupancy-time{font-family:var(--font-heading), serif; font-size:1.4rem; font-weight:600; color:var(--ink);}
 .roster-item{
   display:flex;
   align-items:center;

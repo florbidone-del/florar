@@ -1,15 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant, Work_Sans } from "next/font/google";
+import { Fraunces, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { loadConfig } from "@/lib/snapshot";
 import { themeCssVars } from "@/lib/themes";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-// Elegido para calzar con la letra fina de "taller de cerámica" en el isologo real (logo florar.png).
-const cormorant = Cormorant({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["400", "500", "600"],
   variable: "--font-heading",
   display: "swap",
 });
@@ -56,7 +55,7 @@ export default async function RootLayout({
 
   return (
     <html lang="es" style={themeVars as React.CSSProperties}>
-      <body className={`${cormorant.variable} ${workSans.variable}`}>
+      <body className={`${fraunces.variable} ${workSans.variable}`}>
         <div className="app-shell">{children}</div>
       </body>
     </html>
