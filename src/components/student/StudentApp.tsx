@@ -39,7 +39,7 @@ const TAB_LABELS: Record<Tab, string> = {
   calendario: "Calendario",
   chat: "Chat",
   blog: "CeramiBlog",
-  bitacora: "Mi bitácora",
+  bitacora: "Bitácora",
   info: "Info del Taller",
   cuenta: "Mi cuenta",
 };
