@@ -21,6 +21,7 @@ import { THEMES } from "@/lib/themes";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
+import { useSwipeTabs } from "@/lib/useSwipeTabs";
 import {
   logoutAction,
   setMyThemeAction,
@@ -182,6 +183,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       markSeenAction("blog");
     }
   }
+
+  useSwipeTabs(PILL_TABS, tab, (t) => openTab(t as Tab));
 
   // "Atrás" en el celular vuelve a Calendario en vez de salir de la app, mientras no estés ahí.
   useBackToClose(() => setTab("calendario"), tab !== "calendario");

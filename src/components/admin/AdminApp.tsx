@@ -21,6 +21,7 @@ import { ProfesTab } from "@/components/admin/ProfesTab";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
+import { useSwipeTabs } from "@/lib/useSwipeTabs";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
 import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 
@@ -199,6 +200,8 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
       markSeenAction("blog");
     }
   }
+
+  useSwipeTabs(tabs, tab, openTab, isOwner);
 
   // "Atrás" en el celular vuelve a la pestaña inicial en vez de salir de la app.
   useBackToClose(() => setTab(tabs[0]), tab !== tabs[0]);
