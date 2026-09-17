@@ -13,6 +13,7 @@ import { HolidaysTab } from "@/components/admin/HolidaysTab";
 import { ActivitiesTab } from "@/components/admin/ActivitiesTab";
 import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
 import { BlogTab } from "@/components/admin/BlogTab";
+import { InfoTallerTab } from "@/components/admin/InfoTallerTab";
 import { StudentPostsTab } from "@/components/admin/StudentPostsTab";
 import { ChatTab } from "@/components/admin/ChatTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
@@ -138,6 +139,7 @@ const TAB_LABELS: Record<string, string> = {
   avisos: "Avisos",
   blog: "CeramiBlog",
   bitacoras: "Bitácoras",
+  info: "Info del Taller",
   config: "Configuración",
   profes: "Profes",
 };
@@ -146,7 +148,9 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const router = useRouter();
   const isOwner = session.role === "owner";
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
-  const tabs = isOwner ? ["profes"] : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras"];
+  const tabs = isOwner
+    ? ["profes"]
+    : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras", "info"];
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
@@ -281,6 +285,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
         {!isOwner && tab === "bitacoras" && <StudentPostsTab posts={bundle.studentPosts} />}
+        {!isOwner && tab === "info" && <InfoTallerTab studentInfo={bundle.snapshot.config.studentInfo} />}
         {!isOwner && tab === "config" && (
           <ConfigTab bundle={bundle} isMainProfe={isMainProfe} myUsername={session.username} />
         )}

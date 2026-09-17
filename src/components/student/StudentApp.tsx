@@ -423,10 +423,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         <div id="info-section">
           {data.studentInfo ? (
             <div className="card" style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
-              <h3>Información</h3>
-              <div>
-                <Linkify text={data.studentInfo} />
-              </div>
+              <Linkify text={data.studentInfo} />
             </div>
           ) : (
             <p className="muted">Todavía no hay información cargada.</p>

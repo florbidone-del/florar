@@ -6,7 +6,6 @@ import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
 import { THEMES } from "@/lib/themes";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
-import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import {
   saveConfigAction,
@@ -17,7 +16,7 @@ import {
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
 import { resetAllTutorialsAction, setMyDisplayNameAction } from "@/lib/actions/auth";
-import { saveStudentInfoAction, clearOldImagesAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
+import { clearOldImagesAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
 
 export function ConfigTab({
   bundle,
@@ -48,8 +47,6 @@ export function ConfigTab({
   const [savingRules, setSavingRules] = useState(false);
   const [resettingTutorial, setResettingTutorial] = useState(false);
   const [tutorialResetDone, setTutorialResetDone] = useState(false);
-  const [studentInfo, setStudentInfo] = useState(c.studentInfo);
-  const [savingInfo, setSavingInfo] = useState(false);
   const [displayName, setDisplayName] = useState(me?.displayName || "");
   const displayNameInputRef = useRef<HTMLInputElement>(null);
   const [savingDisplayName, setSavingDisplayName] = useState(false);
@@ -59,13 +56,6 @@ export function ConfigTab({
   const [loadingOfficial, setLoadingOfficial] = useState(false);
   const [officialResult, setOfficialResult] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
-
-  async function saveStudentInfo() {
-    setSavingInfo(true);
-    await saveStudentInfoAction(studentInfo);
-    setSavingInfo(false);
-    router.refresh();
-  }
 
   async function saveDisplayName() {
     setSavingDisplayName(true);
@@ -194,23 +184,6 @@ export function ConfigTab({
       <Collapsible title="Turnos">
         <p className="muted">Elegí los días en los que se dicta cada turno — no hace falta que sean los mismos todos los días.</p>
         <SlotEditor slots={c.slots} onChanged={() => router.refresh()} />
-      </Collapsible>
-
-      <Collapsible title="Información fija para estudiantes">
-        <p className="muted">
-          Esto queda siempre visible arriba de todo en el celular del/de la estudiante — a diferencia de los
-          avisos, no se acumula ni desaparece. Sirve para un link a un PDF, el material del mes, o algo
-          que quieras que estén viendo siempre. Como no se toca seguido, vive acá en vez de en Avisos.
-        </p>
-        <AutoTextarea
-          rows={4}
-          placeholder="Ej: Material de este mes: [link]. Este viernes hay jornada especial de esmaltado."
-          value={studentInfo}
-          onChange={(e) => setStudentInfo(e.target.value)}
-        />
-        <button className="primary block" style={{ marginTop: 12 }} disabled={savingInfo} onClick={saveStudentInfo}>
-          Guardar
-        </button>
       </Collapsible>
 
       {isMainProfe && (
