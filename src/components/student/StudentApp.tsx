@@ -279,26 +279,26 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       {data.payment.unpaid && (
         <div className="banner">
           <strong>
-            {data.payment.isPartial ? "Te falta completar la cuota de este mes" : "Debés la cuota de este mes"}
+            {data.payment.isPartial ? "Te falta completar la cuota del mes" : "Debés la cuota del mes"}
           </strong>
           {data.payment.isPartial ? (
-            <>
+            <p style={{ margin: "4px 0 0" }}>
               Ya pagaste {data.payment.paidAmount} de {data.payment.cashFee}. Te faltan{" "}
-              {data.payment.remainingCash} en efectivo.
-            </>
-          ) : (
-            <>Cuota de {data.payment.monthName} en efectivo: {data.payment.cashFee}.</>
-          )}{" "}
-          {data.payment.isLate
-            ? `Te pasaste de la fecha de pago (día ${data.payment.paymentWindowEnd}) — tiene un recargo del ${data.payment.lateFeePercent}%, ya incluido en el monto.`
-            : data.payment.withinWindow
-              ? `El pago se hace entre el día ${data.payment.paymentWindowStart} y el ${data.payment.paymentWindowEnd}.`
-              : `El pago se habilita a partir del día ${data.payment.paymentWindowStart}.`}
-          {(data.payment.isPartial || data.payment.mpFee !== data.payment.cashFee) && (
-            <p className="hint" style={{ marginTop: 6 }}>
-              Por Mercado Pago se cobra {data.payment.remainingMp}
-              {data.payment.isPartial ? " (el saldo que te queda)" : ""}.
+              {data.payment.remainingCash} en efectivo, {data.payment.remainingMp} en otro medio.
             </p>
+          ) : (
+            <>
+              <p style={{ margin: "4px 0 0" }}>
+                En efectivo es: {data.payment.isLate
+                  ? `${data.payment.baseCashFee}+${data.payment.lateCashSurcharge} - recargo del ${data.payment.lateFeePercent}% sobre ${data.payment.baseCashFee}`
+                  : data.payment.cashFee}
+              </p>
+              <p style={{ margin: "2px 0 0" }}>
+                En otro medio: {data.payment.isLate
+                  ? `${data.payment.baseMpFee}+${data.payment.lateMpSurcharge} - recargo del ${data.payment.lateFeePercent}% sobre ${data.payment.baseMpFee}`
+                  : data.payment.mpFee}
+              </p>
+            </>
           )}
           <PayButton fallbackLink={data.payment.mpLink} />
         </div>

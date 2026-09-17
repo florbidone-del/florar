@@ -454,12 +454,6 @@ export function paidAmountThisMonth(snap: WorkshopSnapshot, studentId: string) {
 export function isUnpaid(snap: WorkshopSnapshot, studentId: string) {
   return paidAmountThisMonth(snap, studentId) < studentFee(snap);
 }
-export function withinPaymentWindow(snap: WorkshopSnapshot) {
-  const day = new Date().getDate();
-  return (
-    day >= snap.config.paymentWindowStart && day <= snap.config.paymentWindowEnd
-  );
-}
 export function profeAccountsUsernames(admins: { username: string; role: string }[]) {
   return admins.filter((a) => a.role === "profe").map((a) => a.username);
 }
