@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import {
   DIAS,
   activityForDate,
+  capacityForSlot,
   capitalize,
   currentMonthKey,
   daysSince,
@@ -30,7 +31,7 @@ import {
 } from "@/lib/domain";
 import { loadInteractions, visibleLikeCount, type CommentDTO } from "@/lib/postInteractionsData";
 
-export type CalendarDaySlot = { id: string; start: string; end: string; occ: number };
+export type CalendarDaySlot = { id: string; start: string; end: string; occ: number; capacity: number };
 export type CalendarDay = {
   date: string;
   day: number;
@@ -59,7 +60,6 @@ export type StudentPanelData = {
   totalClasses: number;
   pendingHolidays: number;
   swapsLeft: number;
-  capacity: number;
   payment: {
     unpaid: boolean;
     isPartial: boolean;
@@ -169,6 +169,7 @@ export async function buildStudentPanelData(
       start: s.start,
       end: s.end,
       occ: slotOccupancy(snap, date, s.id).length,
+      capacity: capacityForSlot(snap, weekday, s.id),
     }));
 
     const generalStatus: CalendarDay["generalStatus"] =
@@ -329,7 +330,6 @@ export async function buildStudentPanelData(
     totalClasses,
     pendingHolidays,
     swapsLeft,
-    capacity: snap.config.capacity,
     payment: {
       unpaid: isUnpaid(snap, studentId),
       isPartial: paidThisMonth > 0 && paidThisMonth < studentFee(snap),

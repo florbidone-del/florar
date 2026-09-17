@@ -37,7 +37,6 @@ enum ChatAuthorKind {
 model Config {
   id                     Int      @id @default(1)
   studioName             String   @default("Taller de Cerámica")
-  capacity               Int      @default(8)
   classesPerCycle        Int      @default(4)
   swapsPerMonth          Int      @default(1)
   paymentWindowStart     Int      @default(1)
@@ -85,6 +84,9 @@ model Admin {
   createdAt    DateTime  @default(now())
   avisosSeenAt DateTime?
   blogSeenAt   DateTime?
+  // Cupo máximo de estudiantes por clase de esta profe — reemplaza al viejo "cupo por turno"
+  // único de Config, porque cada profe puede querer un grupo más chico o más grande.
+  cupo         Int       @default(12)
 
   slotAssignments SlotAssignment[] @relation("AdminSlotAssignments")
   substitutions   Substitution[]   @relation("AdminSubstitutions")

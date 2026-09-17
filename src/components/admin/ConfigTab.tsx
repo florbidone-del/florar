@@ -14,7 +14,9 @@ import {
   addSlotAction,
   updateSlotAction,
   removeSlotAction,
+  updateProfeCupoAction,
 } from "@/lib/actions/config";
+import type { AdminDTO } from "@/lib/views/admin";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
 import { resetAllTutorialsAction, setMyDisplayNameAction } from "@/lib/actions/auth";
 import { saveStudentInfoAction, clearOldImagesAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
@@ -31,10 +33,10 @@ export function ConfigTab({
   const router = useRouter();
   const snap = bundle.snapshot;
   const c = snap.config;
-  const profes = bundle.admins.filter((a) => a.role === "profe").map((a) => a.username);
+  const profeAdmins = bundle.admins.filter((a) => a.role === "profe");
+  const profes = profeAdmins.map((a) => a.username);
   const me = bundle.admins.find((a) => a.username === myUsername);
 
-  const [capacity, setCapacity] = useState(c.capacity);
   const [classesPerCycle, setClassesPerCycle] = useState(c.classesPerCycle);
   const [swapsPerMonth, setSwapsPerMonth] = useState(c.swapsPerMonth);
   const [paymentWindowStart, setPaymentWindowStart] = useState(c.paymentWindowStart);
@@ -123,7 +125,6 @@ export function ConfigTab({
   async function saveRules() {
     setSavingRules(true);
     await saveConfigAction({
-      capacity,
       classesPerCycle,
       swapsPerMonth,
       paymentWindowStart,
@@ -226,15 +227,21 @@ export function ConfigTab({
               Todavía no hay cuentas de profe creadas — pedile al dueño/a que cree una en su panel.
             </p>
           ) : (
-            <SlotAssignmentGrid slots={c.slots} snap={snap} profes={profes} onChanged={() => router.refresh()} />
+            <>
+              <SlotAssignmentGrid slots={c.slots} snap={snap} profes={profes} onChanged={() => router.refresh()} />
+              <label style={{ marginTop: 18 }}>Cupo por profe</label>
+              <p className="muted" style={{ marginTop: 0 }}>
+                Cuántos estudiantes entran en una clase de cada profe — se usa para saber cuándo un turno
+                está lleno.
+              </p>
+              <CupoPorProfe profeAdmins={profeAdmins} onChanged={() => router.refresh()} />
+            </>
           )}
         </Collapsible>
       )}
 
       {isMainProfe && (
         <Collapsible title="Reglas y cuota">
-        <label>Cupo por turno</label>
-        <input type="number" value={capacity} onChange={(e) => setCapacity(Number(e.target.value))} />
         <label>Clases por ciclo (informativo)</label>
         <input type="number" value={classesPerCycle} onChange={(e) => setClassesPerCycle(Number(e.target.value))} />
         <label>Cambios permitidos por mes</label>
@@ -418,6 +425,40 @@ function SlotAssignmentGrid({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function CupoPorProfe({ profeAdmins, onChanged }: { profeAdmins: AdminDTO[]; onChanged: () => void }) {
+  const [values, setValues] = useState<Record<string, number>>(() =>
+    Object.fromEntries(profeAdmins.map((a) => [a.username, a.cupo]))
+  );
+  const [saving, setSaving] = useState<string | null>(null);
+
+  async function save(username: string, value: number) {
+    if (!Number.isFinite(value) || value < 1) return;
+    setSaving(username);
+    await updateProfeCupoAction(username, value);
+    setSaving(null);
+    onChanged();
+  }
+
+  return (
+    <div>
+      {profeAdmins.map((a) => (
+        <div className="list-item" key={a.username}>
+          <span>{capitalize(a.username)}</span>
+          <input
+            type="number"
+            min={1}
+            style={{ width: 90, flexShrink: 0 }}
+            disabled={saving === a.username}
+            value={values[a.username] ?? a.cupo}
+            onChange={(e) => setValues((v) => ({ ...v, [a.username]: Number(e.target.value) }))}
+            onBlur={(e) => save(a.username, Number(e.target.value))}
+          />
+        </div>
+      ))}
     </div>
   );
 }

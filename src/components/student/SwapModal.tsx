@@ -23,7 +23,6 @@ export function SwapModal({
   calendar,
   leadingBlanks,
   todayISO,
-  capacity,
   onClose,
   onConfirmed,
 }: {
@@ -35,7 +34,6 @@ export function SwapModal({
   calendar: CalendarDay[];
   leadingBlanks: number;
   todayISO: string;
-  capacity: number;
   onClose: () => void;
   onConfirmed: () => void;
 }) {
@@ -92,7 +90,7 @@ export function SwapModal({
         ) : (
           chosenDay.slots.map((slot) => {
             const isSameAsOriginal = chosenDate === originalDate && slot.id === originalSlotId;
-            const full = slot.occ >= capacity;
+            const full = slot.occ >= slot.capacity;
             const hrs = hoursUntil(chosenDate!, slot.start);
             const blocked = full || hrs < 24 || isSameAsOriginal;
             return (
@@ -105,7 +103,7 @@ export function SwapModal({
                   {slot.start}–{slot.end}
                 </span>
                 <span className="muted">
-                  {isSameAsOriginal ? "es la que estás cambiando" : `${slot.occ}/${capacity}`}
+                  {isSameAsOriginal ? "es la que estás cambiando" : `${slot.occ}/${slot.capacity}`}
                 </span>
               </div>
             );

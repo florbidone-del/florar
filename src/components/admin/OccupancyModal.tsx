@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/shared/Modal";
 import {
+  capacityForSlot,
   capitalize,
   fmtLong,
   parseISO,
@@ -34,6 +35,7 @@ export function OccupancyModal({
   const profes = profeAccountsUsernames(bundle.admins);
   const currentProfe = profeForDateSlot(snap, date, slotId);
   const regularProfe = profeForSlot(snap, parseISO(date).getDay(), slotId);
+  const capacity = capacityForSlot(snap, parseISO(date).getDay(), slotId);
   const [pending, setPending] = useState(false);
 
   async function handleChange(value: string) {
@@ -50,7 +52,7 @@ export function OccupancyModal({
       <div className="occupancy-meta">
         <span className="occupancy-time">{slot ? `${slot.start}–${slot.end}` : ""}</span>
         <span className="muted">
-          {names.length}/{snap.config.capacity} ocupados
+          {names.length}/{capacity} ocupados
         </span>
       </div>
       <div style={{ marginTop: 10 }}>

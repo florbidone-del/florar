@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { isoDate, type WorkshopSnapshot, type ConfigDTO } from "@/lib/domain";
+import { isoDate, DEFAULT_CUPO, type WorkshopSnapshot, type ConfigDTO } from "@/lib/domain";
 
 function dOnly(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -11,7 +11,6 @@ export function dateInputToUTC(dateISO: string) {
 
 const DEFAULT_CONFIG = {
   studioName: "Florar - Taller de Cerámica",
-  capacity: 8,
   classesPerCycle: 4,
   swapsPerMonth: 1,
   paymentWindowStart: 1,
@@ -56,7 +55,6 @@ export async function loadConfig(): Promise<ConfigDTO> {
   ]);
   return {
     studioName: config.studioName,
-    capacity: config.capacity,
     classesPerCycle: config.classesPerCycle,
     swapsPerMonth: config.swapsPerMonth,
     paymentWindowStart: config.paymentWindowStart,
@@ -76,7 +74,7 @@ export async function loadConfig(): Promise<ConfigDTO> {
 
 /** Carga todo lo necesario para calcular ocupación, calendarios y estado de pago. */
 export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
-  const [config, holidays, students, scheduleChanges, payments, activities, slotAssignments, substitutions] =
+  const [config, holidays, students, scheduleChanges, payments, activities, slotAssignments, substitutions, admins] =
     await Promise.all([
       loadConfig(),
       prisma.holiday.findMany(),
@@ -86,7 +84,9 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       prisma.activity.findMany(),
       prisma.slotAssignment.findMany(),
       prisma.substitution.findMany(),
+      prisma.admin.findMany({ select: { username: true, cupo: true } }),
     ]);
+  const cupoByProfe = new Map(admins.map((a) => [a.username, a.cupo]));
 
   return {
     config,
@@ -131,6 +131,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       weekday: sa.weekday,
       slotId: sa.slotId,
       profeUsername: sa.profeUsername,
+      cupo: cupoByProfe.get(sa.profeUsername) ?? DEFAULT_CUPO,
     })),
     substitutions: substitutions.map((s) => ({
       date: dOnly(s.date),

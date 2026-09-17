@@ -11,6 +11,7 @@ export type AdminDTO = {
   tutorialSeen: boolean;
   displayName: string | null;
   createdAt: string;
+  cupo: number;
 };
 export type NotificationDTO = {
   id: string;
@@ -159,6 +160,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       tutorialSeen: a.tutorialSeen,
       displayName: a.displayName,
       createdAt: isoDate(a.createdAt),
+      cupo: a.cupo,
     })),
     notifications: notifications.map((n) => ({
       id: n.id,

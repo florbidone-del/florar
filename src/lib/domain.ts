@@ -146,7 +146,6 @@ export type SlotDTO = {
 };
 export type ConfigDTO = {
   studioName: string;
-  capacity: number;
   classesPerCycle: number;
   swapsPerMonth: number;
   paymentWindowStart: number;
@@ -204,6 +203,7 @@ export type SlotAssignmentDTO = {
   weekday: number;
   slotId: string;
   profeUsername: string;
+  cupo: number;
 };
 export type SubstitutionDTO = {
   date: string;
@@ -245,6 +245,19 @@ export function profeForSlot(
     (sa) => sa.weekday === weekday && sa.slotId === slotId
   );
   return found ? found.profeUsername : null;
+}
+// Cupo default para un turno sin profe asignada — cada profe tiene el suyo (ver Admin.cupo);
+// esto solo cubre el caso de un turno que todavía nadie tomó.
+export const DEFAULT_CUPO = 12;
+export function capacityForSlot(
+  snap: WorkshopSnapshot,
+  weekday: number,
+  slotId: string
+) {
+  const found = snap.slotAssignments.find(
+    (sa) => sa.weekday === weekday && sa.slotId === slotId
+  );
+  return found ? found.cupo : DEFAULT_CUPO;
 }
 export function profeForDateSlot(
   snap: WorkshopSnapshot,
@@ -346,8 +359,9 @@ export function dayAvailability(
   if (isHoliday(snap, dateISO)) return "holiday";
   const slots = slotsForDate(snap, dateISO);
   if (!slots.length) return "closed";
+  const weekday = parseISO(dateISO).getDay();
   const anyRoom = slots.some(
-    (s) => slotOccupancy(snap, dateISO, s.id).length < snap.config.capacity
+    (s) => slotOccupancy(snap, dateISO, s.id).length < capacityForSlot(snap, weekday, s.id)
   );
   return anyRoom ? "available" : "full";
 }

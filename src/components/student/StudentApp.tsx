@@ -501,7 +501,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         />
       )}
       {modal?.kind === "other" && (
-        <DayInfoModal day={modal.day} capacity={data.capacity} onClose={() => setModal(null)} />
+        <DayInfoModal day={modal.day} onClose={() => setModal(null)} />
       )}
       {modal?.kind === "swap" && originalDay?.own && (
         <SwapModal
@@ -513,7 +513,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           calendar={data.calendar}
           leadingBlanks={data.leadingBlanks}
           todayISO={data.todayISO}
-          capacity={data.capacity}
           onClose={() => setModal(null)}
           onConfirmed={closeAndRefresh}
         />

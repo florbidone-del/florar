@@ -8,11 +8,9 @@ import type { CalendarDay } from "@/lib/views/student";
 
 export function DayInfoModal({
   day,
-  capacity,
   onClose,
 }: {
   day: CalendarDay;
-  capacity: number;
   onClose: () => void;
 }) {
   return (
@@ -37,14 +35,14 @@ export function DayInfoModal({
         </p>
       ) : (
         day.slots.map((slot) => {
-          const full = slot.occ >= capacity;
+          const full = slot.occ >= slot.capacity;
           return (
             <div className="list-item" key={slot.id}>
               <span>
                 {slot.start}–{slot.end}
               </span>
               <span className={`tag ${full ? "warn" : "ok"}`}>
-                {slot.occ}/{capacity}
+                {slot.occ}/{slot.capacity}
               </span>
             </div>
           );

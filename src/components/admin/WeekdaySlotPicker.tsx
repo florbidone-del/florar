@@ -1,6 +1,6 @@
 "use client";
 
-import { DIAS_CORTO, slotsForWeekday, weekdayOccupancyCount, type WorkshopSnapshot } from "@/lib/domain";
+import { DIAS_CORTO, capacityForSlot, slotsForWeekday, weekdayOccupancyCount, type WorkshopSnapshot } from "@/lib/domain";
 
 export function WeekdaySlotPicker({
   snap,
@@ -39,7 +39,8 @@ export function WeekdaySlotPicker({
         ) : (
           slots.map((slot) => {
             const occ = weekdayOccupancyCount(snap, selDay, slot.id, excludeStudentId);
-            const full = occ >= snap.config.capacity;
+            const capacity = capacityForSlot(snap, selDay, slot.id);
+            const full = occ >= capacity;
             const isSel = selSlot === slot.id;
             return (
               <div
@@ -47,7 +48,7 @@ export function WeekdaySlotPicker({
                 className={`chip ${isSel ? "selected" : ""} ${full && !isSel ? "full" : ""}`}
                 onClick={full && !isSel ? undefined : () => onChange(selDay, slot.id)}
               >
-                {slot.start}–{slot.end} <span className="muted">({occ}/{snap.config.capacity})</span>
+                {slot.start}–{slot.end} <span className="muted">({occ}/{capacity})</span>
               </div>
             );
           })

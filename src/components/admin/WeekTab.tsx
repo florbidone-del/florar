@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   DIAS_CORTO,
   addDays,
+  capacityForSlot,
   capitalize,
   fmtShort,
   isHoliday,
@@ -71,7 +72,8 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
                       );
                     }
                     const names = slotOccupancy(snap, date, slotId);
-                    const full = names.length >= snap.config.capacity;
+                    const capacity = capacityForSlot(snap, parseISO(date).getDay(), slotId);
+                    const full = names.length >= capacity;
                     const isSubstituted = snap.substitutions.some(
                       (s) => s.date === date && s.slotId === slotId
                     );
@@ -91,7 +93,7 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
                           className={cls}
                           onClick={() => setModalCell({ date, slotId })}
                         >
-                          {names.length}/{snap.config.capacity}
+                          {names.length}/{capacity}
                           {isSubstituted ? " *" : ""}
                           {profe && <div className="names">{capitalize(profe)}</div>}
                         </button>

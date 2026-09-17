@@ -5,7 +5,6 @@ import { requireProfe, requireMainProfe } from "@/lib/authz";
 import type { ActionResult } from "@/lib/actions/auth";
 
 export async function saveConfigAction(input: {
-  capacity: number;
   classesPerCycle: number;
   swapsPerMonth: number;
   paymentWindowStart: number;
@@ -23,7 +22,6 @@ export async function saveConfigAction(input: {
   await prisma.config.update({
     where: { id: 1 },
     data: {
-      capacity: input.capacity,
       classesPerCycle: input.classesPerCycle,
       swapsPerMonth: input.swapsPerMonth,
       paymentWindowStart: input.paymentWindowStart,
@@ -36,6 +34,19 @@ export async function saveConfigAction(input: {
       profeWhatsapp: input.profeWhatsapp.trim().replace(/[^0-9]/g, "") || null,
       mpLink: input.mpLink.trim() || null,
     },
+  });
+  return { ok: true };
+}
+
+/** El cupo máximo de una clase es propio de cada profe (reemplaza al viejo cupo único del
+ *  taller), así que lo fija la profe principal, igual que a quién le toca cada turno. */
+export async function updateProfeCupoAction(username: string, cupo: number): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  if (!Number.isFinite(cupo) || cupo < 1) return { error: "El cupo tiene que ser un número mayor a 0." };
+  await prisma.admin.updateMany({
+    where: { username, role: "profe" },
+    data: { cupo: Math.round(cupo) },
   });
   return { ok: true };
 }

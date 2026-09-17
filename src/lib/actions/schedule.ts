@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import {
+  capacityForSlot,
   currentMonthKey,
   dayAvailability,
   fmtShort,
@@ -62,7 +63,7 @@ export async function requestScheduleChangeAction(input: {
     return { error: "Elegí un turno distinto del que estás cambiando." };
   }
   const occ = slotOccupancy(snap, targetDate, targetSlotId, student.id);
-  if (occ.length >= snap.config.capacity) {
+  if (occ.length >= capacityForSlot(snap, parseISO(targetDate).getDay(), targetSlotId)) {
     return { error: "Ese turno ya está lleno." };
   }
   if (hoursUntil(snap, targetDate, targetSlotId) < 24) {
