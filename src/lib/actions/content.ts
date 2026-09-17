@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { dateInputToUTC } from "@/lib/snapshot";
+import { todayISO } from "@/lib/domain";
 import { uploadImageDataUrl, deleteBlobImage } from "@/lib/blobStorage";
 import { deleteInteractionsFor } from "@/lib/postInteractionsData";
 import type { ActionResult } from "@/lib/actions/auth";
@@ -61,6 +62,54 @@ export async function loadOfficialHolidaysAction(
     const existing = await prisma.holiday.findUnique({ where: { date: dateInputToUTC(h.date) } });
     if (existing) continue;
     await prisma.holiday.create({ data: { date: dateInputToUTC(h.date), label: h.label } });
+    added++;
+  }
+  return { ok: true, added };
+}
+
+const CLASS_CAP_LABEL = "Sin clases por ya haber tenido las 4 clases del mes";
+
+/** Cancela automáticamente la 5ta clase del mes de cada día de la semana que la tenga (ej: si un
+ *  mes tiene 5 martes, cancela el último) — así ningún turno da más de 4 clases por mes. Igual que
+ *  los feriados oficiales, nunca pisa un día ya cargado, así que se puede apretar todos los años. */
+export async function loadExtraClassCancellationsAction(
+  years: number[]
+): Promise<ActionResult & { added?: number }> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+
+  const slots = await prisma.slot.findMany();
+  const weekdaysWithClass = new Set(slots.flatMap((s) => s.weekdays));
+
+  const toAdd: string[] = [];
+  for (const year of years) {
+    for (let month = 1; month <= 12; month++) {
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const datesByWeekday = new Map<number, string[]>();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const weekday = new Date(year, month - 1, day).getDay();
+        if (!weekdaysWithClass.has(weekday)) continue;
+        const dateISO = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const list = datesByWeekday.get(weekday) || [];
+        list.push(dateISO);
+        datesByWeekday.set(weekday, list);
+      }
+      for (const dates of datesByWeekday.values()) {
+        if (dates.length >= 5) toAdd.push(dates[4]);
+      }
+    }
+  }
+
+  // No reescribe el pasado: una clase que ya se dio, se dio — esto es para lo que falta de acá
+  // en adelante, no para "corregir" retroactivamente meses que ya pasaron.
+  const today = todayISO();
+  const futureOnly = toAdd.filter((dateISO) => dateISO >= today);
+
+  let added = 0;
+  for (const dateISO of futureOnly) {
+    const existing = await prisma.holiday.findUnique({ where: { date: dateInputToUTC(dateISO) } });
+    if (existing) continue;
+    await prisma.holiday.create({ data: { date: dateInputToUTC(dateISO), label: CLASS_CAP_LABEL } });
     added++;
   }
   return { ok: true, added };

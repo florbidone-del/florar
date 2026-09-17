@@ -16,7 +16,11 @@ import {
 } from "@/lib/actions/config";
 import { setSlotAssignmentAction } from "@/lib/actions/schedule";
 import { resetAllTutorialsAction, setMyDisplayNameAction } from "@/lib/actions/auth";
-import { clearOldImagesAction, loadOfficialHolidaysAction } from "@/lib/actions/content";
+import {
+  clearOldImagesAction,
+  loadOfficialHolidaysAction,
+  loadExtraClassCancellationsAction,
+} from "@/lib/actions/content";
 
 export function ConfigTab({
   bundle,
@@ -55,6 +59,8 @@ export function ConfigTab({
   const [clearResult, setClearResult] = useState<string | null>(null);
   const [loadingOfficial, setLoadingOfficial] = useState(false);
   const [officialResult, setOfficialResult] = useState<string | null>(null);
+  const [loadingExtraClass, setLoadingExtraClass] = useState(false);
+  const [extraClassResult, setExtraClassResult] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
 
   async function saveDisplayName() {
@@ -105,6 +111,23 @@ export function ConfigTab({
       res.added === 0
         ? "Ya estaban todos cargados — no había nada nuevo para agregar."
         : `Se agregaron ${res.added} feriados nuevos.`
+    );
+    router.refresh();
+  }
+
+  async function loadExtraClass() {
+    setLoadingExtraClass(true);
+    setExtraClassResult(null);
+    const res = await loadExtraClassCancellationsAction([currentYear]);
+    setLoadingExtraClass(false);
+    if ("error" in res) {
+      setExtraClassResult(res.error!);
+      return;
+    }
+    setExtraClassResult(
+      res.added === 0
+        ? "No había ningún mes con una 5ta clase de más para cancelar."
+        : `Se cancelaron ${res.added} clases de más.`
     );
     router.refresh();
   }
@@ -297,6 +320,17 @@ export function ConfigTab({
             {loadingOfficial ? "Cargando…" : "Cargar los feriados de este año"}
           </button>
           {officialResult && <p className="hint">{officialResult}</p>}
+
+          <label style={{ marginTop: 18 }}>Tope de 4 clases por mes</label>
+          <p className="hint" style={{ marginTop: 0 }}>
+            Cuando un día de la semana tiene 5 clases en un mes de {currentYear} (ej: 5 martes), cancela
+            la última para que nadie dé más de 4 clases ese mes — igual que un feriado, la profe la puede
+            reactivar después si hace falta. No pisa los días que ya tengas cargados.
+          </p>
+          <button className="ghost block" disabled={loadingExtraClass} onClick={loadExtraClass}>
+            {loadingExtraClass ? "Cargando…" : "Cancelar las clases de más de este año"}
+          </button>
+          {extraClassResult && <p className="hint">{extraClassResult}</p>}
 
           <label style={{ marginTop: 18 }}>Fotos de CeramiBlog y bitácoras (antes de esta fecha)</label>
           <input type="date" value={imagesBeforeDate} onChange={(e) => setImagesBeforeDate(e.target.value)} />
