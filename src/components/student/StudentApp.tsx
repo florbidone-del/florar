@@ -485,7 +485,9 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       )}
 
       <p className="footer-note">
-        Florar - Taller y Escuela de Cerámica - El espacio que reúne calidez, aprendizaje y diversión
+        Florar - Taller y Escuela de Cerámica
+        <br />
+        El espacio que reúne calidez, aprendizaje y diversión
       </p>
 
       {modal?.kind === "own" && (
