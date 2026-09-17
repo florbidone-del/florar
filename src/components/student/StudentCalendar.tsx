@@ -34,6 +34,7 @@ export function StudentCalendar({
           if (day.own) {
             if (day.own.status === "moved-swap" || day.own.status === "moved-holiday") cls = "own-moved";
             else if (day.own.status === "pending-holiday") cls = "own-pending";
+            else if (day.own.status === "capped") cls = "own-attended";
             else if (isPast) cls = "own-attended";
             else cls = "own-confirmed";
           } else if (day.weekday === 0) {

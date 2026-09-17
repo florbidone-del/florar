@@ -76,6 +76,17 @@ export function OwnSessionModal({
     );
     actionLabel = "Reprogramar";
     isHolidayReschedule = true;
+  } else if (own.status === "capped") {
+    body = (
+      <>
+        <p className="muted">
+          {own.start}–{own.end}
+        </p>
+        <span className="tag moved">
+          {day.holiday?.label || "Sin clases por ya haber tenido las 4 clases del mes"}
+        </span>
+      </>
+    );
   } else if (own.status === "moved-swap" || own.status === "moved-holiday") {
     body = (
       <>

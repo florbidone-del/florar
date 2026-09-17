@@ -40,7 +40,10 @@ export async function requestScheduleChangeAction(input: {
   );
   if (alreadyChanged) return { error: "Esa clase ya fue movida." };
 
-  const isHolidayReschedule = !!isHoliday(snap, originalDate);
+  // Un feriado "capped" (tope de 4 clases del mes) no da reprogramación gratis — a diferencia de
+  // un feriado real, no le debe una clase al/a la estudiante.
+  const originalHoliday = isHoliday(snap, originalDate);
+  const isHolidayReschedule = !!originalHoliday && !originalHoliday.capped;
   const reason: "cambio" | "feriado" = isHolidayReschedule ? "feriado" : "cambio";
 
   if (!isHolidayReschedule) {

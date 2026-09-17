@@ -72,6 +72,10 @@ model Slot {
 model Holiday {
   date  DateTime @id @db.Date
   label String?
+  // true cuando la clase se canceló por haber llegado al tope de 4 del mes (no por un feriado
+  // real): a diferencia de un feriado, no le "debe" una clase al/a la estudiante, así que no
+  // cuenta para el total de clases del mes ni ofrece reprogramar gratis.
+  capped Boolean @default(false)
 }
 
 model Admin {

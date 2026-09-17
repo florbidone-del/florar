@@ -161,7 +161,7 @@ export type ConfigDTO = {
   studentInfo: string;
   slots: SlotDTO[];
 };
-export type HolidayDTO = { date: string; label: string | null };
+export type HolidayDTO = { date: string; label: string | null; capped: boolean };
 export type StudentDTO = {
   id: string;
   name: string;
@@ -373,6 +373,7 @@ export type SessionRow = {
     | "moved-holiday"
     | "moved-swap"
     | "pending-holiday"
+    | "capped"
     | "confirmed"
     | "rescheduled";
   movedTo?: { date: string; slotId: string };
@@ -401,7 +402,10 @@ export function studentSessionsThisMonth(
         movedTo: { date: change.toDate, slotId: change.toSlotId },
       });
     } else if (isHoliday(snap, date)) {
-      rows.push({ date, slotId: s.defaultSlotId, status: "pending-holiday" });
+      const hol = isHoliday(snap, date)!;
+      // Un feriado real le "debe" una clase (reprograma gratis); el tope de 4 no — ya tuvo sus
+      // 4 clases del mes, así que ni cuenta como pendiente ni suma al total.
+      rows.push({ date, slotId: s.defaultSlotId, status: hol.capped ? "capped" : "pending-holiday" });
     } else {
       rows.push({ date, slotId: s.defaultSlotId, status: "confirmed" });
     }

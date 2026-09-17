@@ -109,7 +109,9 @@ export async function loadExtraClassCancellationsAction(
   for (const dateISO of futureOnly) {
     const existing = await prisma.holiday.findUnique({ where: { date: dateInputToUTC(dateISO) } });
     if (existing) continue;
-    await prisma.holiday.create({ data: { date: dateInputToUTC(dateISO), label: CLASS_CAP_LABEL } });
+    await prisma.holiday.create({
+      data: { date: dateInputToUTC(dateISO), label: CLASS_CAP_LABEL, capped: true },
+    });
     added++;
   }
   return { ok: true, added };

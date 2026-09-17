@@ -90,7 +90,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
 
   return {
     config,
-    holidays: holidays.map((h) => ({ date: dOnly(h.date), label: h.label })),
+    holidays: holidays.map((h) => ({ date: dOnly(h.date), label: h.label, capped: h.capped })),
     students: students.map((s) => ({
       id: s.id,
       name: s.name,
