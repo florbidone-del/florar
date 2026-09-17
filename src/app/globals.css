@@ -5,8 +5,8 @@
   --ink: #2B2233;
   --ink-soft: #6E5F7A;
   --line: #DCD2E6;
-  --glaze: #4B3B63;
-  --glaze-dark: #352748;
+  --glaze: #432467;
+  --glaze-dark: #321B4D;
   --oxide: #A6446B;
   --oxide-soft: #F1DCE5;
   --ok-bg: #E4DCEE;
@@ -31,7 +31,7 @@ a{overflow-wrap:anywhere; word-break:break-word;}
    partan letra por letra (hereda de .card/.banner si no se resetea acá). */
 button{overflow-wrap:normal; word-break:normal;}
 h1,h2,h3{
-  font-family:var(--font-fraunces), Georgia, serif;
+  font-family:var(--font-heading), Georgia, serif;
   font-weight:600;
   margin:0 0 4px 0;
   letter-spacing:-0.01em;
@@ -279,7 +279,7 @@ label:first-child{margin-top:0;}
   border-radius:var(--radius);
   padding:14px;
 }
-.stat .num{font-family:var(--font-fraunces), serif; font-size:1.7rem; line-height:1;}
+.stat .num{font-family:var(--font-heading), serif; font-size:1.7rem; line-height:1;}
 .stat .label{font-size:0.78rem; color:var(--ink-soft); margin-top:4px;}
 .banner{
   background:var(--oxide-soft);
@@ -343,7 +343,7 @@ th,td{
 th{background:var(--surface); font-weight:600; font-size:0.75rem;}
 th.row-head{position:sticky; left:0; z-index:2;}
 th.row-head.slot-time{
-  font-family:var(--font-fraunces), serif;
+  font-family:var(--font-heading), serif;
   font-size:0.85rem;
   font-weight:700;
   color:var(--ink);
@@ -354,13 +354,13 @@ th.row-head.slot-time span{display:block; white-space:nowrap;}
 .week-range{white-space:nowrap;}
 .slot-time-sep{font-size:0.62rem; font-weight:400; color:var(--ink-soft); font-family:var(--font-work-sans), sans-serif;}
 td.holiday{background:var(--oxide-soft);}
-.occ-count{font-family:var(--font-fraunces), serif; font-size:1.1rem;}
+.occ-count{font-family:var(--font-heading), serif; font-size:1.1rem;}
 .names{font-size:0.62rem; color:var(--ink-soft); margin-top:2px; word-break:break-word;}
 .occ-cell{
   width:100%;
   border:none;
   background:transparent;
-  font-family:var(--font-fraunces), serif;
+  font-family:var(--font-heading), serif;
   font-size:1.05rem;
   color:var(--ink-soft);
   padding:10px 2px;
@@ -387,7 +387,7 @@ td.holiday{background:var(--oxide-soft);}
   gap:8px;
 }
 .roster-group-label{
-  font-family:var(--font-fraunces), serif;
+  font-family:var(--font-heading), serif;
   font-size:0.85rem;
   font-weight:700;
   color:var(--glaze-dark);
@@ -405,7 +405,7 @@ td.holiday{background:var(--oxide-soft);}
   gap:8px;
   margin-bottom:4px;
 }
-.occupancy-time{font-family:var(--font-fraunces), serif; font-size:1.4rem; font-weight:600; color:var(--ink);}
+.occupancy-time{font-family:var(--font-heading), serif; font-size:1.4rem; font-weight:600; color:var(--ink);}
 .roster-item{
   display:flex;
   align-items:center;

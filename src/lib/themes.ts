@@ -15,11 +15,12 @@ export type Theme = {
 
 export const THEMES: Record<string, Theme> = {
   florar: {
-    // glaze/glazeDark tomados directo del sello oficial del taller (florar sello.pdf: violeta
-    // #38226A y su sombra), para que el tema por defecto sea fiel a la marca real.
+    // glaze/glazeDark sacados con cuentagotas directo de "logo florar.png" (el archivo real del
+    // isologo): violeta #432467 y una sombra proporcional, para que el tema por defecto sea
+    // fiel al color oficial del taller.
     name: "Florar", bg: "#EEE9F2", surface: "#F7F4FA", surface2: "#FCFAFD",
     ink: "#241A3B", inkSoft: "#6B5E82", line: "#E1DDEC",
-    glaze: "#38226A", glazeDark: "#2A1A50", oxide: "#A6446B", oxideSoft: "#F1DCE5", okBg: "#E4DCEE",
+    glaze: "#432467", glazeDark: "#321B4D", oxide: "#A6446B", oxideSoft: "#F1DCE5", okBg: "#E4DCEE",
   },
   arcilla: {
     name: "Arcilla", bg: "#EDE7DA", surface: "#F7F2E9", surface2: "#FBF8F2",

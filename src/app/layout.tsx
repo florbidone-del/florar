@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Work_Sans } from "next/font/google";
+import { Cormorant, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { loadConfig } from "@/lib/snapshot";
 import { themeCssVars } from "@/lib/themes";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-const fraunces = Fraunces({
+// Elegido para calzar con la letra fina de "taller de cerámica" en el isologo real (logo florar.png).
+const cormorant = Cormorant({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-fraunces",
+  weight: ["500", "600", "700"],
+  variable: "--font-heading",
   display: "swap",
 });
 const workSans = Work_Sans({
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#4B3B63",
+  themeColor: "#432467",
   viewportFit: "cover",
 };
 
@@ -55,7 +56,7 @@ export default async function RootLayout({
 
   return (
     <html lang="es" style={themeVars as React.CSSProperties}>
-      <body className={`${fraunces.variable} ${workSans.variable}`}>
+      <body className={`${cormorant.variable} ${workSans.variable}`}>
         <div className="app-shell">{children}</div>
       </body>
     </html>
