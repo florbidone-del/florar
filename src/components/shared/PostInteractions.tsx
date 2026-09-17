@@ -68,7 +68,8 @@ export function PostInteractions({
     <div className="post-interactions">
       <div className="post-actions-row">
         <button type="button" className={`ghost small like-btn ${liked ? "liked" : ""}`} disabled={busy} onClick={toggleLike}>
-          {liked ? "♥" : "♡"} Me gusta{likeCount !== null ? ` (${likeCount})` : ""}
+          <img src="/florar-mark.png" alt="" className="like-icon" />
+          Me enflorece{likeCount !== null ? ` (${likeCount})` : ""}
         </button>
         <button type="button" className="ghost small" onClick={() => setShowComments((v) => !v)}>
           💬 Comentarios{comments.length > 0 ? ` (${comments.length})` : ""}

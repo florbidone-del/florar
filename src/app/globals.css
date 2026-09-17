@@ -799,6 +799,17 @@ td.holiday{background:var(--oxide-soft);}
 .post-interactions{margin-top:10px; padding-top:10px; border-top:1px solid var(--line);}
 .post-actions-row{display:flex; gap:8px;}
 .like-btn.liked{color:var(--oxide); border-color:var(--oxide);}
+.like-icon{
+  width:15px;
+  height:15px;
+  border-radius:50%;
+  vertical-align:-3px;
+  margin-right:3px;
+  opacity:0.4;
+  filter:grayscale(1);
+  transition:opacity .15s ease, filter .15s ease;
+}
+.like-btn.liked .like-icon{opacity:1; filter:none;}
 .post-comments{margin-top:8px; display:flex; flex-direction:column; gap:6px;}
 .post-comment{font-size:0.85rem; line-height:1.4;}
 .post-comment-author{font-weight:600;}
