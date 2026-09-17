@@ -44,11 +44,12 @@ const TAB_LABELS: Record<Tab, string> = {
   cuenta: "Mi cuenta",
 };
 const SECTION_TAB: Record<string, Tab> = {
-  "calendar-section": "calendario",
   "announcements-section": "calendario",
-  "chat-section": "chat",
+  "calendar-section": "calendario",
   "blog-section": "blog",
+  "bitacora-section": "bitacora",
   "info-section": "info",
+  "chat-section": "chat",
   "account-section": "cuenta",
 };
 
@@ -56,7 +57,22 @@ function studentTourSteps(studioName: string): TourStep[] {
   return [
     {
       title: `¡Bienvenido/a a ${studioName}!`,
-      body: <p className="muted">Un recorrido rapidito por lo que podés hacer acá. Se puede saltear.</p>,
+      body: (
+        <p className="muted">
+          Un recorrido rapidito por lo que podés hacer acá, en el orden en que lo vas viendo en pantalla.
+          Se puede saltear.
+        </p>
+      ),
+    },
+    {
+      title: "Avisos",
+      focus: "announcements-section",
+      body: (
+        <p className="muted">
+          Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
+          todo un botón para pagar con Mercado Pago, sin importar en qué pestaña estés.
+        </p>
+      ),
     },
     {
       title: "Tu calendario",
@@ -79,26 +95,6 @@ function studentTourSteps(studioName: string): TourStep[] {
       ),
     },
     {
-      title: "Chat de tu turno",
-      focus: "chat-section",
-      body: (
-        <p className="muted">
-          Un chat solo entre vos, tus compañeros del mismo día y horario, y la profe de ese turno —
-          nadie más lo ve.
-        </p>
-      ),
-    },
-    {
-      title: "Avisos",
-      focus: "announcements-section",
-      body: (
-        <p className="muted">
-          Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
-          todo un botón para pagar con Mercado Pago, sin importar en qué pestaña estés.
-        </p>
-      ),
-    },
-    {
       title: "CeramiBlog",
       focus: "blog-section",
       body: (
@@ -109,9 +105,29 @@ function studentTourSteps(studioName: string): TourStep[] {
       ),
     },
     {
-      title: "Información del taller",
+      title: "Bitácora",
+      focus: "bitacora-section",
+      body: (
+        <p className="muted">
+          Subí tus piezas y avances con foto — queda privado, solo lo ven las profes y vos, salvo que
+          decidan hacerlo público. Ahí también podés ver las bitácoras públicas de tus compañeros.
+        </p>
+      ),
+    },
+    {
+      title: "Info del Taller",
       focus: "info-section",
       body: <p className="muted">En esta pestaña encontrás la información fija del taller y de tu profe.</p>,
+    },
+    {
+      title: "Chat de tu turno",
+      focus: "chat-section",
+      body: (
+        <p className="muted">
+          Un chat solo entre vos, tus compañeros del mismo día y horario, y la profe de ese turno —
+          nadie más lo ve.
+        </p>
+      ),
     },
     {
       title: "Tu cuenta",

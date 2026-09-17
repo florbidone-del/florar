@@ -50,7 +50,7 @@ function ownerTourSteps(): TourStep[] {
 
 function profeTourSteps(isMainProfe: boolean): TourStep[] {
   return [
-    { title: "¡Bienvenida/o!", body: <p className="muted">Un repaso rápido de las pestañas. Se puede saltear.</p> },
+    { title: "¡Bienvenida/o!", body: <p className="muted">Un repaso rápido de las pestañas, en el orden en que las vas viendo en pantalla. Se puede saltear.</p> },
     {
       title: "Semana",
       focus: "semana",
@@ -59,18 +59,6 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
           Ocupación de cada turno en la semana. Tocá un turno para ver quién está anotado y, si hace
           falta, asignar una suplencia solo para ese día.
         </p>
-      ),
-    },
-    {
-      title: "Chat",
-      focus: "chat",
-      body: isMainProfe ? (
-        <p className="muted">
-          Un chat por turno entre esos estudiantes y su profe. Como sos la profe principal, podés ver y
-          participar en el de cualquier turno.
-        </p>
-      ) : (
-        <p className="muted">Un chat con los estudiantes de tu turno — no ven los de otros turnos.</p>
       ),
     },
     {
@@ -88,9 +76,8 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "avisos",
       body: (
         <p className="muted">
-          Publicá avisos para los estudiantes y cargá los feriados del taller — un feriado cancela la
-          clase de ese día automáticamente. La información fija (la que no cambia seguido) se mudó a
-          Configuración.
+          Publicá avisos para los estudiantes y tocá un día del calendario para cancelar esa clase (por
+          feriado o cualquier otro motivo).
         </p>
       ),
     },
@@ -114,17 +101,49 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       ),
     },
     {
+      title: "Bitácoras",
+      focus: "bitacoras",
+      body: (
+        <p className="muted">
+          Lo que van subiendo los/las estudiantes a su bitácora personal. Desde el menú de cada
+          publicación podés hacerla pública, destacarla en el CeramiBlog, o borrarla.
+        </p>
+      ),
+    },
+    {
+      title: "Info del Taller",
+      focus: "info",
+      body: (
+        <p className="muted">
+          El texto fijo que ven los/las estudiantes arriba de todo — reglas, links, medios de pago. Se
+          edita ahí mismo, con el lápiz.
+        </p>
+      ),
+    },
+    {
+      title: "Chat",
+      focus: "chat",
+      body: isMainProfe ? (
+        <p className="muted">
+          Un chat por turno entre esos estudiantes y su profe. Como sos la profe principal, podés ver y
+          participar en el de cualquier turno.
+        </p>
+      ) : (
+        <p className="muted">Un chat con los estudiantes de tu turno — no ven los de otros turnos.</p>
+      ),
+    },
+    {
       title: "Configuración",
       focus: "config",
       body: isMainProfe ? (
         <p className="muted">
-          Turnos, información fija para estudiantes, tema de colores y, como sos la profe principal,
-          también podés asignar qué profe da cada turno y ajustar las reglas y la cuota del taller.
+          Turnos, tema de colores y, como sos la profe principal, también podés asignar qué profe da cada
+          turno y ajustar las reglas y la cuota del taller.
         </p>
       ) : (
         <p className="muted">
-          Turnos, información fija para estudiantes y tema de colores. La asignación de profes por turno
-          y las reglas/cuota las maneja la profe principal.
+          Turnos y tema de colores. La asignación de profes por turno y las reglas/cuota las maneja la
+          profe principal.
         </p>
       ),
     },
