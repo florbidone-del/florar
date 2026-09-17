@@ -484,7 +484,9 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       )}
 
-      <p className="footer-note">{data.studioName} · turno fijo, cambios con 24hs de anticipación</p>
+      <p className="footer-note">
+        Florar - Taller y Escuela de Cerámica - El espacio que reúne calidez, aprendizaje y diversión
+      </p>
 
       {modal?.kind === "own" && (
         <OwnSessionModal
