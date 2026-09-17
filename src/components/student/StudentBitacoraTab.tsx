@@ -11,6 +11,8 @@ import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { Modal } from "@/components/shared/Modal";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { PostInteractions } from "@/components/shared/PostInteractions";
+import { PostImage } from "@/components/shared/PostImage";
+import { TrashIcon } from "@/components/shared/Icons";
 import { addStudentPostAction, removeStudentPostAction } from "@/lib/actions/studentPosts";
 import type { StudentPanelData } from "@/lib/views/student";
 
@@ -76,19 +78,29 @@ export function StudentBitacoraTab({
             emptyMessage="Todavía no publicaste nada en tu bitácora."
             renderItem={(p) => (
               <div className="blog-post" key={p.id}>
-                <div className="muted">
-                  {fmtLong(p.date)} — <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
+                <div className="muted" style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                  <span>
+                    {fmtLong(p.date)} — <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
+                  </span>
+                  {!p.imageData && (
+                    <button
+                      type="button"
+                      className="ghost blog-post-delete-inline post-menu-toggle"
+                      aria-label="Borrar"
+                      title="Borrar"
+                      onClick={() => remove(p.id)}
+                    >
+                      <TrashIcon size={15} />
+                    </button>
+                  )}
                 </div>
                 {p.title && <h4>{p.title}</h4>}
-                {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+                {p.imageData && <PostImage src={p.imageData} onDelete={() => remove(p.id)} />}
                 {p.body && (
                   <p className="blog-post-body">
                     <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
                   </p>
                 )}
-                <button className="ghost" onClick={() => remove(p.id)}>
-                  quitar
-                </button>
                 <PostInteractions
                   postType="studentpost"
                   postId={p.id}

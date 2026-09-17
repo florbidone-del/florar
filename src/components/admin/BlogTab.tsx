@@ -11,6 +11,8 @@ import { Modal } from "@/components/shared/Modal";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { PostInteractions } from "@/components/shared/PostInteractions";
+import { PostImage } from "@/components/shared/PostImage";
+import { TrashIcon } from "@/components/shared/Icons";
 import type { BlogPostDTO } from "@/lib/views/admin";
 import { addBlogPostAction, removeBlogPostAction } from "@/lib/actions/content";
 
@@ -60,9 +62,22 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
           emptyMessage="Todavía no hay posts."
           renderItem={(p) => (
             <div className="blog-post" key={p.id}>
-              <div className="muted">
-                {p.authorName ? `${p.authorName} compartió: ` : ""}
-                {fmtLong(p.createdAt)}
+              <div className="muted" style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                <span>
+                  {p.authorName ? `${p.authorName} compartió: ` : ""}
+                  {fmtLong(p.createdAt)}
+                </span>
+                {!p.imageData && (
+                  <button
+                    type="button"
+                    className="ghost blog-post-delete-inline post-menu-toggle"
+                    aria-label="Borrar"
+                    title="Borrar"
+                    onClick={() => remove(p.id)}
+                  >
+                    <TrashIcon size={15} />
+                  </button>
+                )}
               </div>
               {p.featured && (
                 <div className="tag ok" style={{ marginTop: 4 }}>
@@ -70,15 +85,12 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
                 </div>
               )}
               {p.title && <h4>{p.title}</h4>}
-              {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+              {p.imageData && <PostImage src={p.imageData} onDelete={() => remove(p.id)} />}
               {p.body && (
                 <p className="blog-post-body">
                   <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
                 </p>
               )}
-              <button className="ghost" onClick={() => remove(p.id)}>
-                quitar
-              </button>
               <PostInteractions
                 postType="blog"
                 postId={p.id}

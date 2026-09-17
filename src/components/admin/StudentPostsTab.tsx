@@ -7,6 +7,7 @@ import { Linkify } from "@/components/shared/Linkify";
 import { CollapsibleText } from "@/components/shared/CollapsibleText";
 import { ShowMoreList } from "@/components/shared/ShowMoreList";
 import { PostInteractions } from "@/components/shared/PostInteractions";
+import { PostActionsMenu } from "@/components/shared/PostActionsMenu";
 import {
   setStudentPostPublicAction,
   featureStudentPostAction,
@@ -54,10 +55,25 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
         emptyMessage="Todavía no hay publicaciones en ninguna bitácora."
         renderItem={(p) => (
           <div className="blog-post" key={p.id}>
-            <div className="muted">
-              {p.studentName} compartió: {fmtLong(p.createdAt)}{" "}
-              <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
-              {p.featured && <span className="tag ok">⭐ destacada</span>}
+            <div className="muted" style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+              <span>
+                {p.studentName} compartió: {fmtLong(p.createdAt)}{" "}
+                <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
+                {p.featured && <span className="tag ok">⭐ destacada</span>}
+              </span>
+              <PostActionsMenu
+                disabled={busy === p.id}
+                items={[
+                  {
+                    label: p.isPublic ? "Hacer privada" : "Hacer pública",
+                    onClick: () => togglePublic(p.id, p.isPublic),
+                  },
+                  ...(!p.featured
+                    ? [{ label: "Destacar en CeramiBlog", onClick: () => feature(p.id) }]
+                    : []),
+                  { label: "Borrar", onClick: () => remove(p.id), danger: true },
+                ]}
+              />
             </div>
             {p.title && <h4>{p.title}</h4>}
             {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
@@ -66,19 +82,6 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
                 <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
               </p>
             )}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
-              <button className="ghost small" disabled={busy === p.id} onClick={() => togglePublic(p.id, p.isPublic)}>
-                {p.isPublic ? "Hacer privada" : "Hacer pública"}
-              </button>
-              {!p.featured && (
-                <button className="ghost small" disabled={busy === p.id} onClick={() => feature(p.id)}>
-                  Destacar en CeramiBlog
-                </button>
-              )}
-              <button className="danger small" disabled={busy === p.id} onClick={() => remove(p.id)}>
-                Borrar
-              </button>
-            </div>
             <PostInteractions
               postType="studentpost"
               postId={p.id}
