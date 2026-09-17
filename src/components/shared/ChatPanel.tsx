@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { sendChatMessageAction } from "@/lib/actions/chat";
 import { ChatAttachMenu } from "@/components/shared/ChatAttachMenu";
+import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { resizeToDataUrl } from "@/lib/resizeImage";
 
 type ChatMsg = {
@@ -35,7 +36,7 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingGif, setPendingGif] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function load() {
@@ -137,8 +138,9 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
         </div>
       )}
       <div className="chat-input-row">
-        <input
+        <AutoTextarea
           ref={inputRef}
+          rows={1}
           placeholder="Escribí un mensaje…"
           value={text}
           onChange={(e) => setText(e.target.value)}

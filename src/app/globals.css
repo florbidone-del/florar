@@ -624,8 +624,9 @@ td.holiday{background:var(--oxide-soft);}
 }
 .chat-author{font-size:0.72rem; font-weight:600; opacity:0.75; margin-bottom:2px;}
 .chat-time{font-size:0.68rem; opacity:0.6; margin-top:3px; text-align:right;}
-.chat-input-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
-.chat-input-row input{flex:1; min-width:0; margin:0;}
+.chat-input-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:flex-end;}
+.chat-input-row input, .chat-input-row textarea{flex:1; min-width:0; margin:0;}
+.chat-input-row textarea{resize:none;}
 .chat-input-row button{flex-shrink:0;}
 .chat-attachment{display:block; max-width:200px; max-height:200px; border-radius:8px; margin-bottom:4px; object-fit:cover;}
 .chat-pending-attachment{display:flex; align-items:center; gap:8px; margin-top:8px;}
