@@ -54,6 +54,7 @@ export function StudentBitacoraTab({
   }
 
   async function remove(id: string) {
+    if (!confirm("¿Borrar esta publicación de tu bitácora?")) return;
     await removeStudentPostAction(id);
     router.refresh();
   }

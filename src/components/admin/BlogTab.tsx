@@ -47,6 +47,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
   }
 
   async function remove(id: string) {
+    if (!confirm("¿Borrar este post del CeramiBlog?")) return;
     await removeBlogPostAction(id);
     router.refresh();
   }
