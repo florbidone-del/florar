@@ -183,14 +183,6 @@ button.block{width:100%;}
   box-shadow:0 10px 30px -8px rgba(0,0,0,0.45);
 }
 .fab:active{transform:scale(0.96);}
-.fab-secondary{
-  width:46px;
-  height:46px;
-  font-size:1.4rem;
-  bottom:max(84px, calc(env(safe-area-inset-bottom, 0px) + 80px));
-  background:var(--surface-2);
-  color:var(--glaze-dark);
-}
 input, select, textarea{
   font-family:var(--font-work-sans), sans-serif;
   font-size:1rem;
@@ -534,6 +526,12 @@ td.holiday{background:var(--oxide-soft);}
 .cal-cell.closed{color:var(--ink-soft); opacity:0.3;}
 .cal-cell.past{color:var(--ink-soft); opacity:0.3;}
 .cal-cell.holiday{background:var(--oxide-soft); border-color:var(--oxide); color:var(--oxide); cursor:pointer;}
+.cal-cell.plain{border-color:var(--line); cursor:pointer;}
+.cal-cell.today::after{
+  content:"";
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%; background:var(--ink);
+}
 .cal-cell.available{background:var(--ok-bg); border-color:var(--glaze); cursor:pointer; font-weight:600;}
 .cal-cell.full{background:var(--surface); border-color:var(--line); color:var(--ink-soft); cursor:pointer;}
 .cal-cell.moved{background:#E6E1F0; border-color:#584A7A; color:#584A7A; cursor:pointer;}
