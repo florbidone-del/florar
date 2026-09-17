@@ -7,9 +7,12 @@ import { MoreIcon } from "@/components/shared/Icons";
 export function PostActionsMenu({
   items,
   disabled,
+  overlay,
 }: {
   items: { label: string; onClick: () => void; danger?: boolean }[];
   disabled?: boolean;
+  /** Para cuando va apoyado sobre una foto: botón más grande y con fondo, en vez del ghost chico. */
+  overlay?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -29,13 +32,13 @@ export function PostActionsMenu({
     <div className="post-menu" ref={ref}>
       <button
         type="button"
-        className="ghost post-menu-toggle"
+        className={overlay ? "post-menu-toggle post-menu-toggle-solid" : "ghost post-menu-toggle"}
         aria-label="Más opciones"
         title="Más opciones"
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
       >
-        <MoreIcon size={18} />
+        <MoreIcon size={overlay ? 20 : 18} />
       </button>
       {open && (
         <div className="post-menu-panel">

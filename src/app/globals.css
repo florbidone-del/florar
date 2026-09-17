@@ -682,6 +682,7 @@ td.holiday{background:var(--oxide-soft);}
 .chat-attach-menu-item:hover{background:var(--surface-2);}
 .chat-attach-back{margin-bottom:6px;}
 .post-menu{position:relative; flex-shrink:0;}
+.post-menu-overlay{position:absolute; top:8px; right:8px;}
 .post-menu-toggle{
   width:30px;
   height:30px;
@@ -693,6 +694,14 @@ td.holiday{background:var(--oxide-soft);}
   justify-content:center;
   flex-shrink:0;
 }
+.post-menu-toggle-solid{
+  width:36px;
+  height:36px;
+  background:rgba(20,12,30,0.55);
+  color:#fff;
+  border:none;
+}
+.post-menu-toggle-solid:active{transform:scale(0.94);}
 .post-menu-panel{
   position:absolute;
   top:calc(100% + 4px);

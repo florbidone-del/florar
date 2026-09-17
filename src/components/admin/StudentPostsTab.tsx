@@ -53,44 +53,49 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
         initialCount={5}
         itemLabelPlural="publicaciones"
         emptyMessage="Todavía no hay publicaciones en ninguna bitácora."
-        renderItem={(p) => (
-          <div className="blog-post" key={p.id}>
-            <div className="muted" style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-              <span>
-                {p.studentName} compartió: {fmtLong(p.createdAt)}{" "}
-                <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
-                {p.featured && <span className="tag ok">⭐ destacada</span>}
-              </span>
-              <PostActionsMenu
-                disabled={busy === p.id}
-                items={[
-                  {
-                    label: p.isPublic ? "Hacer privada" : "Hacer pública",
-                    onClick: () => togglePublic(p.id, p.isPublic),
-                  },
-                  ...(!p.featured
-                    ? [{ label: "Destacar en CeramiBlog", onClick: () => feature(p.id) }]
-                    : []),
-                  { label: "Borrar", onClick: () => remove(p.id), danger: true },
-                ]}
+        renderItem={(p) => {
+          const menuItems = [
+            {
+              label: p.isPublic ? "Hacer privada" : "Hacer pública",
+              onClick: () => togglePublic(p.id, p.isPublic),
+            },
+            ...(!p.featured ? [{ label: "Destacar en CeramiBlog", onClick: () => feature(p.id) }] : []),
+            { label: "Borrar", onClick: () => remove(p.id), danger: true },
+          ];
+          return (
+            <div className="blog-post" key={p.id}>
+              <div className="muted" style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                <span>
+                  {p.studentName} compartió: {fmtLong(p.createdAt)}{" "}
+                  <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
+                  {p.featured && <span className="tag ok">⭐ destacada</span>}
+                </span>
+                {!p.imageData && <PostActionsMenu disabled={busy === p.id} items={menuItems} overlay />}
+              </div>
+              {p.title && <h4>{p.title}</h4>}
+              {p.imageData && (
+                <div className="blog-post-image-wrap">
+                  <img src={p.imageData} alt="" className="blog-post-image" />
+                  <div className="post-menu-overlay">
+                    <PostActionsMenu disabled={busy === p.id} items={menuItems} overlay />
+                  </div>
+                </div>
+              )}
+              {p.body && (
+                <p className="blog-post-body">
+                  <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
+                </p>
+              )}
+              <PostInteractions
+                postType="studentpost"
+                postId={p.id}
+                likedByMe={p.likedByMe}
+                likeCount={p.likeCount}
+                comments={p.comments}
               />
             </div>
-            {p.title && <h4>{p.title}</h4>}
-            {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
-            {p.body && (
-              <p className="blog-post-body">
-                <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
-              </p>
-            )}
-            <PostInteractions
-              postType="studentpost"
-              postId={p.id}
-              likedByMe={p.likedByMe}
-              likeCount={p.likeCount}
-              comments={p.comments}
-            />
-          </div>
-        )}
+          );
+        }}
       />
     </div>
   );
