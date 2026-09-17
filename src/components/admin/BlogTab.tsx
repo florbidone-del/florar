@@ -61,8 +61,8 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
           renderItem={(p) => (
             <div className="blog-post" key={p.id}>
               <div className="muted">
+                {p.authorName ? `${p.authorName} compartió: ` : ""}
                 {fmtLong(p.createdAt)}
-                {p.authorName ? ` — ${p.authorName}` : ""}
               </div>
               {p.featured && (
                 <div className="tag ok" style={{ marginTop: 4 }}>
@@ -72,7 +72,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
               {p.title && <h4>{p.title}</h4>}
               {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
               {p.body && (
-                <p>
+                <p className="blog-post-body">
                   <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
                 </p>
               )}

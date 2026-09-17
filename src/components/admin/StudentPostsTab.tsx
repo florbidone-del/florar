@@ -55,14 +55,14 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
         renderItem={(p) => (
           <div className="blog-post" key={p.id}>
             <div className="muted">
-              {fmtLong(p.createdAt)} — {p.studentName}{" "}
+              {p.studentName} compartió: {fmtLong(p.createdAt)}{" "}
               <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
               {p.featured && <span className="tag ok">⭐ destacada</span>}
             </div>
             {p.title && <h4>{p.title}</h4>}
             {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
             {p.body && (
-              <p>
+              <p className="blog-post-body">
                 <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
               </p>
             )}

@@ -385,8 +385,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             data.blogPosts.map((p) => (
               <div className="card blog-post" key={p.id}>
                 <div className="muted">
+                  {p.authorName ? `${p.authorName} compartió: ` : ""}
                   {fmtLong(p.date)}
-                  {p.authorName ? ` — ${p.authorName}` : ""}
                 </div>
                 {p.featured && (
                   <div className="tag ok" style={{ marginTop: 4 }}>
@@ -396,7 +396,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                 {p.title && <h3>{p.title}</h3>}
                 {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
                 {p.body && (
-                  <p>
+                  <p className="blog-post-body">
                     <Linkify text={p.body} />
                   </p>
                 )}

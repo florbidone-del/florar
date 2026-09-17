@@ -591,6 +591,7 @@ td.holiday{background:var(--oxide-soft);}
   margin-top:10px;
   border:1.5px solid var(--line);
 }
+.blog-post-body{font-size:0.85rem; line-height:1.35; margin-top:6px;}
 .image-picker-preview{
   display:block;
   max-width:220px;
