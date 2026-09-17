@@ -63,10 +63,8 @@ export type StudentPanelData = {
     isPartial: boolean;
     paidAmount: string;
     cashFee: string;
-    baseCashFee: string;
     remainingCash: string;
     mpFee: string;
-    baseMpFee: string;
     remainingMp: string;
     mpLink: string | null;
     isLate: boolean;
@@ -331,10 +329,8 @@ export async function buildStudentPanelData(
       isPartial: paidThisMonth > 0 && paidThisMonth < studentFee(snap),
       paidAmount: money(paidThisMonth),
       cashFee: money(studentFee(snap, "cash")),
-      baseCashFee: money(snap.config.cashFee),
       remainingCash: money(Math.max(0, studentFee(snap, "cash") - paidThisMonth)),
       mpFee: money(studentFee(snap, "mp")),
-      baseMpFee: money(snap.config.mpFee),
       remainingMp: money(Math.max(0, studentFee(snap, "mp") - paidThisMonth)),
       mpLink: snap.config.mpLink,
       isLate: isPastPaymentWindow(snap),

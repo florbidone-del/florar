@@ -292,11 +292,11 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             <>
               <p style={{ margin: "4px 0 0" }}>
                 En efectivo es: {data.payment.cashFee}
-                {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}% sobre ${data.payment.baseCashFee}`}
+                {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}%`}
               </p>
               <p style={{ margin: "2px 0 0" }}>
                 En otro medio: {data.payment.mpFee}
-                {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}% sobre ${data.payment.baseMpFee}`}
+                {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}%`}
               </p>
             </>
           )}
