@@ -220,18 +220,20 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
     await dismissAdminTutorialAction();
   }
 
+  // Resalta el contenido de la pestaña que el tour está describiendo (no la pestañita de arriba:
+  // ahí se veía feo y se salía de la pantalla al hacer scroll horizontal de las pestañas).
   useEffect(() => {
     if (!tourFocus) return;
     const id = setTimeout(() => {
-      const el = document.getElementById(`tab-${tourFocus}`);
-      el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      const el = document.getElementById(tourFocus);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
       el?.classList.add("tour-highlight");
     }, 50);
     return () => {
       clearTimeout(id);
-      document.getElementById(`tab-${tourFocus}`)?.classList.remove("tour-highlight");
+      document.getElementById(tourFocus)?.classList.remove("tour-highlight");
     };
-  }, [tourFocus]);
+  }, [tourFocus, tab]);
 
   return (
     <>
@@ -248,7 +250,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           {!isOwner && (
             <>
               <button
-                id="tab-chat"
                 type="button"
                 className={`icon-button solid ${tab === "chat" ? "active" : ""} ${unread.chat ? "has-unread" : ""}`}
                 onClick={() => openTab("chat")}
@@ -259,7 +260,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
                 {unread.chat && <span className="unread-dot" />}
               </button>
               <button
-                id="tab-config"
                 type="button"
                 className={`icon-button solid ${tab === "config" ? "active" : ""}`}
                 onClick={() => setTab("config")}
@@ -287,7 +287,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           return (
             <div
               key={t}
-              id={`tab-${t}`}
               className={`tab ${t === tab ? "active" : ""} ${isUnread ? "has-unread" : ""}`}
               onClick={() => openTab(t)}
             >
@@ -297,7 +296,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           );
         })}
       </div>
-      <div key={tab} className={`tab-panel-enter-${slideDir}`}>
+      <div key={tab} id={tab} className={`tab-panel-enter-${slideDir}`}>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
         {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
         {!isOwner && tab === "alumnos" && (
