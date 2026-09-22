@@ -354,22 +354,22 @@ label:first-child{margin-top:0;}
 @media (prefers-reduced-motion: reduce){
   .tour-highlight{animation:none; box-shadow:0 0 0 6px rgba(67,36,103,0.28);}
 }
-table{width:100%; border-collapse:collapse; font-size:0.82rem;}
+table{width:100%; border-collapse:collapse; font-size:0.72rem;}
 th,td{
   border:1px solid var(--line);
-  padding:6px 4px;
+  padding:5px 3px;
   text-align:center;
   vertical-align:top;
 }
-th{background:var(--surface); font-weight:600; font-size:0.75rem;}
+th{background:var(--surface); font-weight:600; font-size:0.66rem;}
 th.row-head{position:sticky; left:0; z-index:2;}
 th.row-head.slot-time{
   font-family:var(--font-heading), serif;
-  font-size:0.85rem;
+  font-size:0.74rem;
   font-weight:700;
   color:var(--ink);
-  padding:8px 4px;
-  line-height:1.3;
+  padding:6px 3px;
+  line-height:1.25;
 }
 th.row-head.slot-time span{display:block; white-space:nowrap;}
 .week-range{white-space:nowrap;}
@@ -382,9 +382,9 @@ td.holiday{background:var(--oxide-soft);}
   border:none;
   background:transparent;
   font-family:var(--font-heading), serif;
-  font-size:1.05rem;
+  font-size:0.9rem;
   color:var(--ink-soft);
-  padding:10px 2px;
+  padding:8px 2px;
   border-radius:6px;
   cursor:pointer;
   white-space:nowrap;
@@ -582,6 +582,9 @@ td.holiday{background:var(--oxide-soft);}
   box-shadow:0 0 0 1.5px var(--surface-2);
 }
 .cal-legend{display:flex; gap:14px; font-size:0.72rem; color:var(--ink-soft); flex-wrap:wrap; margin-top:10px;}
+.holidays-calendar .cal-grid{gap:2px;}
+.holidays-calendar .cal-h{font-size:0.6rem;}
+.holidays-calendar .cal-cell{font-size:0.72rem; border-radius:6px;}
 .dot{display:inline-block; width:12px; height:12px; border-radius:4px; margin-right:5px; vertical-align:middle;}
 .dot.mine{background:var(--glaze);}
 .dot.available{background:var(--ok-bg); border:1.5px solid var(--glaze);}
@@ -705,11 +708,13 @@ td.holiday{background:var(--oxide-soft);}
 .post-menu{position:relative; flex-shrink:0;}
 .post-menu-overlay{position:absolute; top:8px; right:8px;}
 .post-menu-toggle{
-  width:30px;
-  height:30px;
+  width:32px;
+  height:32px;
   padding:0;
   border-radius:50%;
-  color:var(--ink-soft);
+  background:var(--surface-2);
+  border-color:var(--ink-soft);
+  color:var(--ink);
   display:flex;
   align-items:center;
   justify-content:center;

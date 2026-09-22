@@ -96,33 +96,35 @@ export function HolidaysTab({
             siguiente →
           </button>
         </div>
-        <div className="cal-grid cal-header">
-          {DIAS_CORTO.map((d, i) => (
-            <div className="cal-h" key={i}>
-              {d[0]}
-            </div>
-          ))}
-        </div>
-        <div className="cal-grid">
-          {Array.from({ length: leadingBlanks }).map((_, i) => (
-            <div className="cal-cell empty" key={`b${i}`} />
-          ))}
-          {days.map((d) => {
-            const hol = holidaysByDate.get(d.date);
-            const hasClass = weekdaysWithClass.has(d.weekday);
-            let cls = "cal-cell";
-            if (hol) cls += " holiday";
-            else if (hasClass) cls += " plain";
-            else cls += " closed";
-            if (d.date < today) cls += " past";
-            if (d.date === today) cls += " today";
-            const clickable = !!hol || hasClass;
-            return (
-              <div key={d.date} className={cls} onClick={clickable ? () => openDay(d.date) : undefined}>
-                {d.day}
+        <div className="holidays-calendar">
+          <div className="cal-grid cal-header">
+            {DIAS_CORTO.map((d, i) => (
+              <div className="cal-h" key={i}>
+                {d[0]}
               </div>
-            );
-          })}
+            ))}
+          </div>
+          <div className="cal-grid">
+            {Array.from({ length: leadingBlanks }).map((_, i) => (
+              <div className="cal-cell empty" key={`b${i}`} />
+            ))}
+            {days.map((d) => {
+              const hol = holidaysByDate.get(d.date);
+              const hasClass = weekdaysWithClass.has(d.weekday);
+              let cls = "cal-cell";
+              if (hol) cls += " holiday";
+              else if (hasClass) cls += " plain";
+              else cls += " closed";
+              if (d.date < today) cls += " past";
+              if (d.date === today) cls += " today";
+              const clickable = !!hol || hasClass;
+              return (
+                <div key={d.date} className={cls} onClick={clickable ? () => openDay(d.date) : undefined}>
+                  {d.day}
+                </div>
+              );
+            })}
+          </div>
         </div>
         <div className="cal-legend">
           <span>
