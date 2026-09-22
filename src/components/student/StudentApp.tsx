@@ -17,7 +17,6 @@ import { PostInteractions } from "@/components/shared/PostInteractions";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
 import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 import { fmtLong } from "@/lib/domain";
-import { THEMES } from "@/lib/themes";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
@@ -25,7 +24,6 @@ import { useSwipeTabs } from "@/lib/useSwipeTabs";
 import { useTabSlideDirection } from "@/lib/useTabSlideDirection";
 import {
   logoutAction,
-  setMyThemeAction,
   setMyNickAction,
   dismissStudentTutorialAction,
 } from "@/lib/actions/auth";
@@ -135,10 +133,7 @@ function studentTourSteps(studioName: string): TourStep[] {
       title: "Tu cuenta",
       focus: "account-section",
       body: (
-        <p className="muted">
-          Acá podés cambiar tu PIN y elegir el tema de colores de tu propia app, sin que afecte a nadie
-          más.
-        </p>
+        <p className="muted">Acá podés cambiar tu PIN.</p>
       ),
     },
   ];
@@ -206,9 +201,14 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   useEffect(() => {
     if (!tourFocus) return;
     const id = setTimeout(() => {
-      document.getElementById(tourFocus)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = document.getElementById(tourFocus);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      el?.classList.add("tour-highlight");
     }, 50);
-    return () => clearTimeout(id);
+    return () => {
+      clearTimeout(id);
+      document.getElementById(tourFocus)?.classList.remove("tour-highlight");
+    };
   }, [tourFocus, tab]);
 
   async function logout() {
@@ -222,11 +222,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
     router.refresh();
   }
 
-  async function chooseTheme(theme: string) {
-    await setMyThemeAction(theme);
-    router.refresh();
-  }
-
   async function saveNick() {
     setSavingNick(true);
     await setMyNickAction(nick);
@@ -235,6 +230,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   }
 
   const originalDay = modal?.kind === "swap" ? data.calendar.find((d) => d.date === modal.originalDate) : null;
+  // Pasada la ventana de pago (hoy: día 10) sin abonar, se corta el acceso al calendario de clases.
+  const paymentBlocked = data.payment.unpaid && data.payment.isLate;
 
   if (data.mustChangePin) {
     return <ForcePinChangeScreen studentName={data.firstName} onDone={() => router.refresh()} />;
@@ -322,7 +319,18 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       </div>
 
       <div key={tab} className={`tab-panel-enter-${slideDir}`}>
-      {tab === "calendario" && (
+      {tab === "calendario" && paymentBlocked && (
+        <div className="card" id="calendar-section" style={{ textAlign: "center" }}>
+          <h3>Cuota vencida</h3>
+          <p className="muted">
+            Para seguir accediendo a la app tenés que abonar la cuota del mes. Una vez que la profe
+            registre tu pago, vas a volver a ver tu calendario acá.
+          </p>
+          <PayButton fallbackLink={data.payment.mpLink} label="Pagar ahora" />
+        </div>
+      )}
+
+      {tab === "calendario" && !paymentBlocked && (
         <div>
           <div className="card" id="announcements-section">
             <h3>Avisos</h3>
@@ -425,7 +433,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                   postId={p.id}
                   likedByMe={p.likedByMe}
                   likeCount={p.likeCount}
-                  comments={p.comments}
                 />
               </div>
             ))
@@ -475,29 +482,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           <button className="ghost block" style={{ marginTop: 8 }} disabled={savingNick} onClick={saveNick}>
             Guardar nick
           </button>
-          <label style={{ marginTop: 14 }}>Tema de tu app</label>
-          <div className="theme-grid">
-            {Object.entries(THEMES).map(([key, t]) => (
-              <button
-                type="button"
-                key={key}
-                className={`theme-card ${data.theme === key ? "selected" : ""}`}
-                onClick={() => chooseTheme(key)}
-              >
-                <div className="theme-swatch">
-                  <span style={{ background: t.bg }} />
-                  <span style={{ background: t.glaze }} />
-                  <span style={{ background: t.oxide }} />
-                  <span style={{ background: t.ink }} />
-                </div>
-                <div className="theme-name">{t.name}</div>
-              </button>
-            ))}
-          </div>
-          <p className="hint">
-            Esto solo cambia los colores de tu propia app — no afecta lo que ven la profe ni otros
-            estudiantes.
-          </p>
         </div>
       )}
       </div>

@@ -7,9 +7,15 @@ import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { EditIcon } from "@/components/shared/Icons";
 import { saveStudentInfoAction } from "@/lib/actions/content";
 
-/** Lo mismo que ve el/la estudiante en su pestaña "Info del Taller", pero con un lápiz para
- *  editarlo ahí mismo en vez de tener que ir a Configuración. */
-export function InfoTallerTab({ studentInfo }: { studentInfo: string }) {
+/** Lo mismo que ve el/la estudiante en su pestaña "Info del Taller". Solo la profe principal
+ *  tiene el lápiz para editarlo ahí mismo en vez de tener que ir a Configuración. */
+export function InfoTallerTab({
+  studentInfo,
+  isMainProfe,
+}: {
+  studentInfo: string;
+  isMainProfe: boolean;
+}) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(studentInfo);
@@ -25,7 +31,7 @@ export function InfoTallerTab({ studentInfo }: { studentInfo: string }) {
 
   return (
     <div className="card" style={{ background: "#F6EAD1", borderColor: "#C9962E", position: "relative" }}>
-      {!editing && (
+      {!editing && isMainProfe && (
         <button
           type="button"
           className="icon-button"
@@ -68,7 +74,7 @@ export function InfoTallerTab({ studentInfo }: { studentInfo: string }) {
         </div>
       ) : (
         <p className="muted" style={{ marginRight: 40 }}>
-          Todavía no hay información cargada. Tocá el lápiz para cargarla.
+          {isMainProfe ? "Todavía no hay información cargada. Tocá el lápiz para cargarla." : "Todavía no hay información cargada."}
         </p>
       )}
     </div>

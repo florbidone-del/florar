@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { logoutAction, dismissAdminTutorialAction } from "@/lib/actions/auth";
 import { markSeenAction } from "@/lib/actions/notifications";
@@ -117,8 +117,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "info",
       body: (
         <p className="muted">
-          El texto fijo que ven los/las estudiantes arriba de todo — reglas, links, medios de pago. Se
-          edita ahí mismo, con el lápiz.
+          El texto fijo que ven los/las estudiantes arriba de todo — reglas, links, medios de pago.
         </p>
       ),
     },
@@ -139,13 +138,13 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "config",
       body: isMainProfe ? (
         <p className="muted">
-          Turnos, tema de colores y, como sos la profe principal, también podés asignar qué profe da cada
-          turno y ajustar las reglas y la cuota del taller.
+          Turnos y, como sos la profe principal, también podés asignar qué profe da cada turno y ajustar
+          las reglas y la cuota del taller.
         </p>
       ) : (
         <p className="muted">
-          Turnos y tema de colores. La asignación de profes por turno y las reglas/cuota las maneja la
-          profe principal.
+          Acá ves los turnos. La asignación de profes por turno y las reglas/cuota las maneja la profe
+          principal.
         </p>
       ),
     },
@@ -175,6 +174,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
+  const [tourFocus, setTourFocus] = useState<string | undefined>();
   const [isRefreshing, startRefresh] = useTransition();
   const pullDistance = usePullToRefresh(() => startRefresh(() => router.refresh()));
   const [seenOverride, setSeenOverride] = useState<{ avisos?: boolean; blog?: boolean }>({});
@@ -216,8 +216,22 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
 
   async function finishTour() {
     setShowTour(false);
+    setTourFocus(undefined);
     await dismissAdminTutorialAction();
   }
+
+  useEffect(() => {
+    if (!tourFocus) return;
+    const id = setTimeout(() => {
+      const el = document.getElementById(`tab-${tourFocus}`);
+      el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      el?.classList.add("tour-highlight");
+    }, 50);
+    return () => {
+      clearTimeout(id);
+      document.getElementById(`tab-${tourFocus}`)?.classList.remove("tour-highlight");
+    };
+  }, [tourFocus]);
 
   return (
     <>
@@ -234,6 +248,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           {!isOwner && (
             <>
               <button
+                id="tab-chat"
                 type="button"
                 className={`icon-button solid ${tab === "chat" ? "active" : ""} ${unread.chat ? "has-unread" : ""}`}
                 onClick={() => openTab("chat")}
@@ -244,6 +259,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
                 {unread.chat && <span className="unread-dot" />}
               </button>
               <button
+                id="tab-config"
                 type="button"
                 className={`icon-button solid ${tab === "config" ? "active" : ""}`}
                 onClick={() => setTab("config")}
@@ -271,6 +287,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           return (
             <div
               key={t}
+              id={`tab-${t}`}
               className={`tab ${t === tab ? "active" : ""} ${isUnread ? "has-unread" : ""}`}
               onClick={() => openTab(t)}
             >
@@ -304,12 +321,14 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
               myUsername={session.username}
               isMainProfe={isMainProfe}
             />
-            <HolidaysTab holidays={bundle.snapshot.holidays} bundle={bundle} />
+            <HolidaysTab holidays={bundle.snapshot.holidays} bundle={bundle} isMainProfe={isMainProfe} />
           </>
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
         {!isOwner && tab === "bitacoras" && <StudentPostsTab posts={bundle.studentPosts} />}
-        {!isOwner && tab === "info" && <InfoTallerTab studentInfo={bundle.snapshot.config.studentInfo} />}
+        {!isOwner && tab === "info" && (
+          <InfoTallerTab studentInfo={bundle.snapshot.config.studentInfo} isMainProfe={isMainProfe} />
+        )}
         {!isOwner && tab === "config" && (
           <ConfigTab bundle={bundle} isMainProfe={isMainProfe} myUsername={session.username} />
         )}
@@ -318,7 +337,10 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         <OnboardingTour
           steps={isOwner ? ownerTourSteps() : profeTourSteps(isMainProfe)}
           onFinish={finishTour}
-          onStepChange={(step) => step.focus && setTab(step.focus)}
+          onStepChange={(step) => {
+            setTourFocus(step.focus);
+            if (step.focus) setTab(step.focus);
+          }}
         />
       )}
     </>

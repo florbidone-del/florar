@@ -18,6 +18,7 @@ import {
   deleteStudentAction,
   resolvePinResetAction,
   resetStudentPinAction,
+  setStudentThemeAction,
   dismissNotificationAction,
 } from "@/lib/actions/students";
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
@@ -118,6 +119,12 @@ export function StudentsTab({
       return;
     setBusy(id);
     await resetStudentPinAction(id);
+    setBusy(null);
+    router.refresh();
+  }
+  async function toggleGiftTheme(id: string, grant: boolean) {
+    setBusy(id);
+    await setStudentThemeAction(id, grant);
     setBusy(null);
     router.refresh();
   }
@@ -250,15 +257,29 @@ export function StudentsTab({
                       Quitar pago
                     </button>
                   )}
-                  <button className="ghost small" onClick={() => setFormStudentId(s.id)}>
-                    Editar
-                  </button>
+                  {isMainProfe && (
+                    <button className="ghost small" onClick={() => setFormStudentId(s.id)}>
+                      Editar
+                    </button>
+                  )}
                   <button className="ghost small" disabled={busy === s.id} onClick={() => resetPin(s.id, s.name)}>
                     Restablecer PIN
                   </button>
-                  <button className="danger small" disabled={busy === s.id} onClick={() => remove(s.id, s.name)}>
-                    Eliminar
-                  </button>
+                  {isMainProfe && (
+                    <button
+                      className="ghost small"
+                      disabled={busy === s.id}
+                      onClick={() => toggleGiftTheme(s.id, s.theme !== "azulyoro")}
+                      title="Un guiño especial: le cambia el color de toda su app, solo para ella/él."
+                    >
+                      {s.theme === "azulyoro" ? "Quitar Azul y Oro" : "🎁 Regalar Azul y Oro"}
+                    </button>
+                  )}
+                  {isMainProfe && (
+                    <button className="danger small" disabled={busy === s.id} onClick={() => remove(s.id, s.name)}>
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               </div>
               </Fragment>

@@ -9,7 +9,15 @@ import { Modal } from "@/components/shared/Modal";
 import { addHolidayAction, removeHolidayAction } from "@/lib/actions/content";
 import type { AdminBundle } from "@/lib/views/admin";
 
-export function HolidaysTab({ holidays, bundle }: { holidays: HolidayDTO[]; bundle: AdminBundle }) {
+export function HolidaysTab({
+  holidays,
+  bundle,
+  isMainProfe,
+}: {
+  holidays: HolidayDTO[];
+  bundle: AdminBundle;
+  isMainProfe: boolean;
+}) {
   const router = useRouter();
   const today = todayISO();
   const [viewMonthKey, setViewMonthKey] = useState(today.slice(0, 7));
@@ -134,9 +142,11 @@ export function HolidaysTab({ holidays, bundle }: { holidays: HolidayDTO[]; bund
               <div>
                 {fmtLong(h.date)} <span className="muted">— {h.label || ""}</span>
               </div>
-              <button className="ghost" onClick={() => remove(h.date)}>
-                quitar
-              </button>
+              {isMainProfe && (
+                <button className="ghost" onClick={() => remove(h.date)}>
+                  quitar
+                </button>
+              )}
             </div>
           )}
         />
@@ -152,9 +162,11 @@ export function HolidaysTab({ holidays, bundle }: { holidays: HolidayDTO[]; bund
                 <button className="ghost block" onClick={() => setClickedDate(null)}>
                   Cerrar
                 </button>
-                <button className="danger block" disabled={pending} onClick={confirmReactivate}>
-                  Reactivar clase
-                </button>
+                {isMainProfe && (
+                  <button className="danger block" disabled={pending} onClick={confirmReactivate}>
+                    Reactivar clase
+                  </button>
+                )}
               </div>
             </>
           ) : (

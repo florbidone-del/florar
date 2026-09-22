@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
-import { THEMES } from "@/lib/themes";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import {
   saveConfigAction,
-  setThemeAction,
   addSlotAction,
   updateSlotAction,
   removeSlotAction,
@@ -151,11 +149,6 @@ export function ConfigTab({
     router.refresh();
   }
 
-  async function chooseTheme(theme: string) {
-    await setThemeAction(theme);
-    router.refresh();
-  }
-
   return (
     <>
       <Collapsible title="Tu nick">
@@ -181,27 +174,6 @@ export function ConfigTab({
         >
           Guardar nick
         </button>
-      </Collapsible>
-
-      <Collapsible title="Paleta de colores">
-        <div className="theme-grid">
-          {Object.entries(THEMES).map(([key, t]) => (
-            <button
-              type="button"
-              key={key}
-              className={`theme-card ${c.theme === key ? "selected" : ""}`}
-              onClick={() => chooseTheme(key)}
-            >
-              <div className="theme-swatch">
-                <span style={{ background: t.bg }} />
-                <span style={{ background: t.glaze }} />
-                <span style={{ background: t.oxide }} />
-                <span style={{ background: t.ink }} />
-              </div>
-              <div className="theme-name">{t.name}</div>
-            </button>
-          ))}
-        </div>
       </Collapsible>
 
       <Collapsible title="Turnos">

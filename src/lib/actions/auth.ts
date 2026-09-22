@@ -54,16 +54,6 @@ export async function studentChangePinAction(input: {
   return { ok: true };
 }
 
-export async function setMyThemeAction(theme: string): Promise<ActionResult> {
-  const session = await requireStudent();
-  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
-  await prisma.student.update({
-    where: { id: session.studentId },
-    data: { theme },
-  });
-  return { ok: true };
-}
-
 export async function setMyNickAction(nick: string): Promise<ActionResult> {
   const session = await requireStudent();
   if (!session) return { error: "Tenés que iniciar sesión de nuevo." };

@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-export function PayButton({ fallbackLink }: { fallbackLink: string | null }) {
+export function PayButton({
+  fallbackLink,
+  label = "Pagar con Mercado Pago",
+}: {
+  fallbackLink: string | null;
+  label?: string;
+}) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,7 +38,7 @@ export function PayButton({ fallbackLink }: { fallbackLink: string | null }) {
   return (
     <div className="mp-btn">
       <button className="primary block" disabled={pending} onClick={handleClick}>
-        {pending ? "Generando link…" : "Pagar con Mercado Pago"}
+        {pending ? "Generando link…" : label}
       </button>
       {error && <p className="err">{error}</p>}
     </div>

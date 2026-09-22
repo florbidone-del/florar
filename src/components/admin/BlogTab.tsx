@@ -97,7 +97,6 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
                 postId={p.id}
                 likedByMe={p.likedByMe}
                 likeCount={p.likeCount}
-                comments={p.comments}
               />
             </div>
           )}

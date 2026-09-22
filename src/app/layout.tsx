@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Work_Sans } from "next/font/google";
+import { Darumadrop_One, Work_Sans } from "next/font/google";
 import "./globals.css";
 import { loadConfig } from "@/lib/snapshot";
 import { themeCssVars } from "@/lib/themes";
 import { getSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-const fraunces = Fraunces({
+const darumadropOne = Darumadrop_One({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: "400",
   variable: "--font-heading",
   display: "swap",
 });
@@ -55,7 +55,7 @@ export default async function RootLayout({
 
   return (
     <html lang="es" style={themeVars as React.CSSProperties}>
-      <body className={`${fraunces.variable} ${workSans.variable}`}>
+      <body className={`${darumadropOne.variable} ${workSans.variable}`}>
         <div className="app-shell">{children}</div>
       </body>
     </html>

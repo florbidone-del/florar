@@ -107,7 +107,6 @@ export function StudentBitacoraTab({
                   postId={p.id}
                   likedByMe={p.likedByMe}
                   likeCount={p.likeCount}
-                  comments={p.comments}
                 />
               </div>
             )}
@@ -140,7 +139,6 @@ export function StudentBitacoraTab({
                   postId={p.id}
                   likedByMe={p.likedByMe}
                   likeCount={p.likeCount}
-                  comments={p.comments}
                 />
               </div>
             )}

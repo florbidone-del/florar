@@ -139,6 +139,18 @@ export async function resolvePinResetAction(
   return { ok: true };
 }
 
+/** Un guiño de la profe principal a un/a estudiante puntual: el tema "Azul y Oro" no está en
+ *  ningún selector, solo ella se lo puede regalar (o sacar) a mano, estudiante por estudiante. */
+export async function setStudentThemeAction(studentId: string, grant: boolean): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.student.update({
+    where: { id: studentId },
+    data: { theme: grant ? "azulyoro" : "florar" },
+  });
+  return { ok: true };
+}
+
 export async function dismissNotificationAction(
   id: string
 ): Promise<ActionResult> {

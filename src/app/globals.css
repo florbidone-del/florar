@@ -313,32 +313,46 @@ label:first-child{margin-top:0;}
 .tag.partial{background:#FCEEB0; color:#8A6D1D;}
 .tabs{
   display:flex;
-  gap:6px;
+  gap:8px;
   overflow-x:auto;
   margin-bottom:16px;
-  padding-bottom:2px;
-  border-bottom:1.5px solid var(--line);
+  padding-bottom:4px;
 }
 .tab{
-  padding:8px 12px;
-  font-size:0.85rem;
+  padding:8px 14px;
+  font-size:0.8rem;
+  font-weight:700;
+  letter-spacing:0.02em;
+  text-transform:uppercase;
   color:var(--ink-soft);
-  border-bottom:2px solid transparent;
   white-space:nowrap;
   cursor:pointer;
-  background:none;
-  border-left:none;
-  border-right:none;
-  border-top:none;
-  border-radius:0;
+  background:var(--surface-2);
+  border:1.5px solid var(--line);
+  border-radius:20px;
 }
-.tab.active{color:var(--ink); border-bottom-color:var(--glaze); font-weight:600;}
+.tab.active{color:#fff; background:var(--glaze); border-color:var(--glaze);}
 @keyframes tab-panel-from-right{from{opacity:0; transform:translateX(18px);} to{opacity:1; transform:translateX(0);}}
 @keyframes tab-panel-from-left{from{opacity:0; transform:translateX(-18px);} to{opacity:1; transform:translateX(0);}}
 .tab-panel-enter-right{animation:tab-panel-from-right 0.22s ease-out;}
 .tab-panel-enter-left{animation:tab-panel-from-left 0.22s ease-out;}
 @media (prefers-reduced-motion: reduce){
   .tab-panel-enter-right, .tab-panel-enter-left{animation:none;}
+}
+.tour-highlight{
+  position:relative;
+  z-index:51;
+  border-radius:12px;
+  outline:3px solid var(--glaze);
+  outline-offset:3px;
+  animation:tour-pulse 1.4s ease-in-out infinite;
+}
+@keyframes tour-pulse{
+  0%,100%{box-shadow:0 0 0 6px rgba(67,36,103,0.28), 0 0 22px 4px rgba(67,36,103,0.45);}
+  50%{box-shadow:0 0 0 10px rgba(67,36,103,0.14), 0 0 28px 8px rgba(67,36,103,0.3);}
+}
+@media (prefers-reduced-motion: reduce){
+  .tour-highlight{animation:none; box-shadow:0 0 0 6px rgba(67,36,103,0.28);}
 }
 table{width:100%; border-collapse:collapse; font-size:0.82rem;}
 th,td{
@@ -704,7 +718,7 @@ td.holiday{background:var(--oxide-soft);}
 .post-menu-toggle-solid{
   width:36px;
   height:36px;
-  background:rgba(20,12,30,0.55);
+  background:var(--glaze);
   color:#fff;
   border:none;
 }

@@ -38,13 +38,6 @@ export async function saveConfigAction(input: {
   return { ok: true };
 }
 
-export async function setThemeAction(theme: string): Promise<ActionResult> {
-  const session = await requireProfe();
-  if (!session) return { error: "No autorizado." };
-  await prisma.config.update({ where: { id: 1 }, data: { theme } });
-  return { ok: true };
-}
-
 export async function addSlotAction(): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
