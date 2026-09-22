@@ -12,14 +12,6 @@
   --ok-bg: #E4DCEE;
   --radius: 10px;
 }
-/* Tipografía elegida en Configuración/Mi cuenta — ver setFontAction / setFontAsStudentAction.
-   Tiene que estar en el mismo elemento (body) que declara --font-darumadrop/--font-test-* (ver
-   layout.tsx): esas variables de next/font todavía no existen a la altura de <html>/:root, así que
-   definirlas ahí quedaba sin efecto. */
-body{ --font-heading: var(--font-darumadrop); }
-body[data-font="roboto"]{ --font-heading: var(--font-test-roboto); }
-body[data-font="montserrat"]{ --font-heading: var(--font-test-montserrat); }
-body[data-font="fira"]{ --font-heading: var(--font-test-fira); }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 html{overflow-x:hidden;}

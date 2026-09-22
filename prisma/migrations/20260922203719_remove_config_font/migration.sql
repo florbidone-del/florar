@@ -1,0 +1,1 @@
+ALTER TABLE "Config" DROP COLUMN "font";

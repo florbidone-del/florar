@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
-import { FONT_OPTIONS } from "@/lib/fontOptions";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import {
   saveConfigAction,
-  setFontAction,
   addSlotAction,
   updateSlotAction,
   removeSlotAction,
@@ -62,11 +60,6 @@ export function ConfigTab({
   const [loadingExtraClass, setLoadingExtraClass] = useState(false);
   const [extraClassResult, setExtraClassResult] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
-
-  async function chooseFont(font: string) {
-    await setFontAction(font);
-    router.refresh();
-  }
 
   async function saveDisplayName() {
     setSavingDisplayName(true);
@@ -182,26 +175,6 @@ export function ConfigTab({
           Guardar nick
         </button>
       </Collapsible>
-
-      {isMainProfe && (
-        <Collapsible title="Tipografía (prueba)" defaultOpen>
-          <p className="muted">
-            Se aplica a toda la app, para todo el mundo — probá cada una y quedate con la que te guste.
-          </p>
-          <div className="chip-row" style={{ marginTop: 10 }}>
-            {FONT_OPTIONS.map((f) => (
-              <div
-                key={f.key}
-                className={`chip ${c.font === f.key ? "selected" : ""}`}
-                style={{ fontFamily: f.cssVar }}
-                onClick={() => chooseFont(f.key)}
-              >
-                {f.label}
-              </div>
-            ))}
-          </div>
-        </Collapsible>
-      )}
 
       <Collapsible title="Turnos">
         <p className="muted">Elegí los días en los que se dicta cada turno — no hace falta que sean los mismos todos los días.</p>
