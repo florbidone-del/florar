@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Darumadrop_One, Work_Sans } from "next/font/google";
+import { Darumadrop_One } from "next/font/google";
 import "./globals.css";
 import { loadConfig } from "@/lib/snapshot";
 import { themeCssVars } from "@/lib/themes";
@@ -10,12 +10,6 @@ const darumadropOne = Darumadrop_One({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-heading",
-  display: "swap",
-});
-const workSans = Work_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-work-sans",
   display: "swap",
 });
 
@@ -55,7 +49,7 @@ export default async function RootLayout({
 
   return (
     <html lang="es" style={themeVars as React.CSSProperties}>
-      <body className={`${darumadropOne.variable} ${workSans.variable}`}>
+      <body className={darumadropOne.variable}>
         <div className="app-shell">{children}</div>
       </body>
     </html>

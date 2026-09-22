@@ -30,7 +30,7 @@ export function InfoTallerTab({
   }
 
   return (
-    <div className="card" style={{ background: "#F6EAD1", borderColor: "#C9962E", position: "relative" }}>
+    <div className="card" style={{ background: "var(--ok-bg)", borderColor: "var(--glaze)", position: "relative" }}>
       {!editing && isMainProfe && (
         <button
           type="button"

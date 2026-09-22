@@ -449,7 +449,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       {tab === "info" && (
         <div id="info-section">
           {data.studentInfo ? (
-            <div className="card" style={{ background: "#F6EAD1", borderColor: "#C9962E" }}>
+            <div className="card" style={{ background: "var(--ok-bg)", borderColor: "var(--glaze)" }}>
               <Linkify text={data.studentInfo} />
             </div>
           ) : (
