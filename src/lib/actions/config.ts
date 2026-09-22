@@ -38,6 +38,15 @@ export async function saveConfigAction(input: {
   return { ok: true };
 }
 
+/** Tipografía de toda la app — de prueba, mientras se elige una definitiva. Es del taller entero
+ *  (no por estudiante), así que solo la profe principal la puede cambiar. */
+export async function setFontAction(font: string): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  await prisma.config.update({ where: { id: 1 }, data: { font } });
+  return { ok: true };
+}
+
 export async function addSlotAction(): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };

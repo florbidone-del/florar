@@ -155,6 +155,7 @@ export type ConfigDTO = {
   lateFeePercent: number;
   mpLink: string | null;
   theme: string;
+  font: string;
   defaultStudentPin: string;
   profeWhatsapp: string | null;
   announcementVisibleDays: number;

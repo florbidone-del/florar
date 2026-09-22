@@ -8,6 +8,7 @@ import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import {
   saveConfigAction,
+  setFontAction,
   addSlotAction,
   updateSlotAction,
   removeSlotAction,
@@ -19,6 +20,13 @@ import {
   loadOfficialHolidaysAction,
   loadExtraClassCancellationsAction,
 } from "@/lib/actions/content";
+
+const FONT_OPTIONS = [
+  { key: "darumadrop", label: "Darumadrop One", cssVar: "var(--font-darumadrop)" },
+  { key: "roboto", label: "Roboto", cssVar: "var(--font-test-roboto)" },
+  { key: "montserrat", label: "Montserrat", cssVar: "var(--font-test-montserrat)" },
+  { key: "fira", label: "Fira Sans Condensed", cssVar: "var(--font-test-fira)" },
+];
 
 export function ConfigTab({
   bundle,
@@ -60,6 +68,11 @@ export function ConfigTab({
   const [loadingExtraClass, setLoadingExtraClass] = useState(false);
   const [extraClassResult, setExtraClassResult] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
+
+  async function chooseFont(font: string) {
+    await setFontAction(font);
+    router.refresh();
+  }
 
   async function saveDisplayName() {
     setSavingDisplayName(true);
@@ -175,6 +188,26 @@ export function ConfigTab({
           Guardar nick
         </button>
       </Collapsible>
+
+      {isMainProfe && (
+        <Collapsible title="Tipografía (prueba)">
+          <p className="muted">
+            Se aplica a toda la app, para todo el mundo — probá cada una y quedate con la que te guste.
+          </p>
+          <div className="chip-row" style={{ marginTop: 10 }}>
+            {FONT_OPTIONS.map((f) => (
+              <div
+                key={f.key}
+                className={`chip ${c.font === f.key ? "selected" : ""}`}
+                style={{ fontFamily: f.cssVar }}
+                onClick={() => chooseFont(f.key)}
+              >
+                {f.label}
+              </div>
+            ))}
+          </div>
+        </Collapsible>
+      )}
 
       <Collapsible title="Turnos">
         <p className="muted">Elegí los días en los que se dicta cada turno — no hace falta que sean los mismos todos los días.</p>

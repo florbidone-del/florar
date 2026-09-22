@@ -9,11 +9,11 @@ import { prisma } from "@/lib/prisma";
 const darumadropOne = Darumadrop_One({
   subsets: ["latin"],
   weight: "400",
-  variable: "--font-heading",
+  variable: "--font-darumadrop",
   display: "swap",
 });
-// Pruebas de tipografía (pedidas para comparar en vivo, sección por sección): cada una queda en
-// su propia variable CSS y se aplica solo dentro de la sección que la usa vía `.font-test-*`.
+// Candidatas de tipografía, elegibles en vivo desde Configuración (solo profe principal). El
+// atributo data-font en <html> decide cuál de estas se usa como --font-heading (ver globals.css).
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
@@ -67,9 +67,10 @@ export default async function RootLayout({
     if (student?.theme) effectiveTheme = student.theme;
   }
   const themeVars = themeCssVars(effectiveTheme);
+  const effectiveFont = config?.font || "darumadrop";
 
   return (
-    <html lang="es" style={themeVars as React.CSSProperties}>
+    <html lang="es" data-font={effectiveFont} style={themeVars as React.CSSProperties}>
       <body
         className={`${darumadropOne.variable} ${roboto.variable} ${montserrat.variable} ${firaSansCondensed.variable}`}
       >

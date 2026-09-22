@@ -46,6 +46,7 @@ model Config {
   lateFeePercent         Int      @default(20)
   mpLink                 String?
   theme                  String   @default("florar")
+  font                   String   @default("darumadrop")
   defaultStudentPin      String   @default("0000")
   profeWhatsapp          String?
   announcementVisibleDays Int     @default(7)

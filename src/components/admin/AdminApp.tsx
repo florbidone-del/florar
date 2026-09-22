@@ -172,9 +172,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
     ? ["profes"]
     : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras", "info"];
   const [tab, setTab] = useState(tabs[0]);
-  // Prueba de tipografías: una por pestaña, para compararlas todas navegando (temporal).
-  const testFontClass =
-    tab === "semana" ? "font-test-roboto" : tab === "avisos" ? "font-test-montserrat" : tab === "bitacoras" ? "font-test-fira" : "";
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
   const [tourFocus, setTourFocus] = useState<string | undefined>();
@@ -299,7 +296,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           );
         })}
       </div>
-      <div key={tab} id={tab} className={`tab-panel-enter-${slideDir} ${testFontClass}`}>
+      <div key={tab} id={tab} className={`tab-panel-enter-${slideDir}`}>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
         {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
         {!isOwner && tab === "alumnos" && (

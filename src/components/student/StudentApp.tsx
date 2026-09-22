@@ -222,9 +222,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const originalDay = modal?.kind === "swap" ? data.calendar.find((d) => d.date === modal.originalDate) : null;
   // Pasada la ventana de pago (hoy: día 10) sin abonar, se corta el acceso al calendario de clases.
   const paymentBlocked = data.payment.unpaid && data.payment.isLate;
-  // Prueba de tipografías: una por pestaña, para compararlas todas navegando (temporal).
-  const testFontClass =
-    tab === "calendario" ? "font-test-roboto" : tab === "blog" ? "font-test-montserrat" : tab === "bitacora" ? "font-test-fira" : "";
 
   if (data.mustChangePin) {
     return <ForcePinChangeScreen studentName={data.firstName} onDone={() => router.refresh()} />;
@@ -311,7 +308,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         })}
       </div>
 
-      <div key={tab} className={`tab-panel-enter-${slideDir} ${testFontClass}`}>
+      <div key={tab} className={`tab-panel-enter-${slideDir}`}>
       {tab === "calendario" && paymentBlocked && (
         <div className="card" id="calendar-section" style={{ textAlign: "center" }}>
           <h3>CUOTA VENCIDA</h3>
