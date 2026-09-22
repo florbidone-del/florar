@@ -190,7 +190,7 @@ export function ConfigTab({
       </Collapsible>
 
       {isMainProfe && (
-        <Collapsible title="Tipografía (prueba)">
+        <Collapsible title="Tipografía (prueba)" defaultOpen>
           <p className="muted">
             Se aplica a toda la app, para todo el mundo — probá cada una y quedate con la que te guste.
           </p>
