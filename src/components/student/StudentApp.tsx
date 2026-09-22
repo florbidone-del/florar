@@ -7,6 +7,7 @@ import { StudentCalendar } from "@/components/student/StudentCalendar";
 import { OwnSessionModal } from "@/components/student/OwnSessionModal";
 import { DayInfoModal } from "@/components/student/DayInfoModal";
 import { SwapModal } from "@/components/student/SwapModal";
+import { ExtraClassModal } from "@/components/student/ExtraClassModal";
 import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen";
 import { PayButton } from "@/components/student/PayButton";
@@ -135,6 +136,7 @@ type ModalState =
   | { kind: "other"; day: CalendarDay }
   | { kind: "swap"; originalDate: string; isHolidayReschedule: boolean }
   | { kind: "pin" }
+  | { kind: "extra" }
   | null;
 
 export function StudentApp({ data }: { data: StudentPanelData }) {
@@ -365,6 +367,42 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </div>
           )}
 
+          {data.extraClass.availableCount > 0 && (
+            <div className="banner" style={{ background: "var(--ok-bg)", borderColor: "var(--glaze)" }}>
+              <strong>
+                {data.extraClass.availableCount === 1
+                  ? "Tenés una clase extra pagada para agendar este mes"
+                  : `Tenés ${data.extraClass.availableCount} clases extra pagadas para agendar este mes`}
+              </strong>
+              <button
+                className="primary block"
+                style={{ marginTop: 10 }}
+                onClick={() => setModal({ kind: "extra" })}
+              >
+                Elegir día
+              </button>
+            </div>
+          )}
+
+          <div className="card">
+            <h3>Clase extra</h3>
+            <p className="muted" style={{ marginTop: 6 }}>
+              Sumá una clase más este mes, además de las tuyas fijas. Se paga por Mercado Pago y vale
+              solo para el mes en que la compres.
+            </p>
+            {data.extraClass.pendingCount > 0 && (
+              <p className="hint">
+                Tenés un pago de clase extra en proceso — en cuanto se confirme vas a poder elegir el
+                día.
+              </p>
+            )}
+            <PayButton
+              fallbackLink={null}
+              label={`Comprar clase extra (${data.extraClass.feeAmount})`}
+              endpoint="/api/mp/generar-link-extra"
+            />
+          </div>
+
           <div className="card" id="calendar-section">
             <h3>Calendario del taller</h3>
             <p className="muted" style={{ marginTop: 6 }}>
@@ -511,6 +549,16 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         />
       )}
       {modal?.kind === "pin" && <ChangePinModal onClose={() => setModal(null)} />}
+      {modal?.kind === "extra" && data.extraClass.nextPurchaseId && (
+        <ExtraClassModal
+          purchaseId={data.extraClass.nextPurchaseId}
+          calendar={data.calendar}
+          leadingBlanks={data.leadingBlanks}
+          todayISO={data.todayISO}
+          onClose={() => setModal(null)}
+          onConfirmed={closeAndRefresh}
+        />
+      )}
       {showTour && (
         <OnboardingTour
           steps={studentTourSteps(data.studioName)}

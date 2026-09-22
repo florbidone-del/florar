@@ -44,6 +44,7 @@ model Config {
   cashFee                Int      @default(15000)
   mpFee                  Int      @default(15000)
   lateFeePercent         Int      @default(20)
+  extraClassFee          Int      @default(15000)
   mpLink                 String?
   theme                  String   @default("florar")
   defaultStudentPin      String   @default("0000")
@@ -130,6 +131,7 @@ model Student {
 
   scheduleChanges ScheduleChange[]
   payments        Payment[]
+  extraClassPurchases ExtraClassPurchase[]
   pinResets       PinResetRequest[]
   chatMessages    ChatMessage[]
   posts           StudentPost[]
@@ -194,6 +196,28 @@ model Payment {
   updatedAt    DateTime      @updatedAt
 
   @@unique([studentId, monthKey])
+}
+
+// Una clase extra pagada por el/la estudiante, además de sus clases fijas de la semana. Se paga
+// primero (por Mercado Pago) y recién después se elige el día/turno — a diferencia de Payment, acá
+// puede haber varias filas por alumno+mes porque puede comprar más de una. Vale solo para el mes
+// en que se compró (monthKey): si no se agenda ese mismo mes, se pierde.
+model ExtraClassPurchase {
+  id             String        @id @default(cuid())
+  studentId      String
+  student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  monthKey       String
+  amount         Int
+  status         PaymentStatus @default(pending)
+  mpPaymentId    String?
+  mpPreferenceId String?
+  bookedDate     DateTime?     @db.Date
+  bookedSlotId   String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([studentId, monthKey])
+  @@index([bookedDate, bookedSlotId])
 }
 
 model PinResetRequest {

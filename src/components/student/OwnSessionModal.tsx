@@ -105,6 +105,16 @@ export function OwnSessionModal({
         <span className="tag moved">reprogramada (antes {fmtLong(own.from!)})</span>
       </>
     );
+  } else if (own.status === "extra") {
+    body = (
+      <>
+        <p className="muted">
+          {own.start}–{own.end}
+          {own.profeName ? ` · profe: ${own.profeName}` : ""}
+        </p>
+        <span className="tag ok">clase extra</span>
+      </>
+    );
   }
 
   return (

@@ -50,9 +50,11 @@ export function SwapCalendar({
         })}
       </div>
       <div className="cal-legend">
-        <span>
-          <span className="dot origin" /> la que cambiás
-        </span>
+        {originalDate && (
+          <span>
+            <span className="dot origin" /> la que cambiás
+          </span>
+        )}
         <span>
           <span className="dot available" /> con lugar
         </span>

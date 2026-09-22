@@ -562,6 +562,15 @@ td.holiday{background:var(--oxide-soft);}
   background:var(--glaze); border-color:var(--glaze-dark); color:#fff;
   font-weight:700; cursor:pointer;
 }
+.cal-cell.own-extra{
+  background:var(--glaze); border-color:var(--glaze-dark); color:#fff;
+  font-weight:700; cursor:pointer;
+}
+.cal-cell.own-extra::after{
+  content:"+";
+  position:absolute; top:1px; right:4px;
+  font-size:0.7rem; font-weight:700; color:#fff;
+}
 .cal-cell.own-pending{
   background:var(--oxide); border-color:var(--oxide); color:#fff;
   font-weight:700; cursor:pointer;

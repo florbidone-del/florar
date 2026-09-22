@@ -42,6 +42,7 @@ export function ConfigTab({
   const [cashFee, setCashFee] = useState(c.cashFee);
   const [mpFee, setMpFee] = useState(c.mpFee);
   const [lateFeePercent, setLateFeePercent] = useState(c.lateFeePercent);
+  const [extraClassFee, setExtraClassFee] = useState(c.extraClassFee);
   const [announcementVisibleDays, setAnnouncementVisibleDays] = useState(c.announcementVisibleDays);
   const [defaultStudentPin, setDefaultStudentPin] = useState(c.defaultStudentPin);
   const [profeWhatsapp, setProfeWhatsapp] = useState(c.profeWhatsapp || "");
@@ -140,6 +141,7 @@ export function ConfigTab({
       cashFee,
       mpFee,
       lateFeePercent,
+      extraClassFee,
       announcementVisibleDays,
       defaultStudentPin,
       profeWhatsapp,
@@ -238,6 +240,16 @@ export function ConfigTab({
         <p className="hint">
           Pasado el día {paymentWindowEnd} sin pagar, ambas cuotas le aparecen al/a la estudiante con este
           recargo ya sumado.
+        </p>
+        <label>Clase extra (por Mercado Pago)</label>
+        <input
+          type="number"
+          value={extraClassFee}
+          onChange={(e) => setExtraClassFee(Number(e.target.value))}
+        />
+        <p className="hint">
+          Lo que cobra cada clase extra que un/a estudiante compre. Una vez pagada, elige un día con
+          lugar dentro del mismo mes — si no la agenda ese mes, se pierde.
         </p>
         <label>Los avisos se muestran a los estudiantes durante (días)</label>
         <input

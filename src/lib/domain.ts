@@ -153,6 +153,7 @@ export type ConfigDTO = {
   cashFee: number;
   mpFee: number;
   lateFeePercent: number;
+  extraClassFee: number;
   mpLink: string | null;
   theme: string;
   defaultStudentPin: string;
@@ -191,6 +192,15 @@ export type PaymentDTO = {
   status: "pending" | "approved" | "rejected";
   source: "manual" | "mercadopago";
 };
+export type ExtraClassPurchaseDTO = {
+  id: string;
+  studentId: string;
+  monthKey: string;
+  amount: number;
+  status: "pending" | "approved" | "rejected";
+  bookedDate: string | null;
+  bookedSlotId: string | null;
+};
 export type ActivityDTO = {
   id: string;
   startDate: string;
@@ -217,6 +227,7 @@ export type WorkshopSnapshot = {
   students: StudentDTO[];
   scheduleChanges: ScheduleChangeDTO[];
   payments: PaymentDTO[];
+  extraClassPurchases: ExtraClassPurchaseDTO[];
   activities: ActivityDTO[];
   slotAssignments: SlotAssignmentDTO[];
   substitutions: SubstitutionDTO[];
@@ -337,6 +348,13 @@ export function slotOccupancy(
       names.push(student?.name || "?");
     }
   }
+  for (const p of snap.extraClassPurchases) {
+    if (p.studentId === excludeStudentId) continue;
+    if (p.status === "approved" && p.bookedDate === dateISO && p.bookedSlotId === slotId) {
+      const student = snap.students.find((s) => s.id === p.studentId);
+      names.push(student?.name || "?");
+    }
+  }
   return names;
 }
 export function weekdayOccupancyCount(
@@ -375,7 +393,8 @@ export type SessionRow = {
     | "pending-holiday"
     | "capped"
     | "confirmed"
-    | "rescheduled";
+    | "rescheduled"
+    | "extra";
   movedTo?: { date: string; slotId: string };
   from?: string;
 };
@@ -420,8 +439,28 @@ export function studentSessionsThisMonth(
         from: c.fromDate,
       });
     });
+  snap.extraClassPurchases
+    .filter((p) => p.studentId === studentId && p.status === "approved" && p.bookedDate)
+    .forEach((p) => {
+      rows.push({ date: p.bookedDate!, slotId: p.bookedSlotId!, status: "extra" });
+    });
   rows.sort((a, b) => a.date.localeCompare(b.date) || a.slotId.localeCompare(b.slotId));
   return rows;
+}
+
+/** Clases extra pagadas y ya aprobadas este mes que todavía no se agendaron. */
+export function extraClassCreditsAvailable(snap: WorkshopSnapshot, studentId: string) {
+  const mk = currentMonthKey();
+  return snap.extraClassPurchases.filter(
+    (p) => p.studentId === studentId && p.monthKey === mk && p.status === "approved" && !p.bookedDate
+  );
+}
+/** Compras de clase extra de este mes con el pago todavía en proceso (esperando el webhook de MP). */
+export function extraClassPurchasesPending(snap: WorkshopSnapshot, studentId: string) {
+  const mk = currentMonthKey();
+  return snap.extraClassPurchases.filter(
+    (p) => p.studentId === studentId && p.monthKey === mk && p.status === "pending"
+  );
 }
 
 export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {

@@ -18,6 +18,7 @@ const DEFAULT_CONFIG = {
   cashFee: 15000,
   mpFee: 15000,
   lateFeePercent: 20,
+  extraClassFee: 15000,
   mpLink: null as string | null,
   theme: "florar",
   defaultStudentPin: "0000",
@@ -62,6 +63,7 @@ export async function loadConfig(): Promise<ConfigDTO> {
     cashFee: config.cashFee,
     mpFee: config.mpFee,
     lateFeePercent: config.lateFeePercent,
+    extraClassFee: config.extraClassFee,
     mpLink: config.mpLink,
     theme: config.theme,
     defaultStudentPin: config.defaultStudentPin,
@@ -74,18 +76,29 @@ export async function loadConfig(): Promise<ConfigDTO> {
 
 /** Carga todo lo necesario para calcular ocupación, calendarios y estado de pago. */
 export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
-  const [config, holidays, students, scheduleChanges, payments, activities, slotAssignments, substitutions, admins] =
-    await Promise.all([
-      loadConfig(),
-      prisma.holiday.findMany(),
-      prisma.student.findMany(),
-      prisma.scheduleChange.findMany(),
-      prisma.payment.findMany(),
-      prisma.activity.findMany(),
-      prisma.slotAssignment.findMany(),
-      prisma.substitution.findMany(),
-      prisma.admin.findMany({ select: { username: true, cupo: true } }),
-    ]);
+  const [
+    config,
+    holidays,
+    students,
+    scheduleChanges,
+    payments,
+    extraClassPurchases,
+    activities,
+    slotAssignments,
+    substitutions,
+    admins,
+  ] = await Promise.all([
+    loadConfig(),
+    prisma.holiday.findMany(),
+    prisma.student.findMany(),
+    prisma.scheduleChange.findMany(),
+    prisma.payment.findMany(),
+    prisma.extraClassPurchase.findMany(),
+    prisma.activity.findMany(),
+    prisma.slotAssignment.findMany(),
+    prisma.substitution.findMany(),
+    prisma.admin.findMany({ select: { username: true, cupo: true } }),
+  ]);
   const cupoByProfe = new Map(admins.map((a) => [a.username, a.cupo]));
 
   return {
@@ -119,6 +132,15 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       amount: p.amount,
       status: p.status,
       source: p.source,
+    })),
+    extraClassPurchases: extraClassPurchases.map((p) => ({
+      id: p.id,
+      studentId: p.studentId,
+      monthKey: p.monthKey,
+      amount: p.amount,
+      status: p.status,
+      bookedDate: p.bookedDate ? dOnly(p.bookedDate) : null,
+      bookedSlotId: p.bookedSlotId,
     })),
     activities: activities.map((a) => ({
       id: a.id,

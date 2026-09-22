@@ -38,7 +38,35 @@ export async function POST(req: NextRequest) {
     });
     const payment = await payRes.json();
     const externalReference: string | undefined = payment.external_reference;
-    if (!externalReference || !externalReference.includes("__")) return response;
+    if (!externalReference) return response;
+
+    // Clase extra: referencia "extra__<id>" — cada compra es su propia fila, sin merge de montos
+    // (a diferencia de la cuota, acá no hay "saldo restante" que sumar).
+    if (externalReference.startsWith("extra__")) {
+      const purchaseId = externalReference.slice("extra__".length);
+      const status = mapMpStatus(payment.status);
+      const mpAmount = Math.round(payment.transaction_amount || 0);
+      const previous = await prisma.extraClassPurchase.findUnique({ where: { id: purchaseId } });
+      if (!previous) return response;
+      await prisma.extraClassPurchase.update({
+        where: { id: purchaseId },
+        data: { status, mpPaymentId: String(payment.id) },
+      });
+      if (status === "approved" && previous.status !== "approved") {
+        const student = await prisma.student.findUnique({ where: { id: previous.studentId } });
+        if (student) {
+          await prisma.notification.create({
+            data: {
+              forProfe: null,
+              message: `${student.name} pagó una clase extra (${money(mpAmount || previous.amount)}) — ya puede elegir el día.`,
+            },
+          });
+        }
+      }
+      return response;
+    }
+
+    if (!externalReference.includes("__")) return response;
 
     const [studentId, monthKey] = externalReference.split("__");
     const status = mapMpStatus(payment.status);

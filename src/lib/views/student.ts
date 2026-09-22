@@ -13,6 +13,8 @@ import {
   isoDate,
   isUnpaid,
   paidAmountThisMonth,
+  extraClassCreditsAvailable,
+  extraClassPurchasesPending,
   money,
   parseISO,
   profeForDateSlot,
@@ -70,6 +72,12 @@ export type StudentPanelData = {
     isLate: boolean;
     lateFeePercent: number;
   };
+  extraClass: {
+    feeAmount: string;
+    availableCount: number;
+    nextPurchaseId: string | null;
+    pendingCount: number;
+  };
   studentInfo: string;
   announcements: { id: string; date: string; message: string; authorName: string | null }[];
   blogPosts: {
@@ -126,13 +134,15 @@ export async function buildStudentPanelData(
   // "moved-holiday"/"moved-swap" son la fecha ORIGINAL que se vació: la clase real ya
   // está contada por su fila "rescheduled" en la fecha destino. Sumar ambas duplica la clase.
   const totalClasses = sessions.filter((r) =>
-    ["confirmed", "rescheduled", "pending-holiday"].includes(r.status)
+    ["confirmed", "rescheduled", "pending-holiday", "extra"].includes(r.status)
   ).length;
   const pendingHolidays = sessions.filter((r) => r.status === "pending-holiday").length;
   const swapsLeft = snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId);
   const defaultSlot = snap.config.slots.find((s) => s.id === student.defaultSlotId) || null;
   const profeName = capitalize(profeForSlot(snap, student.defaultWeekday, student.defaultSlotId));
   const paidThisMonth = paidAmountThisMonth(snap, studentId);
+  const extraCredits = extraClassCreditsAvailable(snap, studentId);
+  const extraPending = extraClassPurchasesPending(snap, studentId);
 
   const today = todayISO();
   const mk = currentMonthKey();
@@ -335,6 +345,12 @@ export async function buildStudentPanelData(
       mpLink: snap.config.mpLink,
       isLate: isPastPaymentWindow(snap),
       lateFeePercent: snap.config.lateFeePercent,
+    },
+    extraClass: {
+      feeAmount: money(snap.config.extraClassFee),
+      availableCount: extraCredits.length,
+      nextPurchaseId: extraCredits[0]?.id || null,
+      pendingCount: extraPending.length,
     },
     studentInfo: snap.config.studentInfo,
     announcements,

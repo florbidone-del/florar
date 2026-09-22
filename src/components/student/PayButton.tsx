@@ -5,9 +5,11 @@ import { useState } from "react";
 export function PayButton({
   fallbackLink,
   label = "Pagar con Mercado Pago",
+  endpoint = "/api/mp/generar-link",
 }: {
   fallbackLink: string | null;
   label?: string;
+  endpoint?: string;
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -16,7 +18,7 @@ export function PayButton({
     setError("");
     setPending(true);
     try {
-      const res = await fetch("/api/mp/generar-link", { method: "POST" });
+      const res = await fetch(endpoint, { method: "POST" });
       const data = await res.json();
       if (res.ok && data.init_point) {
         window.location.href = data.init_point;
