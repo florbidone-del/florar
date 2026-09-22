@@ -34,7 +34,7 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
   }
 
   async function remove(id: string) {
-    if (!confirm("¿Borrar esta publicación de la bitácora del/de la estudiante?")) return;
+    if (!confirm("¿Borrar esta publicación de la bitácora del estudiante?")) return;
     setBusy(id);
     await removeStudentPostAction(id);
     setBusy(null);
@@ -43,10 +43,10 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
 
   return (
     <div className="card">
-      <h3>Bitácoras de los/las estudiantes</h3>
+      <h3>Bitácoras de estudiantes</h3>
       <p className="muted">
-        Lo que van subiendo a su bitácora personal — por defecto solo lo ven ellos y vos. Podés hacerla
-        pública (la ven también sus compañeros) y/o destacarla en el CeramiBlog, con crédito al/a la estudiante.
+        Lo que van subiendo a su bitácora personal — por defecto solo lo ve el estudiante y vos. Podés
+        hacerla pública (la ven también sus compañeros) y/o destacarla en el CeramiBlog.
       </p>
       <ShowMoreList
         items={posts}

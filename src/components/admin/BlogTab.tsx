@@ -55,7 +55,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
   return (
     <>
       <div className="card">
-        <h3>Posts publicados</h3>
+        <h3>POSTS PUBLICADOS</h3>
         <ShowMoreList
           items={posts}
           initialCount={3}
@@ -105,20 +105,17 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
       {showForm && (
         <Modal onClose={() => setShowForm(false)}>
           <h3>Nuevo post</h3>
-          <p className="muted">
-            Compartí links, fotos de piezas terminadas, técnicas o ideas — los estudiantes lo ven en su
-            pestaña CeramiBlog.
-          </p>
+          <p className="muted">Compartí inspiración — los estudiantes lo ven en su pestaña CeramiBlog.</p>
           <div className="field" style={{ marginTop: 10 }}>
             <label>Título (opcional)</label>
-            <input placeholder="Ej: Esmaltado con óxidos" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <input placeholder="Ej: Hecho en torno" value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="field" style={{ marginTop: 10 }}>
             <label>Texto</label>
             <AutoTextarea
               ref={bodyRef}
               rows={3}
-              placeholder="Escribí la idea, contá algo, pegá un link…"
+              placeholder="Escribí la idea, contá algo, pegá un link"
               value={body}
               onChange={(e) => setBody(e.target.value)}
             />

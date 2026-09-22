@@ -49,7 +49,7 @@ export function InfoTallerTab({
       {editing ? (
         <>
           <p className="muted" style={{ marginTop: 0, marginRight: 40 }}>
-            Queda siempre visible arriba de todo en el celular del/de la estudiante — a diferencia de los
+            Queda siempre visible arriba de todo en el celular del estudiante — a diferencia de los
             avisos, no se acumula ni desaparece. Sirve para un link a un PDF, el material del mes, o algo
             que quieras que estén viendo siempre.
           </p>

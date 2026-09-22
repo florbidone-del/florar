@@ -149,7 +149,7 @@ export function StudentBitacoraTab({
         <Modal onClose={() => setShowForm(false)}>
           <h3>Nueva publicación</h3>
           <p className="muted">
-            Subí una pieza, un avance o una idea con foto y descripción. Queda privada — solo la ven las
+            Subí una pieza, un avance o una idea con foto y descripción. Queda privada — solo la ven lxs
             profes y vos — salvo que una profe decida hacerla pública o destacarla en el CeramiBlog.
           </p>
           <div className="field" style={{ marginTop: 10 }}>

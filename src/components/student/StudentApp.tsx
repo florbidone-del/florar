@@ -40,7 +40,7 @@ const TAB_LABELS: Record<Tab, string> = {
   chat: "Chat",
   blog: "CeramiBlog",
   bitacora: "Bitácora",
-  info: "Info del Taller",
+  info: "Info taller",
   cuenta: "Mi cuenta",
 };
 const SECTION_TAB: Record<string, Tab> = {
@@ -56,13 +56,8 @@ const SECTION_TAB: Record<string, Tab> = {
 function studentTourSteps(studioName: string): TourStep[] {
   return [
     {
-      title: `¡Bienvenido/a a ${studioName}!`,
-      body: (
-        <p className="muted">
-          Un recorrido rapidito por lo que podés hacer acá, en el orden en que lo vas viendo en pantalla.
-          Se puede saltear.
-        </p>
-      ),
+      title: `¡Bienvenidx a ${studioName}!`,
+      body: <p className="muted">Te hago un recorrido de lo que podés hacer en la app.</p>,
     },
     {
       title: "Avisos",
@@ -70,7 +65,7 @@ function studentTourSteps(studioName: string): TourStep[] {
       body: (
         <p className="muted">
           Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
-          todo un botón para pagar con Mercado Pago, sin importar en qué pestaña estés.
+          todo un botón para pagar con Mercado Pago.
         </p>
       ),
     },
@@ -79,7 +74,7 @@ function studentTourSteps(studioName: string): TourStep[] {
       focus: "calendar-section",
       body: (
         <p className="muted">
-          Tu clase fija aparece con fondo violeta sólido. Tocá ese día para ver el detalle o para
+          Tus clases aparecen con fondo violeta sólido. Tocá ese día para ver el detalle o para
           cambiarlo; tocá cualquier otro día para ver si tiene lugar.
         </p>
       ),
@@ -89,43 +84,38 @@ function studentTourSteps(studioName: string): TourStep[] {
       focus: "calendar-section",
       body: (
         <p className="muted">
-          Podés mover una clase puntual una vez por mes, con al menos 24hs de anticipación. Si cae un
-          feriado, esa clase queda para reprogramar sin gastar tu cambio del mes.
+          Podés recuperar una clase al mes, con al menos 24hs de anticipación, dentro del mes corriente.
+          Si una clase te cae feriado, tenes que anotarte otro día para tener tu 4ta clase. No te gasta el
+          cambio del mes.
         </p>
       ),
     },
     {
       title: "CeramiBlog",
       focus: "blog-section",
-      body: (
-        <p className="muted">
-          Acá la profe comparte links, fotos y técnicas de vez en cuando — es más para inspirarse que
-          para avisos urgentes.
-        </p>
-      ),
+      body: <p className="muted">Acá lxs profes comparten inspiración para lxs estudiantes.</p>,
     },
     {
       title: "Bitácora",
       focus: "bitacora-section",
       body: (
         <p className="muted">
-          Subí tus piezas y avances con foto — queda privado, solo lo ven las profes y vos, salvo que
-          decidan hacerlo público. Ahí también podés ver las bitácoras públicas de tus compañeros.
+          Registro personal y privado de tus piezas. Solo lo ven lxs profes y vos, salvo que decidan
+          hacerlo público, en ese caso aparecerá en Ceramiblog.
         </p>
       ),
     },
     {
       title: "Info del Taller",
       focus: "info-section",
-      body: <p className="muted">En esta pestaña encontrás la información fija del taller y de tu profe.</p>,
+      body: <p className="muted">Acá encontras las reglas del taller, un glosario y data de proveedores.</p>,
     },
     {
       title: "Chat de tu turno",
       focus: "chat-section",
       body: (
         <p className="muted">
-          Un chat solo entre vos, tus compañeros del mismo día y horario, y la profe de ese turno —
-          nadie más lo ve.
+          Un chat privado entre vos, tus compas del mismo turno y tu profe — nadie más lo ve.
         </p>
       ),
     },
@@ -321,7 +311,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       <div key={tab} className={`tab-panel-enter-${slideDir}`}>
       {tab === "calendario" && paymentBlocked && (
         <div className="card" id="calendar-section" style={{ textAlign: "center" }}>
-          <h3>Cuota vencida</h3>
+          <h3>CUOTA VENCIDA</h3>
           <p className="muted">
             Para seguir accediendo a la app tenés que abonar la cuota del mes. Una vez que la profe
             registre tu pago, vas a volver a ver tu calendario acá.
