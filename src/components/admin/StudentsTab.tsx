@@ -23,6 +23,7 @@ import {
 } from "@/lib/actions/students";
 import { StudentFormModal } from "@/components/admin/StudentFormModal";
 import { Modal } from "@/components/shared/Modal";
+import { PostActionsMenu } from "@/components/shared/PostActionsMenu";
 
 type Turno = { weekday: number; slotId: string; label: string; start: string; end: string };
 
@@ -242,42 +243,27 @@ export function StudentsTab({
                   )}
                 </div>
                 <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end" }}>
-                  {isMainProfe && paid === 0 && (
-                    <button className="ghost small" disabled={busy === s.id} onClick={() => setPayStudentId(s.id)}>
-                      Marcar pagado
-                    </button>
-                  )}
-                  {isMainProfe && isPartial && (
-                    <button className="ghost small" disabled={busy === s.id} onClick={() => setPayStudentId(s.id)}>
-                      Registrar saldo
-                    </button>
-                  )}
-                  {isMainProfe && (isPaid || isPartial) && (
-                    <button className="ghost small" disabled={busy === s.id} onClick={() => removeUnpaid(s.id)}>
-                      Quitar pago
-                    </button>
-                  )}
-                  {isMainProfe && (
-                    <button className="ghost small" onClick={() => setFormStudentId(s.id)}>
-                      Editar
-                    </button>
-                  )}
-                  <button className="ghost small" disabled={busy === s.id} onClick={() => resetPin(s.id, s.name)}>
-                    Restablecer PIN
-                  </button>
-                  {isMainProfe && (
-                    <button
-                      className="ghost small"
+                  {isMainProfe ? (
+                    <PostActionsMenu
                       disabled={busy === s.id}
-                      onClick={() => toggleGiftTheme(s.id, s.theme !== "azulyoro")}
-                      title="Un guiño especial: le cambia el color de toda su app, solo para ella/él."
-                    >
-                      {s.theme === "azulyoro" ? "Quitar Azul y Oro" : "🎁 Regalar Azul y Oro"}
-                    </button>
-                  )}
-                  {isMainProfe && (
-                    <button className="danger small" disabled={busy === s.id} onClick={() => remove(s.id, s.name)}>
-                      Eliminar
+                      items={[
+                        ...(paid === 0 ? [{ label: "Marcar pagado", onClick: () => setPayStudentId(s.id) }] : []),
+                        ...(isPartial ? [{ label: "Registrar saldo", onClick: () => setPayStudentId(s.id) }] : []),
+                        ...(isPaid || isPartial
+                          ? [{ label: "Quitar pago", onClick: () => removeUnpaid(s.id) }]
+                          : []),
+                        { label: "Editar", onClick: () => setFormStudentId(s.id) },
+                        {
+                          label: s.theme === "azulyoro" ? "Quitar Azul y Oro" : "🎁 Regalar Azul y Oro",
+                          onClick: () => toggleGiftTheme(s.id, s.theme !== "azulyoro"),
+                        },
+                        { label: "Restablecer PIN", onClick: () => resetPin(s.id, s.name) },
+                        { label: "Eliminar", onClick: () => remove(s.id, s.name), danger: true },
+                      ]}
+                    />
+                  ) : (
+                    <button className="ghost small" disabled={busy === s.id} onClick={() => resetPin(s.id, s.name)}>
+                      Restablecer PIN
                     </button>
                   )}
                 </div>
