@@ -12,8 +12,10 @@ const darumadropOne = Darumadrop_One({
   variable: "--font-darumadrop",
   display: "swap",
 });
-// Candidatas de tipografía, elegibles en vivo desde Configuración (solo profe principal). El
-// atributo data-font en <html> decide cuál de estas se usa como --font-heading (ver globals.css).
+// Candidatas de tipografía, elegibles en vivo desde Configuración o Mi cuenta. El atributo
+// data-font en <body> decide cuál de estas se usa como --font-heading (ver globals.css) — tiene
+// que ir en el mismo elemento que declara estas variables, si no la variable no está definida
+// todavía cuando el navegador la resuelve.
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
@@ -70,8 +72,9 @@ export default async function RootLayout({
   const effectiveFont = config?.font || "darumadrop";
 
   return (
-    <html lang="es" data-font={effectiveFont} style={themeVars as React.CSSProperties}>
+    <html lang="es" style={themeVars as React.CSSProperties}>
       <body
+        data-font={effectiveFont}
         className={`${darumadropOne.variable} ${roboto.variable} ${montserrat.variable} ${firaSansCondensed.variable}`}
       >
         <div className="app-shell">{children}</div>
