@@ -17,6 +17,7 @@ import { PostInteractions } from "@/components/shared/PostInteractions";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
 import { PullToRefreshIndicator } from "@/components/shared/PullToRefreshIndicator";
 import { fmtLong } from "@/lib/domain";
+import { FONT_OPTIONS } from "@/lib/fontOptions";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
@@ -25,6 +26,7 @@ import { useTabSlideDirection } from "@/lib/useTabSlideDirection";
 import {
   logoutAction,
   setMyNickAction,
+  setFontAsStudentAction,
   dismissStudentTutorialAction,
 } from "@/lib/actions/auth";
 import { markSeenAction } from "@/lib/actions/notifications";
@@ -216,6 +218,11 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
     setSavingNick(true);
     await setMyNickAction(nick);
     setSavingNick(false);
+    router.refresh();
+  }
+
+  async function chooseFont(font: string) {
+    await setFontAsStudentAction(font);
     router.refresh();
   }
 
@@ -472,6 +479,22 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           <button className="ghost block" style={{ marginTop: 8 }} disabled={savingNick} onClick={saveNick}>
             Guardar nick
           </button>
+          <label style={{ marginTop: 14 }}>Tipografía (prueba)</label>
+          <p className="hint" style={{ marginTop: 0 }}>
+            Se aplica a toda la app, para todo el mundo — es para probar, mientras se elige una.
+          </p>
+          <div className="chip-row" style={{ marginTop: 10 }}>
+            {FONT_OPTIONS.map((f) => (
+              <div
+                key={f.key}
+                className={`chip ${data.font === f.key ? "selected" : ""}`}
+                style={{ fontFamily: f.cssVar }}
+                onClick={() => chooseFont(f.key)}
+              >
+                {f.label}
+              </div>
+            ))}
+          </div>
         </div>
       )}
       </div>

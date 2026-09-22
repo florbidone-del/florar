@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
+import { FONT_OPTIONS } from "@/lib/fontOptions";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
@@ -20,13 +21,6 @@ import {
   loadOfficialHolidaysAction,
   loadExtraClassCancellationsAction,
 } from "@/lib/actions/content";
-
-const FONT_OPTIONS = [
-  { key: "darumadrop", label: "Darumadrop One", cssVar: "var(--font-darumadrop)" },
-  { key: "roboto", label: "Roboto", cssVar: "var(--font-test-roboto)" },
-  { key: "montserrat", label: "Montserrat", cssVar: "var(--font-test-montserrat)" },
-  { key: "fira", label: "Fira Sans Condensed", cssVar: "var(--font-test-fira)" },
-];
 
 export function ConfigTab({
   bundle,

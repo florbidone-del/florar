@@ -54,6 +54,17 @@ export async function studentChangePinAction(input: {
   return { ok: true };
 }
 
+/** Temporal, mientras se prueba la tipografía: deja que cualquier cuenta de estudiante también
+ *  cambie la tipografía del taller entero (la misma que setFontAction, del lado de la profe), para
+ *  poder ver cómo queda cada una sin tener que entrar y salir de la cuenta de profe. Sacar esta
+ *  acción (o volver a restringirla) antes de que el taller tenga estudiantes reales. */
+export async function setFontAsStudentAction(font: string): Promise<ActionResult> {
+  const session = await requireStudent();
+  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
+  await prisma.config.update({ where: { id: 1 }, data: { font } });
+  return { ok: true };
+}
+
 export async function setMyNickAction(nick: string): Promise<ActionResult> {
   const session = await requireStudent();
   if (!session) return { error: "Tenés que iniciar sesión de nuevo." };

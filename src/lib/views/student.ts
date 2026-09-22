@@ -44,6 +44,7 @@ export type CalendarDay = {
 export type StudentPanelData = {
   studioName: string;
   theme: string;
+  font: string;
   tutorialSeen: boolean;
   mustChangePin: boolean;
   studentId: string;
@@ -310,6 +311,7 @@ export async function buildStudentPanelData(
   return {
     studioName: snap.config.studioName,
     theme: student.theme || snap.config.theme,
+    font: snap.config.font,
     tutorialSeen: student.tutorialSeen,
     mustChangePin: student.mustChangePin,
     studentId: student.id,
