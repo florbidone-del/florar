@@ -339,6 +339,11 @@ label:first-child{margin-top:0;}
 @media (prefers-reduced-motion: reduce){
   .tab-panel-enter-right, .tab-panel-enter-left{animation:none;}
 }
+/* Pruebas de tipografía: cada clase pisa --font-heading (la variable que usa TODO el texto de la
+   app) solo dentro de la sección donde se aplica, para poder comparar varias a la vez. */
+.font-test-roboto{ --font-heading: var(--font-test-roboto); }
+.font-test-montserrat{ --font-heading: var(--font-test-montserrat); }
+.font-test-fira{ --font-heading: var(--font-test-fira); }
 .tour-highlight{
   position:relative;
   border-radius:12px;

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Darumadrop_One } from "next/font/google";
+import { Darumadrop_One, Roboto, Montserrat, Fira_Sans_Condensed } from "next/font/google";
 import "./globals.css";
 import { loadConfig } from "@/lib/snapshot";
 import { themeCssVars } from "@/lib/themes";
@@ -10,6 +10,27 @@ const darumadropOne = Darumadrop_One({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-heading",
+  display: "swap",
+});
+// Pruebas de tipografía (pedidas para comparar en vivo, sección por sección): cada una queda en
+// su propia variable CSS y se aplica solo dentro de la sección que la usa vía `.font-test-*`.
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-test-roboto",
+  display: "swap",
+});
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-test-montserrat",
+  display: "swap",
+});
+// "Faltory Sans Condensed" no es una tipografía real de Google Fonts — la más parecida es esta.
+const firaSansCondensed = Fira_Sans_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-test-fira",
   display: "swap",
 });
 
@@ -49,7 +70,9 @@ export default async function RootLayout({
 
   return (
     <html lang="es" style={themeVars as React.CSSProperties}>
-      <body className={darumadropOne.variable}>
+      <body
+        className={`${darumadropOne.variable} ${roboto.variable} ${montserrat.variable} ${firaSansCondensed.variable}`}
+      >
         <div className="app-shell">{children}</div>
       </body>
     </html>
