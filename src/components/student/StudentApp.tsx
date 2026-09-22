@@ -101,7 +101,8 @@ function studentTourSteps(studioName: string): TourStep[] {
       body: (
         <p className="muted">
           Registro personal y privado de tus piezas. Solo lo ven lxs profes y vos, salvo que decidan
-          hacerlo público, en ese caso aparecerá en Ceramiblog.
+          hacerlo público, en ese caso aparecerá en Bitácora del taller y/o también pueden
+          destacarlo en CeramiBlog.
         </p>
       ),
     },
