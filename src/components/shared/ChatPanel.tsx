@@ -24,6 +24,21 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
 }
 
+function dayKey(d: Date) {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+/** Etiqueta del divisor de fecha, estilo WhatsApp: "Hoy" / "Ayer" / "dd/mm/aaaa". */
+function fmtDayDivider(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (dayKey(d) === dayKey(today)) return "Hoy";
+  if (dayKey(d) === dayKey(yesterday)) return "Ayer";
+  return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 /** Chat de un turno (día+horario fijo). Se actualiza solo por polling cada POLL_MS, sin
  *  websockets — consistente con que el resto de la app se actualiza con router.refresh(). */
 export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string }) {
@@ -110,14 +125,20 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
         ) : messages.length === 0 ? (
           <p className="muted">Todavía no hay mensajes. ¡Arrancá la charla!</p>
         ) : (
-          messages.map((m) => (
-            <div key={m.id} className={`chat-bubble ${isMine(m) ? "mine" : ""}`}>
-              <div className="chat-author">{m.authorName}</div>
-              {m.attachmentUrl && <img src={m.attachmentUrl} alt="" className="chat-attachment" />}
-              {m.body && <div>{m.body}</div>}
-              <div className="chat-time">{fmtTime(m.createdAt)}</div>
-            </div>
-          ))
+          messages.map((m, i) => {
+            const showDivider = i === 0 || dayKey(new Date(m.createdAt)) !== dayKey(new Date(messages[i - 1].createdAt));
+            return (
+              <div key={m.id} style={{ display: "contents" }}>
+                {showDivider && <div className="chat-day-divider">{fmtDayDivider(m.createdAt)}</div>}
+                <div className={`chat-bubble ${isMine(m) ? "mine" : ""}`}>
+                  <div className="chat-author">{m.authorName}</div>
+                  {m.attachmentUrl && <img src={m.attachmentUrl} alt="" className="chat-attachment" />}
+                  {m.body && <div>{m.body}</div>}
+                  <div className="chat-time">{fmtTime(m.createdAt)}</div>
+                </div>
+              </div>
+            );
+          })
         )}
         <div ref={bottomRef} />
       </div>
