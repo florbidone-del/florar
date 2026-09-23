@@ -47,6 +47,7 @@ const TAB_LABELS: Record<Tab, string> = {
 const SECTION_TAB: Record<string, Tab> = {
   "announcements-section": "calendario",
   "calendar-section": "calendario",
+  "extra-class-section": "calendario",
   "blog-section": "blog",
   "bitacora-section": "bitacora",
   "info-section": "info",
@@ -88,6 +89,16 @@ function studentTourSteps(studioName: string): TourStep[] {
           Podés recuperar una clase al mes, con al menos 24hs de anticipación, dentro del mes corriente.
           Si una clase te cae feriado, tenes que anotarte otro día para tener tu 4ta clase. No te gasta el
           cambio del mes.
+        </p>
+      ),
+    },
+    {
+      title: "Clase extra",
+      focus: "extra-class-section",
+      body: (
+        <p className="muted">
+          Debajo del calendario podés comprar una clase extra por Mercado Pago. Una vez aprobado el
+          pago, elegís el día que quieras entre los que tengan lugar, dentro del mismo mes.
         </p>
       ),
     },
@@ -410,7 +421,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card" id="extra-class-section">
             <h3>Clase extra</h3>
             <p className="muted" style={{ marginTop: 6 }}>
               Sumá una clase más este mes, además de las tuyas fijas. Se paga por Mercado Pago y vale
