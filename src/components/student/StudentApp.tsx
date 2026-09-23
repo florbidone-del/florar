@@ -294,6 +294,26 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       )}
 
+      {data.extraClass.availableCount > 0 && (
+        <div className="banner" style={{ background: "var(--ok-bg)", borderColor: "var(--glaze)" }}>
+          <strong>
+            {data.extraClass.availableCount === 1
+              ? "Tenés una clase extra pagada para agendar este mes"
+              : `Tenés ${data.extraClass.availableCount} clases extra pagadas para agendar este mes`}
+          </strong>
+          <button
+            className="primary block"
+            style={{ marginTop: 10 }}
+            onClick={() => {
+              setTab("calendario");
+              setModal({ kind: "extra" });
+            }}
+          >
+            Elegir día
+          </button>
+        </div>
+      )}
+
       <div className="tabs">
         {PILL_TABS.map((t) => {
           const isUnread = (t === "calendario" && unread.avisos) || (t === "blog" && unread.blog);
@@ -367,42 +387,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </div>
           )}
 
-          {data.extraClass.availableCount > 0 && (
-            <div className="banner" style={{ background: "var(--ok-bg)", borderColor: "var(--glaze)" }}>
-              <strong>
-                {data.extraClass.availableCount === 1
-                  ? "Tenés una clase extra pagada para agendar este mes"
-                  : `Tenés ${data.extraClass.availableCount} clases extra pagadas para agendar este mes`}
-              </strong>
-              <button
-                className="primary block"
-                style={{ marginTop: 10 }}
-                onClick={() => setModal({ kind: "extra" })}
-              >
-                Elegir día
-              </button>
-            </div>
-          )}
-
-          <div className="card">
-            <h3>Clase extra</h3>
-            <p className="muted" style={{ marginTop: 6 }}>
-              Sumá una clase más este mes, además de las tuyas fijas. Se paga por Mercado Pago y vale
-              solo para el mes en que la compres.
-            </p>
-            {data.extraClass.pendingCount > 0 && (
-              <p className="hint">
-                Tenés un pago de clase extra en proceso — en cuanto se confirme vas a poder elegir el
-                día.
-              </p>
-            )}
-            <PayButton
-              fallbackLink={null}
-              label={`Comprar clase extra (${data.extraClass.feeAmount})`}
-              endpoint="/api/mp/generar-link-extra"
-            />
-          </div>
-
           <div className="card" id="calendar-section">
             <h3>Calendario del taller</h3>
             <p className="muted" style={{ marginTop: 6 }}>
@@ -424,6 +408,25 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                 onOtherClick={(day) => setModal({ kind: "other", day })}
               />
             </div>
+          </div>
+
+          <div className="card">
+            <h3>Clase extra</h3>
+            <p className="muted" style={{ marginTop: 6 }}>
+              Sumá una clase más este mes, además de las tuyas fijas. Se paga por Mercado Pago y vale
+              solo para el mes en que la compres.
+            </p>
+            {data.extraClass.pendingCount > 0 && (
+              <p className="hint">
+                Tenés un pago de clase extra en proceso — en cuanto se confirme vas a poder elegir el
+                día.
+              </p>
+            )}
+            <PayButton
+              fallbackLink={null}
+              label={`Comprar clase extra (${data.extraClass.feeAmount})`}
+              endpoint="/api/mp/generar-link-extra"
+            />
           </div>
         </div>
       )}
