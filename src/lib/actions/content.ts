@@ -69,9 +69,12 @@ export async function loadOfficialHolidaysAction(
 
 const CLASS_CAP_LABEL = "Sin clases por ya haber tenido las 4 clases del mes";
 
-/** Cancela automáticamente la 5ta clase del mes de cada día de la semana que la tenga (ej: si un
- *  mes tiene 5 martes, cancela el último) — así ningún turno da más de 4 clases por mes. Igual que
- *  los feriados oficiales, nunca pisa un día ya cargado, así que se puede apretar todos los años. */
+/** Cancela automáticamente la 5ta clase real del mes de cada día de la semana que la tenga (ej: si
+ *  un mes tiene 5 martes, cancela el último) — así ningún turno da más de 4 clases por mes. Un
+ *  feriado ya cargado en alguno de esos días no cuenta como clase dada, así que no cuenta para
+ *  llegar al 5 — si el mes tiene 5 martes y el 2do ya es feriado, ninguno se cancela por tope (con
+ *  el feriado incluido, solo hay 4 martes "reales"). Igual que los feriados oficiales, nunca pisa
+ *  un día ya cargado, así que se puede apretar todos los años. */
 export async function loadExtraClassCancellationsAction(
   years: number[]
 ): Promise<ActionResult & { added?: number }> {
@@ -80,6 +83,8 @@ export async function loadExtraClassCancellationsAction(
 
   const slots = await prisma.slot.findMany();
   const weekdaysWithClass = new Set(slots.flatMap((s) => s.weekdays));
+  const existingHolidays = await prisma.holiday.findMany();
+  const holidayDates = new Set(existingHolidays.map((h) => h.date.toISOString().slice(0, 10)));
 
   const toAdd: string[] = [];
   for (const year of years) {
@@ -90,6 +95,7 @@ export async function loadExtraClassCancellationsAction(
         const weekday = new Date(year, month - 1, day).getDay();
         if (!weekdaysWithClass.has(weekday)) continue;
         const dateISO = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        if (holidayDates.has(dateISO)) continue;
         const list = datesByWeekday.get(weekday) || [];
         list.push(dateISO);
         datesByWeekday.set(weekday, list);
