@@ -424,8 +424,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           <div className="card" id="extra-class-section">
             <h3>Clase extra</h3>
             <p className="muted" style={{ marginTop: 6 }}>
-              Sumá una clase más este mes, además de las tuyas fijas. Se paga por Mercado Pago y vale
-              solo para el mes en que la compres.
+              ¡Adicionate clases en el mes! Una vez abonada, podés agendarla en el calendario en
+              cualquier horario disponible.
             </p>
             {data.extraClass.pendingCount > 0 && (
               <p className="hint">
