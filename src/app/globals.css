@@ -317,13 +317,15 @@ label:first-child{margin-top:0;}
   display:flex;
   gap:8px;
   overflow-x:auto;
-  padding-bottom:4px;
   scroll-behavior:smooth;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
 }
+.tabs::-webkit-scrollbar{display:none;}
 .tabs-arrow{
   position:absolute;
   top:0;
-  bottom:4px;
+  bottom:0;
   display:flex;
   align-items:center;
   justify-content:center;
