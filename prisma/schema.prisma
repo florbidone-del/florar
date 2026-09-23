@@ -98,6 +98,7 @@ model Admin {
   notifications   Notification[]
   chatMessages    ChatMessage[]
   chatSeens       AdminChatSeen[]
+  pushSubscriptions PushSubscription[]
 }
 
 // Última vez que una profe vio el chat de un turno puntual — a diferencia de avisos/blog, el chat
@@ -135,6 +136,7 @@ model Student {
   pinResets       PinResetRequest[]
   chatMessages    ChatMessage[]
   posts           StudentPost[]
+  pushSubscriptions PushSubscription[]
 
   @@index([defaultWeekday, defaultSlotId])
 }
@@ -327,6 +329,21 @@ model PostComment {
   createdAt  DateTime @default(now())
 
   @@index([postType, postId, createdAt])
+}
+
+// Una suscripción de Web Push por dispositivo (el mismo usuario puede tener varias: celu +
+// compu). endpoint es único porque el navegador lo genera; si deja de servir (410/404 al
+// mandarle un push) se borra sola.
+model PushSubscription {
+  id            String   @id @default(cuid())
+  endpoint      String   @unique
+  p256dh        String
+  auth          String
+  studentId     String?
+  student       Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  adminUsername String?
+  admin         Admin?   @relation(fields: [adminUsername], references: [username], onDelete: Cascade)
+  createdAt     DateTime @default(now())
 }
 
 model Notification {

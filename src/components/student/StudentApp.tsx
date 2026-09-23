@@ -14,6 +14,7 @@ import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { StudentBitacoraTab } from "@/components/student/StudentBitacoraTab";
 import { TabsScroller } from "@/components/shared/TabsScroller";
+import { NotificationsToggle } from "@/components/shared/NotificationsToggle";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { PostInteractions } from "@/components/shared/PostInteractions";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
@@ -526,6 +527,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           <button className="ghost block" style={{ marginTop: 8 }} disabled={savingNick} onClick={saveNick}>
             Guardar nick
           </button>
+        </div>
+      )}
+
+      {tab === "cuenta" && (
+        <div className="card" style={{ marginTop: 14 }}>
+          <h3>Notificaciones</h3>
+          <NotificationsToggle />
         </div>
       )}
       </div>

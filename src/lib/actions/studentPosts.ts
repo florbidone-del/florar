@@ -1,10 +1,12 @@
 "use server";
 
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
 import { requireProfe } from "@/lib/authz";
 import { uploadImageDataUrl, duplicateBlobImage, deleteBlobImage } from "@/lib/blobStorage";
 import { deleteInteractionsFor } from "@/lib/postInteractionsData";
+import { notifyNewBlogPost } from "@/lib/push";
 import type { ActionResult } from "@/lib/actions/auth";
 
 /** Publica en la bitácora personal del alumno logueado — arranca privada (solo la ve él/ella y
@@ -101,5 +103,8 @@ export async function featureStudentPostAction(id: string): Promise<ActionResult
     },
   });
   await prisma.studentPost.update({ where: { id }, data: { isPublic: true } });
+  after(() =>
+    notifyNewBlogPost({ authorUsername: session.username, title: post.title, body: post.body }).catch(() => {})
+  );
   return { ok: true };
 }

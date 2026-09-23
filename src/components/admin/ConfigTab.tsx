@@ -6,6 +6,7 @@ import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
+import { NotificationsToggle } from "@/components/shared/NotificationsToggle";
 import {
   saveConfigAction,
   addSlotAction,
@@ -153,6 +154,10 @@ export function ConfigTab({
 
   return (
     <>
+      <Collapsible title="Notificaciones">
+        <NotificationsToggle />
+      </Collapsible>
+
       <Collapsible title="Tu nick">
         <p className="muted">
           Así te van a ver los estudiantes en el chat, los avisos y el CeramiBlog, en vez de tu usuario de

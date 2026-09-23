@@ -1,8 +1,10 @@
 "use server";
 
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authorizeChatTurno } from "@/lib/chat";
 import { uploadImageDataUrl } from "@/lib/blobStorage";
+import { notifyNewChatMessage } from "@/lib/push";
 import type { ActionResult } from "@/lib/actions/auth";
 
 export async function sendChatMessageAction(input: {
@@ -47,5 +49,20 @@ export async function sendChatMessageAction(input: {
       attachmentType,
     },
   });
+
+  // after() sigue corriendo aunque ya se le haya respondido a quien escribió — así no lo hace
+  // esperar a que salgan los pushes, pero tampoco se cortan a mitad de camino.
+  after(() =>
+    notifyNewChatMessage({
+      weekday: input.weekday,
+      slotId: input.slotId,
+      authorName: identity.authorName,
+      body,
+      hasAttachment: !!attachmentUrl,
+      excludeStudentId: identity.kind === "student" ? identity.studentId : null,
+      excludeAdminUsername: identity.kind === "admin" ? identity.username : null,
+    }).catch(() => {})
+  );
+
   return { ok: true };
 }

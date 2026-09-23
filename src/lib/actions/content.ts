@@ -1,11 +1,13 @@
 "use server";
 
+import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { dateInputToUTC } from "@/lib/snapshot";
 import { todayISO } from "@/lib/domain";
 import { uploadImageDataUrl, deleteBlobImage } from "@/lib/blobStorage";
 import { deleteInteractionsFor } from "@/lib/postInteractionsData";
+import { notifyNewBlogPost } from "@/lib/push";
 import type { ActionResult } from "@/lib/actions/auth";
 
 export async function addHolidayAction(input: {
@@ -240,6 +242,11 @@ export async function addBlogPostAction(input: {
       authorUsername: session.username,
     },
   });
+  after(() =>
+    notifyNewBlogPost({ authorUsername: session.username, title: input.title?.trim() || null, body }).catch(
+      () => {}
+    )
+  );
   return { ok: true };
 }
 
