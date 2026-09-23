@@ -13,6 +13,7 @@ import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen"
 import { PayButton } from "@/components/student/PayButton";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { StudentBitacoraTab } from "@/components/student/StudentBitacoraTab";
+import { TabsScroller } from "@/components/shared/TabsScroller";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { PostInteractions } from "@/components/shared/PostInteractions";
 import { ChatIcon, GearIcon } from "@/components/shared/Icons";
@@ -325,7 +326,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       )}
 
-      <div className="tabs">
+      <TabsScroller>
         {PILL_TABS.map((t) => {
           const isUnread = (t === "calendario" && unread.avisos) || (t === "blog" && unread.blog);
           return (
@@ -340,7 +341,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </button>
           );
         })}
-      </div>
+      </TabsScroller>
 
       <div key={tab} className={`tab-panel-enter-${slideDir}`}>
       {tab === "calendario" && paymentBlocked && (

@@ -18,6 +18,7 @@ import { StudentPostsTab } from "@/components/admin/StudentPostsTab";
 import { ChatTab } from "@/components/admin/ChatTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
 import { ProfesTab } from "@/components/admin/ProfesTab";
+import { TabsScroller } from "@/components/shared/TabsScroller";
 import { OnboardingTour, type TourStep } from "@/components/shared/OnboardingTour";
 import { useBackToClose } from "@/lib/useBackToClose";
 import { usePullToRefresh } from "@/lib/usePullToRefresh";
@@ -281,7 +282,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
           de profe.
         </p>
       )}
-      <div className="tabs">
+      <TabsScroller>
         {tabs.map((t) => {
           const isUnread = (t === "avisos" && unread.avisos) || (t === "blog" && unread.blog);
           return (
@@ -295,7 +296,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
             </div>
           );
         })}
-      </div>
+      </TabsScroller>
       <div key={tab} id={tab} className={`tab-panel-enter-${slideDir}`}>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
         {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
