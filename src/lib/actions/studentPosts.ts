@@ -25,7 +25,8 @@ export async function addStudentPostAction(input: {
   if (input.imageData) {
     try {
       imageUrl = await uploadImageDataUrl(input.imageData, "bitacoras");
-    } catch {
+    } catch (err) {
+      console.error("[addStudentPostAction] Falló la subida a Blob:", err);
       return { error: "No se pudo subir la foto. Probá de nuevo." };
     }
   }

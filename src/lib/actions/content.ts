@@ -229,7 +229,8 @@ export async function addBlogPostAction(input: {
   if (input.imageData) {
     try {
       imageUrl = await uploadImageDataUrl(input.imageData, "ceramiblog");
-    } catch {
+    } catch (err) {
+      console.error("[addBlogPostAction] Falló la subida a Blob:", err);
       return { error: "No se pudo subir la foto. Probá de nuevo." };
     }
   }

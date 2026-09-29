@@ -28,7 +28,8 @@ export async function sendChatMessageAction(input: {
     try {
       attachmentUrl = await uploadImageDataUrl(input.imageData, "chat");
       attachmentType = "photo";
-    } catch {
+    } catch (err) {
+      console.error("[sendChatMessageAction] Falló la subida a Blob:", err);
       return { error: "No se pudo subir la foto. Probá de nuevo." };
     }
   } else if (input.gifUrl) {

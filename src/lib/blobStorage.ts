@@ -36,7 +36,8 @@ export async function deleteBlobImage(imageData: string | null | undefined): Pro
   if (!imageData || !imageData.startsWith("http")) return;
   try {
     await del(imageData);
-  } catch {
+  } catch (err) {
+    console.error("[deleteBlobImage] Falló el borrado en Blob:", err);
     // ya no existe, o el borrado falló — no es motivo para frenar el resto de la operación.
   }
 }
