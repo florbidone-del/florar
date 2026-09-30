@@ -316,6 +316,7 @@ label:first-child{margin-top:0;}
 .tabs{
   display:flex;
   gap:8px;
+  margin-bottom:16px;
   overflow-x:auto;
   scroll-behavior:smooth;
   scrollbar-width:none;
