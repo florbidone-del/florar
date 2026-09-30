@@ -71,6 +71,8 @@ export type StudentPanelData = {
     mpFee: string;
     remainingMp: string;
     mpLink: string | null;
+    /** Si la profe habilitó cobrar por Mercado Pago (si no, solo transferencia + comprobante). */
+    mpEnabled: boolean;
     isLate: boolean;
     lateFeePercent: number;
     /** Saldo en efectivo/transferencia (número, para precargar el monto del comprobante). */
@@ -363,6 +365,7 @@ export async function buildStudentPanelData(
       mpFee: money(studentFee(snap, "mp")),
       remainingMp: money(Math.max(0, studentFee(snap, "mp") - paidThisMonth)),
       mpLink: snap.config.mpLink,
+      mpEnabled: snap.config.mpEnabled,
       isLate: isPastPaymentWindow(snap),
       lateFeePercent: snap.config.lateFeePercent,
       remainingCashAmount: Math.max(0, studentFee(snap, "cash") - paidThisMonth),

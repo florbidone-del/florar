@@ -13,6 +13,9 @@ export async function POST(req: NextRequest) {
   }
 
   const snap = await loadWorkshopSnapshot();
+  if (!snap.config.mpEnabled) {
+    return NextResponse.json({ error: "El pago por Mercado Pago no está habilitado." }, { status: 403 });
+  }
   const student = snap.students.find((s) => s.id === session.studentId);
   if (!student) {
     return NextResponse.json({ error: "Estudiante no encontrado." }, { status: 404 });

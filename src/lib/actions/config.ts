@@ -17,6 +17,7 @@ export async function saveConfigAction(input: {
   defaultStudentPin: string;
   profeWhatsapp: string;
   mpLink: string;
+  mpEnabled: boolean;
   transferAlias: string;
   transferCbu: string;
   transferHolder: string;
@@ -38,6 +39,7 @@ export async function saveConfigAction(input: {
       defaultStudentPin: input.defaultStudentPin.trim() || "0000",
       profeWhatsapp: input.profeWhatsapp.trim().replace(/[^0-9]/g, "") || null,
       mpLink: input.mpLink.trim() || null,
+      mpEnabled: input.mpEnabled,
       transferAlias: input.transferAlias.trim() || null,
       transferCbu: input.transferCbu.replace(/s/g, "") || null,
       transferHolder: input.transferHolder.trim() || null,

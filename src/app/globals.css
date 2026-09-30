@@ -947,3 +947,4 @@ td.holiday{background:var(--oxide-soft);}
 .receipt-actions button{min-width:88px;}
 .receipt-full{display:block; width:100%; max-height:65vh; object-fit:contain; border-radius:var(--radius); border:1.5px solid var(--line); background:var(--surface);}
 .receipt-reason{font-style:italic; margin-top:2px;}
+.receipt-cta-main{margin-top:12px;}

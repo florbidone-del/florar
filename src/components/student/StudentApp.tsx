@@ -59,8 +59,8 @@ const SECTION_TAB: Record<string, Tab> = {
   "account-section": "cuenta",
 };
 
-function studentTourSteps(studioName: string): TourStep[] {
-  return [
+function studentTourSteps(studioName: string, mpEnabled: boolean): TourStep[] {
+  const steps: TourStep[] = [
     {
       title: `¡Bienvenidx a ${studioName}!`,
       body: <p className="muted">Te hago un recorrido de lo que podés hacer en la app.</p>,
@@ -71,7 +71,7 @@ function studentTourSteps(studioName: string): TourStep[] {
       body: (
         <p className="muted">
           Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
-          todo para pagar con Mercado Pago o subir el comprobante de tu transferencia.
+          todo para pagar o subir el comprobante de tu transferencia.
         </p>
       ),
     },
@@ -144,6 +144,8 @@ function studentTourSteps(studioName: string): TourStep[] {
       ),
     },
   ];
+  // Sin Mercado Pago no se venden clases extra (hoy solo se pagan por ahí), así que no se muestra.
+  return mpEnabled ? steps : steps.filter((s) => s.focus !== "extra-class-section");
 }
 
 type ModalState =
@@ -245,6 +247,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   const receiptPending = receipt?.status === "pending";
   const paymentBlocked = data.payment.unpaid && data.payment.isLate && !receiptPending;
   const openReceipt = () => setModal({ kind: "receipt" });
+  const mpEnabled = data.payment.mpEnabled;
 
   if (data.mustChangePin) {
     return <ForcePinChangeScreen studentName={data.firstName} onDone={() => router.refresh()} />;
@@ -314,7 +317,14 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           {data.payment.isPartial ? (
             <p style={{ margin: "4px 0 0" }}>
               Ya pagaste {data.payment.paidAmount} de {data.payment.cashFee}. Te faltan{" "}
-              {data.payment.remainingCash} en efectivo, {data.payment.remainingMp} en otro medio.
+              {mpEnabled
+                ? `${data.payment.remainingCash} en efectivo, ${data.payment.remainingMp} en otro medio.`
+                : `${data.payment.remainingCash}.`}
+            </p>
+          ) : !mpEnabled ? (
+            <p style={{ margin: "4px 0 0" }}>
+              La cuota es: {data.payment.cashFee}
+              {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}%`}
             </p>
           ) : (
             <>
@@ -331,13 +341,13 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           {receipt?.status === "rejected" && (
             <div className="receipt-rejected">
               Tu comprobante del {receipt.sentAt} no se pudo confirmar
-              {receipt.rejectReason ? <>: <em>{receipt.rejectReason}</em>.</> : "."} Subí otro o pagá por
-              Mercado Pago.
+              {receipt.rejectReason ? <>: <em>{receipt.rejectReason}</em>.</> : "."} Subí otro
+              {mpEnabled ? " o pagá por Mercado Pago" : ""}.
             </div>
           )}
           {data.payment.transfer && <TransferInfo transfer={data.payment.transfer} />}
-          <PayButton fallbackLink={data.payment.mpLink} />
-          <button type="button" className="block receipt-cta" onClick={openReceipt}>
+          {mpEnabled && <PayButton fallbackLink={data.payment.mpLink} />}
+          <button type="button" className={`block ${mpEnabled ? "receipt-cta" : "primary receipt-cta-main"}`} onClick={openReceipt}>
             Ya transferí · subir comprobante
           </button>
         </div>
@@ -388,8 +398,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             Para seguir accediendo a la app tenés que abonar la cuota del mes. Una vez que la profe
             registre tu pago, vas a volver a ver tu calendario acá.
           </p>
-          <PayButton fallbackLink={data.payment.mpLink} label="Pagar ahora" />
-          <button type="button" className="block receipt-cta" onClick={openReceipt}>
+          {mpEnabled && <PayButton fallbackLink={data.payment.mpLink} label="Pagar ahora" />}
+          <button type="button" className={`block ${mpEnabled ? "receipt-cta" : "primary receipt-cta-main"}`} onClick={openReceipt}>
             Ya transferí · subir comprobante
           </button>
         </div>
@@ -462,6 +472,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </div>
           </div>
 
+          {mpEnabled && (
           <div className="card" id="extra-class-section">
             <h3>Clase extra</h3>
             <p className="muted" style={{ marginTop: 6 }}>
@@ -480,6 +491,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
               endpoint="/api/mp/generar-link-extra"
             />
           </div>
+          )}
         </div>
       )}
 
@@ -633,7 +645,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       )}
       {showTour && (
         <OnboardingTour
-          steps={studentTourSteps(data.studioName)}
+          steps={studentTourSteps(data.studioName, data.payment.mpEnabled)}
           onFinish={finishTour}
           onStepChange={(step) => setTourFocus(step.focus)}
         />

@@ -46,6 +46,9 @@ model Config {
   lateFeePercent         Int      @default(20)
   extraClassFee          Int      @default(15000)
   mpLink                 String?
+  // Si está apagado, no se ofrece pagar por Mercado Pago (ni la cuota ni la clase extra): la
+  // comisión de MP no le conviene al taller y se cobra por transferencia + comprobante.
+  mpEnabled              Boolean  @default(false)
   // Datos para transferir (alias / CBU o CVU / titular) que ve el/la estudiante al pagar.
   transferAlias          String?
   transferCbu            String?

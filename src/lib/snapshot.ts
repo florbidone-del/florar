@@ -65,6 +65,7 @@ export async function loadConfig(): Promise<ConfigDTO> {
     lateFeePercent: config.lateFeePercent,
     extraClassFee: config.extraClassFee,
     mpLink: config.mpLink,
+    mpEnabled: config.mpEnabled,
     transferAlias: config.transferAlias,
     transferCbu: config.transferCbu,
     transferHolder: config.transferHolder,

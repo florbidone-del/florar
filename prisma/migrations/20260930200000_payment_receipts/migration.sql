@@ -1,5 +1,6 @@
 -- AlterTable
-ALTER TABLE "Config" ADD COLUMN     "transferAlias" TEXT,
+ALTER TABLE "Config" ADD COLUMN     "mpEnabled" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "transferAlias" TEXT,
 ADD COLUMN     "transferCbu" TEXT,
 ADD COLUMN     "transferHolder" TEXT;
 
