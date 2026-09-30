@@ -96,12 +96,14 @@ export async function POST(req: NextRequest) {
           status: "approved",
           source: "mercadopago",
           mpPaymentId: String(payment.id),
+          paidAt: new Date(),
         },
         update: {
           amount: baseApproved + mpAmount,
           status: "approved",
           source: "mercadopago",
           mpPaymentId: String(payment.id),
+          paidAt: new Date(),
         },
       });
     } else if (previous?.status === "approved") {

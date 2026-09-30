@@ -11,6 +11,8 @@ import { ExtraClassModal } from "@/components/student/ExtraClassModal";
 import { ChangePinModal } from "@/components/student/ChangePinModal";
 import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen";
 import { PayButton } from "@/components/student/PayButton";
+import { ReceiptUploadModal } from "@/components/student/ReceiptUploadModal";
+import { TransferInfo } from "@/components/student/TransferInfo";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { StudentBitacoraTab } from "@/components/student/StudentBitacoraTab";
 import { TabsScroller } from "@/components/shared/TabsScroller";
@@ -69,7 +71,7 @@ function studentTourSteps(studioName: string): TourStep[] {
       body: (
         <p className="muted">
           Acá vas a ver los avisos recientes del taller. Si debés la cuota, te va a aparecer arriba de
-          todo un botón para pagar con Mercado Pago.
+          todo para pagar con Mercado Pago o subir el comprobante de tu transferencia.
         </p>
       ),
     },
@@ -150,6 +152,7 @@ type ModalState =
   | { kind: "swap"; originalDate: string; isHolidayReschedule: boolean }
   | { kind: "pin" }
   | { kind: "extra" }
+  | { kind: "receipt" }
   | null;
 
 export function StudentApp({ data }: { data: StudentPanelData }) {
@@ -236,8 +239,12 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
   }
 
   const originalDay = modal?.kind === "swap" ? data.calendar.find((d) => d.date === modal.originalDate) : null;
-  // Pasada la ventana de pago (hoy: día 10) sin abonar, se corta el acceso al calendario de clases.
-  const paymentBlocked = data.payment.unpaid && data.payment.isLate;
+  // Pasada la ventana de pago (hoy: día 10) sin abonar, se corta el acceso al calendario de clases —
+  // salvo que haya subido un comprobante que la profe todavía no revisó (acceso provisorio).
+  const receipt = data.payment.receipt;
+  const receiptPending = receipt?.status === "pending";
+  const paymentBlocked = data.payment.unpaid && data.payment.isLate && !receiptPending;
+  const openReceipt = () => setModal({ kind: "receipt" });
 
   if (data.mustChangePin) {
     return <ForcePinChangeScreen studentName={data.firstName} onDone={() => router.refresh()} />;
@@ -281,7 +288,25 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
         </div>
       </div>
 
-      {data.payment.unpaid && (
+      {data.payment.unpaid && receiptPending && receipt && (
+        <div className="banner calm">
+          <strong>⏳ Comprobante en revisión</strong>
+          <p style={{ margin: "4px 0 0" }}>
+            Mandaste {receipt.amount} el {receipt.sentAt}. Mientras la profe lo revisa, tenés acceso
+            normal al calendario.
+          </p>
+          <div className="banner-links">
+            <a href={`/api/comprobantes/${receipt.id}`} target="_blank" rel="noopener">
+              Ver comprobante
+            </a>
+            <button type="button" className="link-button" onClick={openReceipt}>
+              Cambiarlo
+            </button>
+          </div>
+        </div>
+      )}
+
+      {data.payment.unpaid && !receiptPending && (
         <div className="banner">
           <strong>
             {data.payment.isPartial ? "Te falta completar la cuota del mes" : "Debés la cuota del mes"}
@@ -303,7 +328,18 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
               </p>
             </>
           )}
+          {receipt?.status === "rejected" && (
+            <div className="receipt-rejected">
+              Tu comprobante del {receipt.sentAt} no se pudo confirmar
+              {receipt.rejectReason ? <>: <em>{receipt.rejectReason}</em>.</> : "."} Subí otro o pagá por
+              Mercado Pago.
+            </div>
+          )}
+          {data.payment.transfer && <TransferInfo transfer={data.payment.transfer} />}
           <PayButton fallbackLink={data.payment.mpLink} />
+          <button type="button" className="block receipt-cta" onClick={openReceipt}>
+            Ya transferí · subir comprobante
+          </button>
         </div>
       )}
 
@@ -353,6 +389,9 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             registre tu pago, vas a volver a ver tu calendario acá.
           </p>
           <PayButton fallbackLink={data.payment.mpLink} label="Pagar ahora" />
+          <button type="button" className="block receipt-cta" onClick={openReceipt}>
+            Ya transferí · subir comprobante
+          </button>
         </div>
       )}
 
@@ -580,6 +619,16 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           todayISO={data.todayISO}
           onClose={() => setModal(null)}
           onConfirmed={closeAndRefresh}
+        />
+      )}
+      {modal?.kind === "receipt" && (
+        <ReceiptUploadModal
+          remaining={data.payment.remainingCash}
+          defaultAmount={data.payment.remainingCashAmount}
+          transfer={data.payment.transfer}
+          replacing={receiptPending}
+          onClose={() => setModal(null)}
+          onDone={closeAndRefresh}
         />
       )}
       {showTour && (

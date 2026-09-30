@@ -155,6 +155,9 @@ export type ConfigDTO = {
   lateFeePercent: number;
   extraClassFee: number;
   mpLink: string | null;
+  transferAlias: string | null;
+  transferCbu: string | null;
+  transferHolder: string | null;
   theme: string;
   defaultStudentPin: string;
   profeWhatsapp: string | null;

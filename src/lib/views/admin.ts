@@ -1,7 +1,15 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
-import { isoDate, capitalize, DIAS, type WorkshopSnapshot } from "@/lib/domain";
+import {
+  isoDate,
+  capitalize,
+  currentMonthKey,
+  feeDueThisMonth,
+  paidAmountThisMonth,
+  DIAS,
+  type WorkshopSnapshot,
+} from "@/lib/domain";
 import { loadInteractions, visibleLikeCount, type CommentDTO } from "@/lib/postInteractionsData";
 
 export type AdminDTO = {
@@ -62,6 +70,27 @@ export type StudentPostDTO = {
   comments: CommentDTO[];
 };
 
+/** Comprobante de transferencia subido por un/a estudiante (sin el archivo: ese se pide aparte
+ *  por /api/comprobantes/[id], para no mandar todas las fotos en cada carga del panel). */
+export type ReceiptDTO = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  turnoLabel: string;
+  monthKey: string;
+  amount: number;
+  note: string | null;
+  isPdf: boolean;
+  status: "pending" | "approved" | "rejected";
+  rejectReason: string | null;
+  reviewedBy: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  /** Solo para comprobantes del mes en curso: cuota que corresponde y lo ya pagado antes. */
+  feeDue: number | null;
+  alreadyPaid: number | null;
+};
+
 export type AdminBundle = {
   snapshot: WorkshopSnapshot;
   admins: AdminDTO[];
@@ -70,6 +99,8 @@ export type AdminBundle = {
   announcements: AnnouncementFullDTO[];
   blogPosts: BlogPostDTO[];
   studentPosts: StudentPostDTO[];
+  /** Solo se cargan para la profe principal (el resto de las profes no ve temas de cuotas). */
+  receipts: ReceiptDTO[];
   unread: { avisos: boolean; chat: boolean; blog: boolean };
   chatUnreadByTurno: Record<string, boolean>;
 };
@@ -102,6 +133,34 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
   // El chat es por turno (la principal ve varios a la vez), así que lo no-leído también se calcula
   // por turno: turnos que le interesan a esta profe (todos si es la principal, si no los asignados).
   const me = admins.find((a) => a.username === username);
+
+  // Comprobantes: todos los pendientes + los revisados de los últimos 45 días (historial corto).
+  const receipts = me?.isMainProfe
+    ? await prisma.paymentReceipt.findMany({
+        where: {
+          OR: [
+            { status: "pending" },
+            { reviewedAt: { gte: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000) } },
+          ],
+        },
+        select: {
+          id: true,
+          studentId: true,
+          monthKey: true,
+          amount: true,
+          note: true,
+          fileType: true,
+          status: true,
+          rejectReason: true,
+          reviewedBy: true,
+          createdAt: true,
+          reviewedAt: true,
+          student: { select: { name: true, defaultWeekday: true, defaultSlotId: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 80,
+      })
+    : [];
   const turnoKey = (t: { weekday: number; slotId: string }) => `${t.weekday}_${t.slotId}`;
   const relevantTurnos = me?.isMainProfe
     ? snapshot.config.slots.flatMap((slot) => slot.weekdays.map((weekday) => ({ weekday, slotId: slot.id })))
@@ -162,6 +221,27 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
       createdAt: isoDate(a.createdAt),
       cupo: a.cupo,
     })),
+    receipts: receipts.map((r) => {
+      const slot = snapshot.config.slots.find((s) => s.id === r.student.defaultSlotId);
+      const isCurrentMonth = r.monthKey === currentMonthKey();
+      return {
+        id: r.id,
+        studentId: r.studentId,
+        studentName: r.student.name,
+        turnoLabel: `${capitalize(DIAS[r.student.defaultWeekday])}${slot ? ` ${slot.start}–${slot.end}` : ""}`,
+        monthKey: r.monthKey,
+        amount: r.amount,
+        note: r.note,
+        isPdf: r.fileType === "application/pdf",
+        status: r.status,
+        rejectReason: r.rejectReason,
+        reviewedBy: r.reviewedBy ? authorNameByUsername.get(r.reviewedBy) || r.reviewedBy : null,
+        createdAt: r.createdAt.toISOString(),
+        reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
+        feeDue: isCurrentMonth ? feeDueThisMonth(snapshot, r.studentId) : null,
+        alreadyPaid: isCurrentMonth ? paidAmountThisMonth(snapshot, r.studentId) : null,
+      };
+    }),
     notifications: notifications.map((n) => ({
       id: n.id,
       forProfe: n.forProfe,

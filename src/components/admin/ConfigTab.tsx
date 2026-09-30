@@ -48,6 +48,9 @@ export function ConfigTab({
   const [defaultStudentPin, setDefaultStudentPin] = useState(c.defaultStudentPin);
   const [profeWhatsapp, setProfeWhatsapp] = useState(c.profeWhatsapp || "");
   const [mpLink, setMpLink] = useState(c.mpLink || "");
+  const [transferAlias, setTransferAlias] = useState(c.transferAlias || "");
+  const [transferCbu, setTransferCbu] = useState(c.transferCbu || "");
+  const [transferHolder, setTransferHolder] = useState(c.transferHolder || "");
   const [savingRules, setSavingRules] = useState(false);
   const [resettingTutorial, setResettingTutorial] = useState(false);
   const [tutorialResetDone, setTutorialResetDone] = useState(false);
@@ -147,6 +150,9 @@ export function ConfigTab({
       defaultStudentPin,
       profeWhatsapp,
       mpLink,
+      transferAlias,
+      transferCbu,
+      transferHolder,
     });
     setSavingRules(false);
     router.refresh();
@@ -273,6 +279,16 @@ export function ConfigTab({
         <p className="hint">
           Si lo cargás, cuando un/a estudiante pida restablecer su PIN le va a aparecer un botón para
           avisarte directo por WhatsApp.
+        </p>
+        <label>Alias para transferencias</label>
+        <input placeholder="florar.taller" value={transferAlias} onChange={(e) => setTransferAlias(e.target.value)} />
+        <label>CBU / CVU</label>
+        <input inputMode="numeric" placeholder="22 dígitos" value={transferCbu} onChange={(e) => setTransferCbu(e.target.value)} />
+        <label>Titular de la cuenta</label>
+        <input placeholder="Nombre y apellido" value={transferHolder} onChange={(e) => setTransferHolder(e.target.value)} />
+        <p className="hint">
+          Si los cargás, a quien deba la cuota le aparecen con un botón para copiarlos, junto a la opción
+          de subir el comprobante de la transferencia.
         </p>
         <label>Link de cobro de Mercado Pago (general)</label>
         <input placeholder="https://mpago.la/..." value={mpLink} onChange={(e) => setMpLink(e.target.value)} />

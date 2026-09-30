@@ -58,7 +58,7 @@ export async function GET() {
   // cuota es un pago parcial: todavía falta el saldo, aunque la fila diga "approved" en la base.
   const rows: Row[] = payments.map((p) => {
     const baseFee = p.source === "mercadopago" ? config.mpFee : config.cashFee;
-    const paidOn = isoDate(p.updatedAt);
+    const paidOn = isoDate(p.paidAt ?? p.updatedAt);
     const paidOnTime = paidOn.slice(0, 7) === mk && Number(paidOn.slice(8, 10)) <= config.paymentWindowEnd;
     const dueFee = paidOnTime && p.amount >= baseFee ? baseFee : Math.round(baseFee * lateFactor);
     const isCurrentPartial = p.status === "approved" && p.monthKey === mk && p.amount < dueFee;
@@ -69,7 +69,7 @@ export async function GET() {
       monto: p.amount,
       estado: isCurrentPartial ? "parcial" : STATUS_ES[p.status] || p.status,
       origen: p.status === "approved" ? SOURCE_ES[p.source] || p.source : "—",
-      fecha: p.status === "approved" ? isoDate(p.updatedAt) : "—",
+      fecha: p.status === "approved" ? isoDate(p.paidAt ?? p.updatedAt) : "—",
     };
   });
 

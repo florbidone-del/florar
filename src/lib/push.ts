@@ -115,3 +115,41 @@ export async function notifyNewBlogPost(input: {
     url: "/",
   });
 }
+
+/** Avisa por push a la(s) profe(s) principal(es) que un/a estudiante subió un comprobante de
+ *  transferencia y está esperando revisión. */
+export async function notifyReceiptSubmitted(input: { studentName: string; amount: string }) {
+  if (!configured) return;
+  const mainProfes = await prisma.admin.findMany({ where: { isMainProfe: true }, select: { username: true } });
+  if (mainProfes.length === 0) return;
+  const subs = await prisma.pushSubscription.findMany({
+    where: { adminUsername: { in: mainProfes.map((p) => p.username) } },
+  });
+  await sendToSubscriptions(subs, {
+    title: "Comprobante para revisar",
+    body: `${input.studentName} subió un comprobante de ${input.amount}.`,
+    url: "/",
+  });
+}
+
+/** Le avisa por push al/a la estudiante cómo quedó la revisión de su comprobante. */
+export async function notifyReceiptReviewed(input: {
+  studentId: string;
+  approved: boolean;
+  reason?: string | null;
+}) {
+  if (!configured) return;
+  const subs = await prisma.pushSubscription.findMany({ where: { studentId: input.studentId } });
+  await sendToSubscriptions(
+    subs,
+    input.approved
+      ? { title: "¡Pago confirmado!", body: "La profe revisó tu comprobante: tu cuota ya está al día.", url: "/" }
+      : {
+          title: "Revisá tu comprobante",
+          body: input.reason
+            ? `No se pudo validar tu comprobante: ${input.reason}`
+            : "No se pudo validar tu comprobante. Entrá a la app para ver qué pasó.",
+          url: "/",
+        }
+  );
+}

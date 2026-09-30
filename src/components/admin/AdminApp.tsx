@@ -9,6 +9,7 @@ import type { AdminBundle } from "@/lib/views/admin";
 import type { AdminSession } from "@/lib/session";
 import { WeekTab } from "@/components/admin/WeekTab";
 import { StudentsTab } from "@/components/admin/StudentsTab";
+import { ReceiptsTab } from "@/components/admin/ReceiptsTab";
 import { HolidaysTab } from "@/components/admin/HolidaysTab";
 import { ActivitiesTab } from "@/components/admin/ActivitiesTab";
 import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
@@ -74,6 +75,20 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
         </p>
       ),
     },
+    ...(isMainProfe
+      ? [
+          {
+            title: "Comprobantes",
+            focus: "comprobantes",
+            body: (
+              <p className="muted">
+                Cuando un/a estudiante paga por transferencia y sube el comprobante, aparece acá. Mientras
+                lo revisás tiene acceso provisorio; al aprobarlo queda registrado el pago.
+              </p>
+            ),
+          },
+        ]
+      : []),
     {
       title: "Avisos",
       focus: "avisos",
@@ -155,6 +170,7 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
 const TAB_LABELS: Record<string, string> = {
   semana: "Semana",
   alumnos: "Estudiantes",
+  comprobantes: "Comprobantes",
   chat: "Chat",
   actividades: "Actividades",
   avisos: "Avisos",
@@ -171,7 +187,10 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const isMainProfe = bundle.admins.find((a) => a.username === session.username)?.isMainProfe ?? false;
   const tabs = isOwner
     ? ["profes"]
-    : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras", "info"];
+    : isMainProfe
+      ? ["semana", "alumnos", "comprobantes", "avisos", "actividades", "blog", "bitacoras", "info"]
+      : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras", "info"];
+  const pendingReceipts = bundle.receipts.filter((r) => r.status === "pending").length;
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
   const [showTour, setShowTour] = useState(!tutorialSeen);
@@ -292,6 +311,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
               onClick={() => openTab(t)}
             >
               {TAB_LABELS[t]}
+              {t === "comprobantes" && pendingReceipts > 0 && <span className="tab-count">{pendingReceipts}</span>}
               {isUnread && <span className="unread-dot" />}
             </div>
           );
@@ -303,6 +323,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         {!isOwner && tab === "alumnos" && (
           <StudentsTab bundle={bundle} me={session.username} isMainProfe={isMainProfe} />
         )}
+        {!isOwner && isMainProfe && tab === "comprobantes" && <ReceiptsTab receipts={bundle.receipts} />}
         {!isOwner && tab === "chat" && (
           <ChatTab
             bundle={bundle}

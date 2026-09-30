@@ -66,6 +66,7 @@ export function StudentsTab({
   const turnoOptions = isMainProfe ? buildTurnos() : myTurnos;
   const myTurnoKeys = new Set(myTurnos.map((t) => turnoKey(t.weekday, t.slotId)));
   const mk = currentMonthKey();
+  const pendingReceiptIds = new Set(bundle.receipts.filter((r) => r.status === "pending").map((r) => r.studentId));
 
   // Turno de cada estudiante (para agrupar cuando el filtro es "Todos"), en orden cronológico.
   function turnoLabelFor(weekday: number, slotId: string) {
@@ -240,6 +241,11 @@ export function StudentsTab({
                         : isPartial
                           ? `pagó ${money(paid)} de ${money(fee)} — debe ${money(fee - paid)}`
                           : `debe ${money(fee)}`}
+                    </div>
+                  )}
+                  {isMainProfe && !isPaid && pendingReceiptIds.has(s.id) && (
+                    <div className="tag partial" style={{ marginTop: 4, marginLeft: 4 }}>
+                      comprobante en revisión
                     </div>
                   )}
                 </div>

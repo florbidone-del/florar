@@ -11,6 +11,7 @@ import {
   fmtShort,
   isHoliday,
   isoDate,
+  fmtLong,
   isUnpaid,
   feeDueThisMonth,
   paidAmountThisMonth,
@@ -72,6 +73,19 @@ export type StudentPanelData = {
     mpLink: string | null;
     isLate: boolean;
     lateFeePercent: number;
+    /** Saldo en efectivo/transferencia (número, para precargar el monto del comprobante). */
+    remainingCashAmount: number;
+    /** Datos para transferir que cargó la profe principal (null si no cargó ninguno). */
+    transfer: { alias: string | null; cbu: string | null; holder: string | null } | null;
+    /** Último comprobante del mes si está en revisión o fue rechazado (si se aprobó, ya cuenta
+     *  como pago y no hace falta mostrarlo). */
+    receipt: {
+      id: string;
+      status: "pending" | "rejected";
+      amount: string;
+      sentAt: string;
+      rejectReason: string | null;
+    } | null;
   };
   extraClass: {
     feeAmount: string;
@@ -212,7 +226,7 @@ export async function buildStudentPanelData(
     });
   }
 
-  const [allAnnouncements, allBlogPosts, admins, allStudentPosts, seenAt, latestChatMsg] =
+  const [allAnnouncements, allBlogPosts, admins, allStudentPosts, seenAt, latestChatMsg, latestReceipt] =
     await Promise.all([
       prisma.announcement.findMany({ orderBy: { createdAt: "asc" } }),
       prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
@@ -232,6 +246,11 @@ export async function buildStudentPanelData(
         },
         orderBy: { createdAt: "desc" },
         select: { createdAt: true },
+      }),
+      prisma.paymentReceipt.findFirst({
+        where: { studentId, monthKey: mk },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, status: true, amount: true, createdAt: true, rejectReason: true },
       }),
     ]);
   // Nombre a mostrar para cada profe: su nick si se puso uno, si no el usuario con mayúscula.
@@ -346,6 +365,25 @@ export async function buildStudentPanelData(
       mpLink: snap.config.mpLink,
       isLate: isPastPaymentWindow(snap),
       lateFeePercent: snap.config.lateFeePercent,
+      remainingCashAmount: Math.max(0, studentFee(snap, "cash") - paidThisMonth),
+      transfer:
+        snap.config.transferAlias || snap.config.transferCbu
+          ? {
+              alias: snap.config.transferAlias,
+              cbu: snap.config.transferCbu,
+              holder: snap.config.transferHolder,
+            }
+          : null,
+      receipt:
+        latestReceipt && latestReceipt.status !== "approved"
+          ? {
+              id: latestReceipt.id,
+              status: latestReceipt.status,
+              amount: money(latestReceipt.amount),
+              sentAt: fmtLong(isoDate(latestReceipt.createdAt)),
+              rejectReason: latestReceipt.rejectReason,
+            }
+          : null,
     },
     extraClass: {
       feeAmount: money(snap.config.extraClassFee),

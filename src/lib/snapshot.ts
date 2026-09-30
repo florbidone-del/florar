@@ -65,6 +65,9 @@ export async function loadConfig(): Promise<ConfigDTO> {
     lateFeePercent: config.lateFeePercent,
     extraClassFee: config.extraClassFee,
     mpLink: config.mpLink,
+    transferAlias: config.transferAlias,
+    transferCbu: config.transferCbu,
+    transferHolder: config.transferHolder,
     theme: config.theme,
     defaultStudentPin: config.defaultStudentPin,
     profeWhatsapp: config.profeWhatsapp,
@@ -132,7 +135,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       amount: p.amount,
       status: p.status,
       source: p.source,
-      paidOn: isoDate(p.updatedAt),
+      paidOn: isoDate(p.paidAt ?? p.updatedAt),
     })),
     extraClassPurchases: extraClassPurchases.map((p) => ({
       id: p.id,

@@ -46,6 +46,10 @@ model Config {
   lateFeePercent         Int      @default(20)
   extraClassFee          Int      @default(15000)
   mpLink                 String?
+  // Datos para transferir (alias / CBU o CVU / titular) que ve el/la estudiante al pagar.
+  transferAlias          String?
+  transferCbu            String?
+  transferHolder         String?
   theme                  String   @default("florar")
   defaultStudentPin      String   @default("0000")
   profeWhatsapp          String?
@@ -132,6 +136,7 @@ model Student {
 
   scheduleChanges ScheduleChange[]
   payments        Payment[]
+  paymentReceipts PaymentReceipt[]
   extraClassPurchases ExtraClassPurchase[]
   pinResets       PinResetRequest[]
   chatMessages    ChatMessage[]
@@ -194,10 +199,37 @@ model Payment {
   source       PaymentSource
   mpPaymentId  String?
   mpPreferenceId String?
+  // Cuándo entró el último pago de esta fila, para saber si se pagó dentro de la ventana (sin
+  // recargo). Null en filas viejas: ahí se usa updatedAt.
+  paidAt       DateTime?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
   @@unique([studentId, monthKey])
+}
+
+// Comprobante de transferencia que sube el/la estudiante ("ya pagué"). Mientras está pendiente le
+// da acceso provisorio al calendario; la profe principal lo aprueba (ahí se registra el Payment) o
+// lo rechaza con un motivo. El archivo (foto o PDF) se guarda acá como data URL y no en Vercel Blob
+// (que es público) porque tiene datos bancarios: solo se sirve por /api/comprobantes/[id] con la
+// sesión de la profe principal o del/de la estudiante que lo subió.
+model PaymentReceipt {
+  id           String        @id @default(cuid())
+  studentId    String
+  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  monthKey     String
+  amount       Int
+  note         String?
+  fileData     String
+  fileType     String
+  status       PaymentStatus @default(pending)
+  rejectReason String?
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime      @default(now())
+
+  @@index([studentId, monthKey])
+  @@index([status])
 }
 
 // Una clase extra pagada por el/la estudiante, además de sus clases fijas de la semana. Se paga

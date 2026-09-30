@@ -17,6 +17,9 @@ export async function saveConfigAction(input: {
   defaultStudentPin: string;
   profeWhatsapp: string;
   mpLink: string;
+  transferAlias: string;
+  transferCbu: string;
+  transferHolder: string;
 }): Promise<ActionResult> {
   const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
@@ -35,6 +38,9 @@ export async function saveConfigAction(input: {
       defaultStudentPin: input.defaultStudentPin.trim() || "0000",
       profeWhatsapp: input.profeWhatsapp.trim().replace(/[^0-9]/g, "") || null,
       mpLink: input.mpLink.trim() || null,
+      transferAlias: input.transferAlias.trim() || null,
+      transferCbu: input.transferCbu.replace(/s/g, "") || null,
+      transferHolder: input.transferHolder.trim() || null,
     },
   });
   return { ok: true };

@@ -106,8 +106,8 @@ export async function markPaidManuallyAction(
   const total = alreadyPaid + Math.round(amount);
   await prisma.payment.upsert({
     where: { studentId_monthKey: { studentId, monthKey: mk } },
-    create: { studentId, monthKey: mk, amount: total, status: "approved", source: "manual" },
-    update: { status: "approved", source: "manual", amount: total },
+    create: { studentId, monthKey: mk, amount: total, status: "approved", source: "manual", paidAt: new Date() },
+    update: { status: "approved", source: "manual", amount: total, paidAt: new Date() },
   });
   return { ok: true };
 }
