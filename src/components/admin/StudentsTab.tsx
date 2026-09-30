@@ -66,7 +66,7 @@ export function StudentsTab({
   const turnoOptions = isMainProfe ? buildTurnos() : myTurnos;
   const myTurnoKeys = new Set(myTurnos.map((t) => turnoKey(t.weekday, t.slotId)));
   const mk = currentMonthKey();
-  const pendingReceiptIds = new Set(bundle.receipts.filter((r) => r.status === "pending").map((r) => r.studentId));
+  const pendingReceiptIds = new Set(bundle.receipts.filter((r) => r.status === "pending" && !r.isExtraClass).map((r) => r.studentId));
 
   // Turno de cada estudiante (para agrupar cuando el filtro es "Todos"), en orden cronológico.
   function turnoLabelFor(weekday: number, slotId: string) {

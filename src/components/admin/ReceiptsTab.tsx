@@ -73,8 +73,9 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
           </div>
         ) : (
           <p className="hint" style={{ marginTop: 6 }}>
-            Mientras están acá, esos/as estudiantes tienen acceso provisorio al calendario. Revisá que la
-            plata haya entrado y confirmá o rechazá.
+            Revisá que la plata haya entrado y confirmá o rechazá. Mientras un comprobante de cuota está
+            acá, ese/a estudiante tiene acceso provisorio al calendario; la clase extra se habilita recién
+            cuando la aprobás.
           </p>
         )}
         {pending.map((r) => (
@@ -95,7 +96,8 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
               <div>
                 <div style={{ fontWeight: 600 }}>{r.studentName}</div>
                 <div className="muted">
-                  {money(r.amount)} · cuota de {monthLabel(r.monthKey)} · {r.reviewedAt ? when(r.reviewedAt) : ""}
+                  {money(r.amount)} · {r.isExtraClass ? "clase extra" : "cuota"} de {monthLabel(r.monthKey)} ·{" "}
+                  {r.reviewedAt ? when(r.reviewedAt) : ""}
                   {r.reviewedBy ? ` · ${r.reviewedBy}` : ""}
                 </div>
                 <span className={`tag ${r.status === "approved" ? "ok" : "warn"}`}>
@@ -173,12 +175,15 @@ function ReceiptCard({
           <strong>{r.studentName}</strong>
           <span className="muted receipt-when">{when(r.createdAt)}</span>
         </div>
-        <div className="muted">{r.turnoLabel}</div>
+        <div className="muted">
+          {r.isExtraClass && <span className="tag moved receipt-kind">clase extra</span>}
+          {r.turnoLabel}
+        </div>
         <div className="receipt-amount">
           {money(r.amount)}
           {remaining !== null && (
             <span className={`tag ${covers ? "ok" : "partial"}`}>
-              {covers ? "cubre la cuota" : `faltarían ${money(remaining - r.amount)}`}
+              {covers ? (r.isExtraClass ? "monto correcto" : "cubre la cuota") : `faltarían ${money(remaining - r.amount)}`}
             </span>
           )}
         </div>
@@ -219,13 +224,18 @@ function ApproveModal({
 
   return (
     <Modal onClose={onClose}>
-      <h3>Aprobar comprobante — {receipt.studentName}</h3>
+      <h3>
+        Aprobar {receipt.isExtraClass ? "clase extra" : "comprobante"} — {receipt.studentName}
+      </h3>
       <label htmlFor="approve-amount">Monto que entró</label>
       <input id="approve-amount" type="number" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
       <p className="hint">
-        Se registra como pago de la cuota de {monthLabel(receipt.monthKey)}
-        {receipt.alreadyPaid ? `, sumado a los ${money(receipt.alreadyPaid)} que ya había pagado` : ""}. Si en
-        tu cuenta entró otro monto, corregilo acá.
+        {receipt.isExtraClass
+          ? "Al aprobarlo, se le habilita la clase extra para que elija el día (dentro de este mes). "
+          : `Se registra como pago de la cuota de ${monthLabel(receipt.monthKey)}${
+              receipt.alreadyPaid ? `, sumado a los ${money(receipt.alreadyPaid)} que ya había pagado` : ""
+            }. `}
+        Si en tu cuenta entró otro monto, corregilo acá.
       </p>
       {error && <p className="err">{error}</p>}
       <div className="row" style={{ marginTop: 16 }}>
@@ -265,7 +275,7 @@ function RejectModal({
     <Modal onClose={onClose}>
       <h3>Rechazar comprobante — {receipt.studentName}</h3>
       <p className="muted" style={{ marginTop: 0 }}>
-        Le va a aparecer el motivo para que suba otro o pague por Mercado Pago.
+        Le va a aparecer el motivo para que suba otro comprobante.
       </p>
       <div className="chip-row">
         {REJECT_REASONS.map((r) => (

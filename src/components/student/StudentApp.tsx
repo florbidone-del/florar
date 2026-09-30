@@ -59,7 +59,7 @@ const SECTION_TAB: Record<string, Tab> = {
   "account-section": "cuenta",
 };
 
-function studentTourSteps(studioName: string, mpEnabled: boolean): TourStep[] {
+function studentTourSteps(studioName: string): TourStep[] {
   const steps: TourStep[] = [
     {
       title: `¡Bienvenidx a ${studioName}!`,
@@ -101,8 +101,8 @@ function studentTourSteps(studioName: string, mpEnabled: boolean): TourStep[] {
       focus: "extra-class-section",
       body: (
         <p className="muted">
-          Debajo del calendario podés comprar una clase extra por Mercado Pago. Una vez aprobado el
-          pago, elegís el día que quieras entre los que tengan lugar, dentro del mismo mes.
+          Debajo del calendario podés comprar una clase extra: transferís y subís el comprobante. Cuando
+          la profe lo confirma, elegís el día que quieras entre los que tengan lugar, dentro del mismo mes.
         </p>
       ),
     },
@@ -144,8 +144,7 @@ function studentTourSteps(studioName: string, mpEnabled: boolean): TourStep[] {
       ),
     },
   ];
-  // Sin Mercado Pago no se venden clases extra (hoy solo se pagan por ahí), así que no se muestra.
-  return mpEnabled ? steps : steps.filter((s) => s.focus !== "extra-class-section");
+  return steps;
 }
 
 type ModalState =
@@ -155,6 +154,7 @@ type ModalState =
   | { kind: "pin" }
   | { kind: "extra" }
   | { kind: "receipt" }
+  | { kind: "extraReceipt" }
   | null;
 
 export function StudentApp({ data }: { data: StudentPanelData }) {
@@ -316,27 +316,28 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           </strong>
           {data.payment.isPartial ? (
             <p style={{ margin: "4px 0 0" }}>
-              Ya pagaste {data.payment.paidAmount} de {data.payment.cashFee}. Te faltan{" "}
-              {mpEnabled
-                ? `${data.payment.remainingCash} en efectivo, ${data.payment.remainingMp} en otro medio.`
-                : `${data.payment.remainingCash}.`}
-            </p>
-          ) : !mpEnabled ? (
-            <p style={{ margin: "4px 0 0" }}>
-              La cuota es: {data.payment.cashFee}
-              {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}%`}
+              Ya pagaste {data.payment.paidAmount}. Te faltan {data.payment.remainingCash} en efectivo o{" "}
+              {data.payment.remainingMp} por transferencia.
             </p>
           ) : (
-            <>
-              <p style={{ margin: "4px 0 0" }}>
-                En efectivo es: {data.payment.cashFee}
-                {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}%`}
-              </p>
-              <p style={{ margin: "2px 0 0" }}>
-                En otro medio: {data.payment.mpFee}
-                {data.payment.isLate && ` - recargo del ${data.payment.lateFeePercent}%`}
-              </p>
-            </>
+            <div className="fee-lines">
+              <div className="fee-line">
+                <span>Por transferencia{mpEnabled ? " o Mercado Pago" : ""}</span>
+                <strong>{data.payment.mpFee}</strong>
+              </div>
+              <div className="fee-line cash">
+                <span>
+                  En efectivo
+                  {data.payment.cashDiscount && (
+                    <span className="discount-pill">ahorrás {data.payment.cashDiscount}</span>
+                  )}
+                </span>
+                <strong>{data.payment.cashFee}</strong>
+              </div>
+              {data.payment.isLate && (
+                <div className="hint">Incluye el recargo del {data.payment.lateFeePercent}% por pago fuera de fecha.</div>
+              )}
+            </div>
           )}
           {receipt?.status === "rejected" && (
             <div className="receipt-rejected">
@@ -472,7 +473,6 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </div>
           </div>
 
-          {mpEnabled && (
           <div className="card" id="extra-class-section">
             <h3>Clase extra</h3>
             <p className="muted" style={{ marginTop: 6 }}>
@@ -481,17 +481,32 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             </p>
             {data.extraClass.pendingCount > 0 && (
               <p className="hint">
-                Tenés un pago de clase extra en proceso — en cuanto se confirme vas a poder elegir el
-                día.
+                Tenés un pago de clase extra en revisión — en cuanto la profe lo confirme vas a poder
+                elegir el día.
               </p>
             )}
-            <PayButton
-              fallbackLink={null}
-              label={`Comprar clase extra (${data.extraClass.feeAmount})`}
-              endpoint="/api/mp/generar-link-extra"
-            />
+            {data.extraClass.rejected && (
+              <div className="receipt-rejected">
+                Tu comprobante de clase extra del {data.extraClass.rejected.sentAt} no se pudo confirmar
+                {data.extraClass.rejected.reason ? <>: <em>{data.extraClass.rejected.reason}</em>.</> : "."}
+              </div>
+            )}
+            <button
+              type="button"
+              className="primary block"
+              style={{ marginTop: 10 }}
+              onClick={() => setModal({ kind: "extraReceipt" })}
+            >
+              Comprar clase extra ({data.extraClass.feeAmount})
+            </button>
+            {mpEnabled && (
+              <PayButton
+                fallbackLink={null}
+                label="Pagar la clase extra con Mercado Pago"
+                endpoint="/api/mp/generar-link-extra"
+              />
+            )}
           </div>
-          )}
         </div>
       )}
 
@@ -635,17 +650,28 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
       )}
       {modal?.kind === "receipt" && (
         <ReceiptUploadModal
-          remaining={data.payment.remainingCash}
-          defaultAmount={data.payment.remainingCashAmount}
+          mode={{
+            kind: "cuota",
+            remaining: data.payment.remainingMp,
+            defaultAmount: data.payment.remainingTransferAmount,
+            replacing: receiptPending,
+          }}
           transfer={data.payment.transfer}
-          replacing={receiptPending}
+          onClose={() => setModal(null)}
+          onDone={closeAndRefresh}
+        />
+      )}
+      {modal?.kind === "extraReceipt" && (
+        <ReceiptUploadModal
+          mode={{ kind: "extra", price: data.extraClass.feeAmount }}
+          transfer={data.payment.transfer}
           onClose={() => setModal(null)}
           onDone={closeAndRefresh}
         />
       )}
       {showTour && (
         <OnboardingTour
-          steps={studentTourSteps(data.studioName, data.payment.mpEnabled)}
+          steps={studentTourSteps(data.studioName)}
           onFinish={finishTour}
           onStepChange={(step) => setTourFocus(step.focus)}
         />

@@ -948,3 +948,10 @@ td.holiday{background:var(--oxide-soft);}
 .receipt-full{display:block; width:100%; max-height:65vh; object-fit:contain; border-radius:var(--radius); border:1.5px solid var(--line); background:var(--surface);}
 .receipt-reason{font-style:italic; margin-top:2px;}
 .receipt-cta-main{margin-top:12px;}
+.fee-lines{margin-top:8px; display:flex; flex-direction:column; gap:4px;}
+.fee-line{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.fee-line > span{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+.fee-line strong{margin:0; display:inline; font-variant-numeric:tabular-nums;}
+.fee-line.cash strong{color:var(--glaze);}
+.discount-pill{font-size:0.72rem; font-weight:600; padding:1px 8px; border-radius:20px; background:var(--ok-bg); color:var(--glaze); border:1px solid var(--glaze);}
+.receipt-kind{margin:0 6px 0 0; vertical-align:middle;}

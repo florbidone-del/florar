@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/shared/Modal";
 import { TransferInfo } from "@/components/student/TransferInfo";
 import { resizeToDataUrl } from "@/lib/resizeImage";
-import { submitPaymentReceiptAction } from "@/lib/actions/receipts";
+import { submitExtraClassReceiptAction, submitPaymentReceiptAction } from "@/lib/actions/receipts";
 
 // Un comprobante tiene letra chica: se achica menos que las fotos del blog para que se siga leyendo.
 const RECEIPT_MAX_DIMENSION = 1800;
@@ -21,23 +21,26 @@ function readAsDataUrl(file: File): Promise<string> {
   });
 }
 
-/** "Ya transferí": el/la estudiante sube la foto/captura (o el PDF del banco) de su transferencia.
- *  Al mandarlo queda en revisión y tiene acceso provisorio al calendario. */
+type Mode =
+  | { kind: "cuota"; remaining: string; defaultAmount: number; replacing: boolean }
+  | { kind: "extra"; price: string };
+
+/** "Ya transferí": el/la estudiante sube la foto/captura (o el PDF del banco) de su transferencia,
+ *  de la cuota (queda en revisión con acceso provisorio al calendario) o de una clase extra (se
+ *  habilita para agendar cuando la profe lo aprueba). */
 export function ReceiptUploadModal({
-  remaining,
-  defaultAmount,
+  mode,
   transfer,
-  replacing,
   onClose,
   onDone,
 }: {
-  remaining: string;
-  defaultAmount: number;
+  mode: Mode;
   transfer: { alias: string | null; cbu: string | null; holder: string | null } | null;
-  replacing: boolean;
   onClose: () => void;
   onDone: () => void;
 }) {
+  const isExtra = mode.kind === "extra";
+  const defaultAmount = mode.kind === "cuota" ? mode.defaultAmount : 0;
   const [file, setFile] = useState<Picked | null>(null);
   const [reading, setReading] = useState(false);
   const [amount, setAmount] = useState(defaultAmount > 0 ? String(defaultAmount) : "");
@@ -67,10 +70,12 @@ export function ReceiptUploadModal({
 
   async function send() {
     if (!file) return setError("Elegí la foto o el PDF del comprobante.");
-    if (!(Number(amount) > 0)) return setError("Poné el monto que transferiste.");
+    if (!isExtra && !(Number(amount) > 0)) return setError("Poné el monto que transferiste.");
     setError("");
     setSending(true);
-    const res = await submitPaymentReceiptAction({ fileData: file.dataUrl, amount: Number(amount), note });
+    const res = isExtra
+      ? await submitExtraClassReceiptAction({ fileData: file.dataUrl, note })
+      : await submitPaymentReceiptAction({ fileData: file.dataUrl, amount: Number(amount), note });
     setSending(false);
     if ("error" in res && res.error) return setError(res.error);
     setSent(true);
@@ -83,8 +88,9 @@ export function ReceiptUploadModal({
           <div className="receipt-success-icon" aria-hidden>✓</div>
           <h3>¡Comprobante enviado!</h3>
           <p className="muted">
-            La profe lo va a revisar y te avisamos cuando quede confirmado. Mientras tanto, ya podés usar
-            el calendario normalmente.
+            {isExtra
+              ? "La profe lo va a revisar y, cuando lo confirme, vas a poder elegir el día de tu clase extra."
+              : "La profe lo va a revisar y te avisamos cuando quede confirmado. Mientras tanto, ya podés usar el calendario normalmente."}
           </p>
           <button className="primary block" onClick={onDone}>
             Listo
@@ -96,18 +102,31 @@ export function ReceiptUploadModal({
 
   return (
     <Modal onClose={onClose}>
-      <h3>{replacing ? "Cambiar comprobante" : "Subir comprobante"}</h3>
-      <p className="muted" style={{ marginTop: 0 }}>
-        Te falta pagar <strong>{remaining}</strong> este mes. Subí la captura o el PDF de la transferencia y
-        la profe lo confirma.
-      </p>
-
-      {transfer && (
-        <details className="transfer-details">
-          <summary>¿Todavía no transferiste? Ver alias y CBU</summary>
-          <TransferInfo transfer={transfer} />
-        </details>
+      <h3>{isExtra ? "Comprar clase extra" : mode.replacing ? "Cambiar comprobante" : "Subir comprobante"}</h3>
+      {mode.kind === "extra" ? (
+        <p className="muted" style={{ marginTop: 0 }}>
+          Transferí <strong>{mode.price}</strong> y subí acá el comprobante. Cuando la profe lo confirme,
+          elegís el día (dentro de este mes).
+        </p>
+      ) : (
+        <p className="muted" style={{ marginTop: 0 }}>
+          Te falta pagar <strong>{mode.remaining}</strong> por transferencia este mes. Subí la captura o el
+          PDF y la profe lo confirma.
+        </p>
       )}
+
+      {transfer &&
+        (isExtra ? (
+          // Comprando la clase extra todavía no transfirió: los datos van a la vista, no plegados.
+          <div style={{ marginBottom: 12 }}>
+            <TransferInfo transfer={transfer} />
+          </div>
+        ) : (
+          <details className="transfer-details">
+            <summary>¿Todavía no transferiste? Ver alias y CBU</summary>
+            <TransferInfo transfer={transfer} />
+          </details>
+        ))}
 
       <input
         id="receipt-file"
@@ -142,14 +161,18 @@ export function ReceiptUploadModal({
         </label>
       )}
 
-      <label htmlFor="receipt-amount">Monto que transferiste</label>
-      <input
-        id="receipt-amount"
-        type="number"
-        inputMode="numeric"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
+      {!isExtra && (
+        <>
+          <label htmlFor="receipt-amount">Monto que transferiste</label>
+          <input
+            id="receipt-amount"
+            type="number"
+            inputMode="numeric"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </>
+      )}
       <label htmlFor="receipt-note">Comentario (opcional)</label>
       <input
         id="receipt-note"

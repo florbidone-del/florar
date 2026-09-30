@@ -118,7 +118,11 @@ export async function notifyNewBlogPost(input: {
 
 /** Avisa por push a la(s) profe(s) principal(es) que un/a estudiante subió un comprobante de
  *  transferencia y está esperando revisión. */
-export async function notifyReceiptSubmitted(input: { studentName: string; amount: string }) {
+export async function notifyReceiptSubmitted(input: {
+  studentName: string;
+  amount: string;
+  isExtraClass: boolean;
+}) {
   if (!configured) return;
   const mainProfes = await prisma.admin.findMany({ where: { isMainProfe: true }, select: { username: true } });
   if (mainProfes.length === 0) return;
@@ -127,7 +131,9 @@ export async function notifyReceiptSubmitted(input: { studentName: string; amoun
   });
   await sendToSubscriptions(subs, {
     title: "Comprobante para revisar",
-    body: `${input.studentName} subió un comprobante de ${input.amount}.`,
+    body: input.isExtraClass
+      ? `${input.studentName} compró una clase extra y subió el comprobante (${input.amount}).`
+      : `${input.studentName} subió un comprobante de ${input.amount}.`,
     url: "/",
   });
 }
@@ -137,13 +143,16 @@ export async function notifyReceiptReviewed(input: {
   studentId: string;
   approved: boolean;
   reason?: string | null;
+  isExtraClass: boolean;
 }) {
   if (!configured) return;
   const subs = await prisma.pushSubscription.findMany({ where: { studentId: input.studentId } });
   await sendToSubscriptions(
     subs,
     input.approved
-      ? { title: "¡Pago confirmado!", body: "La profe revisó tu comprobante: tu cuota ya está al día.", url: "/" }
+      ? input.isExtraClass
+        ? { title: "¡Clase extra confirmada!", body: "Ya podés entrar a la app y elegir el día.", url: "/" }
+        : { title: "¡Pago confirmado!", body: "La profe revisó tu comprobante: tu cuota ya está al día.", url: "/" }
       : {
           title: "Revisá tu comprobante",
           body: input.reason

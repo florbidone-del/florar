@@ -13,6 +13,7 @@ const STATUS_ES: Record<string, string> = {
 const SOURCE_ES: Record<string, string> = {
   manual: "manual",
   mercadopago: "Mercado Pago",
+  transferencia: "transferencia",
 };
 
 const GREEN_FILL: ExcelJS.Fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDDEFDD" } };
@@ -57,7 +58,7 @@ export async function GET() {
   // parezca que el pago se hizo con esos datos. Un pago aprobado del mes actual por menos de la
   // cuota es un pago parcial: todavía falta el saldo, aunque la fila diga "approved" en la base.
   const rows: Row[] = payments.map((p) => {
-    const baseFee = p.source === "mercadopago" ? config.mpFee : config.cashFee;
+    const baseFee = p.source === "manual" ? config.cashFee : config.mpFee;
     const paidOn = isoDate(p.paidAt ?? p.updatedAt);
     const paidOnTime = paidOn.slice(0, 7) === mk && Number(paidOn.slice(8, 10)) <= config.paymentWindowEnd;
     const dueFee = paidOnTime && p.amount >= baseFee ? baseFee : Math.round(baseFee * lateFactor);

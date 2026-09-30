@@ -75,8 +75,10 @@ export type StudentPanelData = {
     mpEnabled: boolean;
     isLate: boolean;
     lateFeePercent: number;
-    /** Saldo en efectivo/transferencia (número, para precargar el monto del comprobante). */
-    remainingCashAmount: number;
+    /** Saldo por transferencia ("otro medio"), en número, para precargar el monto del comprobante. */
+    remainingTransferAmount: number;
+    /** Cuánto se ahorra pagando en efectivo en vez de por transferencia (null si no hay diferencia). */
+    cashDiscount: string | null;
     /** Datos para transferir que cargó la profe principal (null si no cargó ninguno). */
     transfer: { alias: string | null; cbu: string | null; holder: string | null } | null;
     /** Último comprobante del mes si está en revisión o fue rechazado (si se aprobó, ya cuenta
@@ -94,6 +96,8 @@ export type StudentPanelData = {
     availableCount: number;
     nextPurchaseId: string | null;
     pendingCount: number;
+    /** Último comprobante de clase extra del mes, si la profe lo rechazó (para mostrar el motivo). */
+    rejected: { sentAt: string; reason: string | null } | null;
   };
   studentInfo: string;
   announcements: { id: string; date: string; message: string; authorName: string | null }[];
@@ -228,7 +232,7 @@ export async function buildStudentPanelData(
     });
   }
 
-  const [allAnnouncements, allBlogPosts, admins, allStudentPosts, seenAt, latestChatMsg, latestReceipt] =
+  const [allAnnouncements, allBlogPosts, admins, allStudentPosts, seenAt, latestChatMsg, latestReceipt, latestExtraReceipt] =
     await Promise.all([
       prisma.announcement.findMany({ orderBy: { createdAt: "asc" } }),
       prisma.blogPost.findMany({ orderBy: { createdAt: "desc" } }),
@@ -250,9 +254,14 @@ export async function buildStudentPanelData(
         select: { createdAt: true },
       }),
       prisma.paymentReceipt.findFirst({
-        where: { studentId, monthKey: mk },
+        where: { studentId, monthKey: mk, extraClassPurchaseId: null },
         orderBy: { createdAt: "desc" },
         select: { id: true, status: true, amount: true, createdAt: true, rejectReason: true },
+      }),
+      prisma.paymentReceipt.findFirst({
+        where: { studentId, monthKey: mk, extraClassPurchaseId: { not: null } },
+        orderBy: { createdAt: "desc" },
+        select: { status: true, createdAt: true, rejectReason: true },
       }),
     ]);
   // Nombre a mostrar para cada profe: su nick si se puso uno, si no el usuario con mayúscula.
@@ -368,7 +377,11 @@ export async function buildStudentPanelData(
       mpEnabled: snap.config.mpEnabled,
       isLate: isPastPaymentWindow(snap),
       lateFeePercent: snap.config.lateFeePercent,
-      remainingCashAmount: Math.max(0, studentFee(snap, "cash") - paidThisMonth),
+      remainingTransferAmount: Math.max(0, studentFee(snap, "mp") - paidThisMonth),
+      cashDiscount:
+        studentFee(snap, "mp") > studentFee(snap, "cash")
+          ? money(studentFee(snap, "mp") - studentFee(snap, "cash"))
+          : null,
       transfer:
         snap.config.transferAlias || snap.config.transferCbu
           ? {
@@ -393,6 +406,10 @@ export async function buildStudentPanelData(
       availableCount: extraCredits.length,
       nextPurchaseId: extraCredits[0]?.id || null,
       pendingCount: extraPending.length,
+      rejected:
+        latestExtraReceipt?.status === "rejected"
+          ? { sentAt: fmtLong(isoDate(latestExtraReceipt.createdAt)), reason: latestExtraReceipt.rejectReason }
+          : null,
     },
     studentInfo: snap.config.studentInfo,
     announcements,

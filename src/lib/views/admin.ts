@@ -5,8 +5,8 @@ import {
   isoDate,
   capitalize,
   currentMonthKey,
-  feeDueThisMonth,
   paidAmountThisMonth,
+  studentFee,
   DIAS,
   type WorkshopSnapshot,
 } from "@/lib/domain";
@@ -81,12 +81,15 @@ export type ReceiptDTO = {
   amount: number;
   note: string | null;
   isPdf: boolean;
+  /** true si es la compra de una clase extra (no la cuota). */
+  isExtraClass: boolean;
   status: "pending" | "approved" | "rejected";
   rejectReason: string | null;
   reviewedBy: string | null;
   createdAt: string;
   reviewedAt: string | null;
-  /** Solo para comprobantes del mes en curso: cuota que corresponde y lo ya pagado antes. */
+  /** Solo para comprobantes del mes en curso: lo que corresponde pagar por transferencia (la cuota
+   *  de "otro medio", o el precio de la clase extra) y lo ya pagado antes de la cuota. */
   feeDue: number | null;
   alreadyPaid: number | null;
 };
@@ -155,6 +158,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
           reviewedBy: true,
           createdAt: true,
           reviewedAt: true,
+          extraClassPurchaseId: true,
           student: { select: { name: true, defaultWeekday: true, defaultSlotId: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -233,13 +237,18 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
         amount: r.amount,
         note: r.note,
         isPdf: r.fileType === "application/pdf",
+        isExtraClass: !!r.extraClassPurchaseId,
         status: r.status,
         rejectReason: r.rejectReason,
         reviewedBy: r.reviewedBy ? authorNameByUsername.get(r.reviewedBy) || r.reviewedBy : null,
         createdAt: r.createdAt.toISOString(),
         reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
-        feeDue: isCurrentMonth ? feeDueThisMonth(snapshot, r.studentId) : null,
-        alreadyPaid: isCurrentMonth ? paidAmountThisMonth(snapshot, r.studentId) : null,
+        feeDue: !isCurrentMonth
+          ? null
+          : r.extraClassPurchaseId
+            ? snapshot.config.extraClassFee
+            : studentFee(snapshot, "mp"),
+        alreadyPaid: !isCurrentMonth ? null : r.extraClassPurchaseId ? 0 : paidAmountThisMonth(snapshot, r.studentId),
       };
     }),
     notifications: notifications.map((n) => ({

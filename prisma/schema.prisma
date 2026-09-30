@@ -26,6 +26,7 @@ enum PaymentStatus {
 enum PaymentSource {
   manual
   mercadopago
+  transferencia
 }
 
 enum ChatAuthorKind {
@@ -211,11 +212,12 @@ model Payment {
   @@unique([studentId, monthKey])
 }
 
-// Comprobante de transferencia que sube el/la estudiante ("ya pagué"). Mientras está pendiente le
-// da acceso provisorio al calendario; la profe principal lo aprueba (ahí se registra el Payment) o
-// lo rechaza con un motivo. El archivo (foto o PDF) se guarda acá como data URL y no en Vercel Blob
-// (que es público) porque tiene datos bancarios: solo se sirve por /api/comprobantes/[id] con la
-// sesión de la profe principal o del/de la estudiante que lo subió.
+// Comprobante de transferencia que sube el/la estudiante ("ya pagué"). Si es de la cuota, mientras
+// está pendiente le da acceso provisorio al calendario y al aprobarlo se registra el Payment. Si es
+// de una clase extra (extraClassPurchaseId), al aprobarlo se habilita esa compra para agendarla.
+// El archivo (foto o PDF) se guarda acá como data URL y no en Vercel Blob (que es público) porque
+// tiene datos bancarios: solo se sirve por /api/comprobantes/[id] con la sesión de la profe
+// principal o del/de la estudiante que lo subió.
 model PaymentReceipt {
   id           String        @id @default(cuid())
   studentId    String
@@ -230,13 +232,16 @@ model PaymentReceipt {
   reviewedBy   String?
   reviewedAt   DateTime?
   createdAt    DateTime      @default(now())
+  extraClassPurchaseId String?             @unique
+  extraClassPurchase   ExtraClassPurchase? @relation(fields: [extraClassPurchaseId], references: [id], onDelete: Cascade)
 
   @@index([studentId, monthKey])
   @@index([status])
 }
 
 // Una clase extra pagada por el/la estudiante, además de sus clases fijas de la semana. Se paga
-// primero (por Mercado Pago) y recién después se elige el día/turno — a diferencia de Payment, acá
+// primero (por Mercado Pago o por transferencia con comprobante) y recién después se elige el
+// día/turno — a diferencia de Payment, acá
 // puede haber varias filas por alumno+mes porque puede comprar más de una. Vale solo para el mes
 // en que se compró (monthKey): si no se agenda ese mismo mes, se pierde.
 model ExtraClassPurchase {
@@ -252,6 +257,7 @@ model ExtraClassPurchase {
   bookedSlotId   String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  receipt        PaymentReceipt?
 
   @@index([studentId, monthKey])
   @@index([bookedDate, bookedSlotId])

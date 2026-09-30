@@ -194,7 +194,7 @@ export type PaymentDTO = {
   monthKey: string;
   amount: number;
   status: "pending" | "approved" | "rejected";
-  source: "manual" | "mercadopago";
+  source: "manual" | "mercadopago" | "transferencia";
   /** Fecha (hora argentina) del último pago que entró en esta fila. */
   paidOn: string;
 };
@@ -480,8 +480,8 @@ export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {
 export function isPastPaymentWindow(snap: WorkshopSnapshot) {
   return new Date().getDate() > snap.config.paymentWindowEnd;
 }
-/** "cash" es la cuota en efectivo/transferencia (la que se usa para "debe"/"pagó" en general);
- *  "mp" es la que cobra el botón de Mercado Pago — pueden ser distintas. */
+/** "cash" es la cuota en efectivo (la que se usa para "debe"/"pagó" en general); "mp" es la de
+ *  "otro medio" (transferencia o Mercado Pago) — suele ser más alta: pagar en efectivo tiene descuento. */
 export function studentFee(snap: WorkshopSnapshot, method: "cash" | "mp" = "cash") {
   const base = method === "mp" ? snap.config.mpFee : snap.config.cashFee;
   return isPastPaymentWindow(snap)
@@ -496,15 +496,15 @@ export function paidAmountThisMonth(snap: WorkshopSnapshot, studentId: string) {
   );
   return payment?.amount || 0;
 }
-/** Cuota contra la que se compara lo pagado este mes: si el pago se completó por Mercado Pago,
- *  la cuota de MP (que puede ser distinta a la de efectivo); si no, la de efectivo. Si la cuota
+/** Cuota contra la que se compara lo pagado este mes: si el pago se completó por transferencia o
+ *  Mercado Pago, la de "otro medio" (que puede ser distinta a la de efectivo); si no, la de efectivo. Si la cuota
  *  base quedó cubierta dentro de la ventana de pago, el recargo no aplica aunque ya haya vencido. */
 export function feeDueThisMonth(snap: WorkshopSnapshot, studentId: string) {
   const mk = currentMonthKey();
   const payment = snap.payments.find(
     (p) => p.studentId === studentId && p.monthKey === mk && p.status === "approved"
   );
-  const method = payment?.source === "mercadopago" ? "mp" : "cash";
+  const method = payment && payment.source !== "manual" ? "mp" : "cash";
   const base = method === "mp" ? snap.config.mpFee : snap.config.cashFee;
   if (
     payment &&

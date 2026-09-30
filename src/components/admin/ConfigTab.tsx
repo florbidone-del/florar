@@ -238,16 +238,12 @@ export function ConfigTab({
         </div>
         <label>Cuota en efectivo</label>
         <input type="number" value={cashFee} onChange={(e) => setCashFee(Number(e.target.value))} />
-        {mpEnabled && (
-          <>
-            <label>Cuota por Mercado Pago</label>
-            <input type="number" value={mpFee} onChange={(e) => setMpFee(Number(e.target.value))} />
-            <p className="hint">
-              El botón de Mercado Pago siempre cobra el saldo restante: si el/la estudiante ya pagó una
-              parte (por ejemplo en efectivo), solo le cobra la diferencia hasta esta cuota.
-            </p>
-          </>
-        )}
+        <label>Cuota por transferencia{mpEnabled ? " o Mercado Pago" : ""}</label>
+        <input type="number" value={mpFee} onChange={(e) => setMpFee(Number(e.target.value))} />
+        <p className="hint">
+          Si es más alta que la de efectivo, al/a la estudiante le aparece cuánto se ahorra pagando en
+          efectivo. Es también el monto que se le sugiere al subir el comprobante.
+        </p>
         <label>Recargo por pago fuera de fecha (%)</label>
         <input
           type="number"
@@ -255,23 +251,19 @@ export function ConfigTab({
           onChange={(e) => setLateFeePercent(Number(e.target.value))}
         />
         <p className="hint">
-          Pasado el día {paymentWindowEnd} sin pagar, la cuota le aparece al/a la estudiante con este
+          Pasado el día {paymentWindowEnd} sin pagar, ambas cuotas le aparecen al/a la estudiante con este
           recargo ya sumado.
         </p>
-        {mpEnabled && (
-          <>
-            <label>Clase extra (por Mercado Pago)</label>
-            <input
-              type="number"
-              value={extraClassFee}
-              onChange={(e) => setExtraClassFee(Number(e.target.value))}
-            />
-            <p className="hint">
-              Lo que cobra cada clase extra que un/a estudiante compre. Una vez pagada, elige un día con
-              lugar dentro del mismo mes — si no la agenda ese mes, se pierde.
-            </p>
-          </>
-        )}
+        <label>Clase extra</label>
+        <input
+          type="number"
+          value={extraClassFee}
+          onChange={(e) => setExtraClassFee(Number(e.target.value))}
+        />
+        <p className="hint">
+          Lo que cuesta cada clase extra. El/la estudiante transfiere y sube el comprobante; cuando lo
+          aprobás, elige un día con lugar dentro del mismo mes — si no la agenda ese mes, se pierde.
+        </p>
         <label>Los avisos se muestran a los estudiantes durante (días)</label>
         <input
           type="number"
@@ -311,8 +303,8 @@ export function ConfigTab({
         </label>
         <p className="hint">
           Apagado, los/las estudiantes solo ven los datos para transferir y subir el comprobante (Mercado
-          Pago se queda con una comisión de cada cobro). Prendido, vuelve el botón de Mercado Pago para la
-          cuota y la compra de clases extra.
+          Pago se queda con una comisión de cada cobro). Prendido, se suma el botón de Mercado Pago para
+          la cuota y las clases extra.
         </p>
         {mpEnabled && (
           <>
