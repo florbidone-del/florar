@@ -48,10 +48,9 @@ export async function GET() {
 
   const mk = currentMonthKey();
   const isLate = new Date().getDate() > config.paymentWindowEnd;
-  const lateFactor = isLate ? 1 + config.lateFeePercent / 100 : 1;
-  const currentFee = isLate
-    ? Math.round(config.cashFee * (1 + config.lateFeePercent / 100))
-    : config.cashFee;
+  // Fuera de término no hay descuento por efectivo: todos pagan la de transferencia con recargo.
+  const lateFee = Math.round(config.mpFee * (1 + config.lateFeePercent / 100));
+  const currentFee = isLate ? lateFee : config.cashFee;
 
   // Origen y fecha solo tienen sentido para un pago efectivamente concretado (aprobado): un link de
   // Mercado Pago abierto pero no pagado ya crea la fila en estado "pending", y no queremos que
@@ -61,7 +60,7 @@ export async function GET() {
     const baseFee = p.source === "manual" ? config.cashFee : config.mpFee;
     const paidOn = isoDate(p.paidAt ?? p.updatedAt);
     const paidOnTime = paidOn.slice(0, 7) === mk && Number(paidOn.slice(8, 10)) <= config.paymentWindowEnd;
-    const dueFee = paidOnTime && p.amount >= baseFee ? baseFee : Math.round(baseFee * lateFactor);
+    const dueFee = paidOnTime && p.amount >= baseFee ? baseFee : isLate ? lateFee : baseFee;
     const isCurrentPartial = p.status === "approved" && p.monthKey === mk && p.amount < dueFee;
     return {
       alumno: p.student.name,

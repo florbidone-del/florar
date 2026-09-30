@@ -481,12 +481,14 @@ export function isPastPaymentWindow(snap: WorkshopSnapshot) {
   return new Date().getDate() > snap.config.paymentWindowEnd;
 }
 /** "cash" es la cuota en efectivo (la que se usa para "debe"/"pagó" en general); "mp" es la de
- *  "otro medio" (transferencia o Mercado Pago) — suele ser más alta: pagar en efectivo tiene descuento. */
+ *  "otro medio" (transferencia o Mercado Pago) — suele ser más alta: pagar en efectivo tiene descuento.
+ *  El descuento por efectivo vale solo dentro de la ventana de pago: pasada, todos pagan la cuota de
+ *  transferencia con el recargo, sin importar el medio. */
 export function studentFee(snap: WorkshopSnapshot, method: "cash" | "mp" = "cash") {
-  const base = method === "mp" ? snap.config.mpFee : snap.config.cashFee;
-  return isPastPaymentWindow(snap)
-    ? Math.round(base * (1 + snap.config.lateFeePercent / 100))
-    : base;
+  if (isPastPaymentWindow(snap)) {
+    return Math.round(snap.config.mpFee * (1 + snap.config.lateFeePercent / 100));
+  }
+  return method === "mp" ? snap.config.mpFee : snap.config.cashFee;
 }
 /** Suma lo que ya pagó (aprobado) este mes — con pagos parciales, puede ser menos que la cuota. */
 export function paidAmountThisMonth(snap: WorkshopSnapshot, studentId: string) {

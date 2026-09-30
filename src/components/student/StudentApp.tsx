@@ -319,9 +319,24 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           </strong>
           {data.payment.isPartial ? (
             <p style={{ margin: "4px 0 0" }}>
-              Ya pagaste {data.payment.paidAmount}. Te faltan {data.payment.remainingCash} en efectivo o{" "}
-              {data.payment.remainingMp} por transferencia.
+              Ya pagaste {data.payment.paidAmount}. Te faltan{" "}
+              {data.payment.cashDiscount
+                ? `${data.payment.remainingCash} en efectivo o ${data.payment.remainingMp} por transferencia.`
+                : `${data.payment.remainingMp}.`}
             </p>
+          ) : !data.payment.cashDiscount ? (
+            <div className="fee-lines">
+              <div className="fee-line">
+                <span>La cuota es</span>
+                <strong>{data.payment.mpFee}</strong>
+              </div>
+              {data.payment.isLate && (
+                <div className="hint">
+                  Incluye el recargo del {data.payment.lateFeePercent}% por pago fuera de fecha (pasada la fecha,
+                  el precio es el mismo en efectivo o por transferencia).
+                </div>
+              )}
+            </div>
           ) : (
             <div className="fee-lines">
               <div className="fee-line">
@@ -337,9 +352,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                 </span>
                 <strong>{data.payment.cashFee}</strong>
               </div>
-              {data.payment.isLate && (
-                <div className="hint">Incluye el recargo del {data.payment.lateFeePercent}% por pago fuera de fecha.</div>
-              )}
+              <div className="hint">El precio en efectivo vale hasta el día {data.payment.discountUntilDay}.</div>
             </div>
           )}
           {receipt?.status === "rejected" && (

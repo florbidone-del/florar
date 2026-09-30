@@ -77,8 +77,11 @@ export type StudentPanelData = {
     lateFeePercent: number;
     /** Saldo por transferencia ("otro medio"), en número, para precargar el monto del comprobante. */
     remainingTransferAmount: number;
-    /** Cuánto se ahorra pagando en efectivo en vez de por transferencia (null si no hay diferencia). */
+    /** Cuánto se ahorra pagando en efectivo en vez de por transferencia (null si no hay diferencia,
+     *  o si ya pasó la ventana de pago y el descuento no corre). */
     cashDiscount: string | null;
+    /** Último día del mes en que vale el descuento por efectivo (fin de la ventana de pago). */
+    discountUntilDay: number;
     /** Datos para transferir que cargó la profe principal (null si no cargó ninguno). */
     transfer: { alias: string | null; cbu: string | null; holder: string | null } | null;
     /** Último comprobante del mes si está en revisión o fue rechazado (si se aprobó, ya cuenta
@@ -383,6 +386,7 @@ export async function buildStudentPanelData(
         studentFee(snap, "mp") > studentFee(snap, "cash")
           ? money(studentFee(snap, "mp") - studentFee(snap, "cash"))
           : null,
+      discountUntilDay: snap.config.paymentWindowEnd,
       transfer:
         snap.config.transferAlias || snap.config.transferCbu
           ? {

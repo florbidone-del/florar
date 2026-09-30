@@ -242,7 +242,8 @@ export function ConfigTab({
         <input type="number" value={mpFee} onChange={(e) => setMpFee(Number(e.target.value))} />
         <p className="hint">
           Si es más alta que la de efectivo, al/a la estudiante le aparece cuánto se ahorra pagando en
-          efectivo. Es también el monto que se le sugiere al subir el comprobante.
+          efectivo (solo hasta el día {paymentWindowEnd}). Es también el monto que se le sugiere al subir
+          el comprobante.
         </p>
         <label>Recargo por pago fuera de fecha (%)</label>
         <input
@@ -251,8 +252,8 @@ export function ConfigTab({
           onChange={(e) => setLateFeePercent(Number(e.target.value))}
         />
         <p className="hint">
-          Pasado el día {paymentWindowEnd} sin pagar, ambas cuotas le aparecen al/a la estudiante con este
-          recargo ya sumado.
+          Pasado el día {paymentWindowEnd} sin pagar, se termina el descuento por efectivo: todos pagan la
+          cuota por transferencia con este recargo sumado, en efectivo o por transferencia.
         </p>
         <label>Clase extra</label>
         <input
