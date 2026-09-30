@@ -977,3 +977,4 @@ td.holiday{background:var(--oxide-soft);}
   background:rgba(255,255,255,0.16); color:#fff; font-size:1.1rem; line-height:1;
 }
 @keyframes lightbox-in{from{opacity:0} to{opacity:1}}
+.receipts-month-summary{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 12px; margin-bottom:6px; border-radius:8px; background:var(--ok-bg); font-size:0.9rem;}

@@ -137,13 +137,14 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
   // por turno: turnos que le interesan a esta profe (todos si es la principal, si no los asignados).
   const me = admins.find((a) => a.username === username);
 
-  // Comprobantes: todos los pendientes + los revisados de los últimos 45 días (historial corto).
+  // Comprobantes: todos los pendientes + los revisados de los últimos 12 meses (el historial se ve
+  // separado por mes). Sin el archivo, así que cada fila pesa poco.
   const receipts = me?.isMainProfe
     ? await prisma.paymentReceipt.findMany({
         where: {
           OR: [
             { status: "pending" },
-            { reviewedAt: { gte: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000) } },
+            { reviewedAt: { gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } },
           ],
         },
         select: {
@@ -162,7 +163,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
           student: { select: { name: true, defaultWeekday: true, defaultSlotId: true } },
         },
         orderBy: { createdAt: "desc" },
-        take: 80,
+        take: 1000,
       })
     : [];
   const turnoKey = (t: { weekday: number; slotId: string }) => `${t.weekday}_${t.slotId}`;

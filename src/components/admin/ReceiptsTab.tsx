@@ -39,15 +39,28 @@ function monthLabel(monthKey: string) {
   return MESES[Number(monthKey.slice(5, 7)) - 1];
 }
 
+function monthTitle(monthKey: string) {
+  const [y, m] = monthKey.split("-").map(Number);
+  const name = MESES[m - 1];
+  const label = name.charAt(0).toUpperCase() + name.slice(1);
+  return y === new Date().getFullYear() ? label : `${label} ${y}`;
+}
+
 /** Pestaña de la profe principal para revisar los comprobantes de transferencia que suben los/las
- *  estudiantes: los pendientes arriba (con la foto a la vista y aprobar/rechazar a un toque) y un
- *  historial corto de lo ya revisado. */
+ *  estudiantes: los pendientes arriba (con la foto a la vista y aprobar/rechazar a un toque) y el
+ *  historial de lo ya revisado, separado por mes (el mes de la cuota o de la clase extra). */
 export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
   const router = useRouter();
   const pending = receipts.filter((r) => r.status === "pending").sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const reviewed = receipts
     .filter((r) => r.status !== "pending")
     .sort((a, b) => (b.reviewedAt || "").localeCompare(a.reviewedAt || ""));
+  const historyMonths = Array.from(new Set(reviewed.map((r) => r.monthKey))).sort().reverse();
+  const [historyMonth, setHistoryMonth] = useState<string | null>(null);
+  const selectedMonth = historyMonth && historyMonths.includes(historyMonth) ? historyMonth : historyMonths[0];
+  const monthReceipts = reviewed.filter((r) => r.monthKey === selectedMonth);
+  const monthApproved = monthReceipts.filter((r) => r.status === "approved");
+  const monthRejected = monthReceipts.length - monthApproved.length;
   const [viewing, setViewing] = useState<ReceiptDTO | null>(null);
   const [approving, setApproving] = useState<ReceiptDTO | null>(null);
   const [rejecting, setRejecting] = useState<ReceiptDTO | null>(null);
@@ -91,14 +104,36 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
       </div>
 
       {reviewed.length > 0 && (
-        <Collapsible title={`Revisados recientemente (${reviewed.length})`}>
-          {reviewed.map((r) => (
+        <Collapsible title="Historial por mes">
+          <div className="chip-row">
+            {historyMonths.map((mk) => (
+              <div
+                key={mk}
+                className={`chip ${mk === selectedMonth ? "selected" : ""}`}
+                onClick={() => setHistoryMonth(mk)}
+              >
+                {monthTitle(mk)}
+              </div>
+            ))}
+          </div>
+          <div className="receipts-month-summary">
+            <span>
+              <strong>{monthApproved.length}</strong> aprobado{monthApproved.length === 1 ? "" : "s"} ·{" "}
+              <strong>{money(monthApproved.reduce((sum, r) => sum + r.amount, 0))}</strong>
+            </span>
+            {monthRejected > 0 && (
+              <span className="muted">
+                {monthRejected} rechazado{monthRejected === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+          {monthReceipts.map((r) => (
             <div className="list-item" key={r.id}>
               <div>
                 <div style={{ fontWeight: 600 }}>{r.studentName}</div>
                 <div className="muted">
-                  {money(r.amount)} · {r.isExtraClass ? "clase extra" : "cuota"} de {monthLabel(r.monthKey)} ·{" "}
-                  {r.reviewedAt ? when(r.reviewedAt) : ""}
+                  {money(r.amount)} · {r.isExtraClass ? "clase extra" : "cuota"} ·{" "}
+                  {r.reviewedAt ? `revisado ${when(r.reviewedAt)}` : ""}
                   {r.reviewedBy ? ` · ${r.reviewedBy}` : ""}
                 </div>
                 <span className={`tag ${r.status === "approved" ? "ok" : "warn"}`}>
