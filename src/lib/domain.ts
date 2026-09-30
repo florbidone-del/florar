@@ -191,6 +191,8 @@ export type PaymentDTO = {
   amount: number;
   status: "pending" | "approved" | "rejected";
   source: "manual" | "mercadopago";
+  /** Fecha (hora argentina) del último pago que entró en esta fila. */
+  paidOn: string;
 };
 export type ExtraClassPurchaseDTO = {
   id: string;
@@ -491,13 +493,24 @@ export function paidAmountThisMonth(snap: WorkshopSnapshot, studentId: string) {
   return payment?.amount || 0;
 }
 /** Cuota contra la que se compara lo pagado este mes: si el pago se completó por Mercado Pago,
- *  la cuota de MP (que puede ser distinta a la de efectivo); si no, la de efectivo. */
+ *  la cuota de MP (que puede ser distinta a la de efectivo); si no, la de efectivo. Si la cuota
+ *  base quedó cubierta dentro de la ventana de pago, el recargo no aplica aunque ya haya vencido. */
 export function feeDueThisMonth(snap: WorkshopSnapshot, studentId: string) {
   const mk = currentMonthKey();
   const payment = snap.payments.find(
     (p) => p.studentId === studentId && p.monthKey === mk && p.status === "approved"
   );
-  return studentFee(snap, payment?.source === "mercadopago" ? "mp" : "cash");
+  const method = payment?.source === "mercadopago" ? "mp" : "cash";
+  const base = method === "mp" ? snap.config.mpFee : snap.config.cashFee;
+  if (
+    payment &&
+    payment.amount >= base &&
+    monthKeyOf(payment.paidOn) === mk &&
+    parseISO(payment.paidOn).getDate() <= snap.config.paymentWindowEnd
+  ) {
+    return base;
+  }
+  return studentFee(snap, method);
 }
 export function isUnpaid(snap: WorkshopSnapshot, studentId: string) {
   return paidAmountThisMonth(snap, studentId) < feeDueThisMonth(snap, studentId);
