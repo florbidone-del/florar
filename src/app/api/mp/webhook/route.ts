@@ -76,6 +76,12 @@ export async function POST(req: NextRequest) {
       where: { studentId_monthKey: { studentId, monthKey } },
     });
 
+    // Mercado Pago manda varias notificaciones por el mismo pago (reintentos, created/updated):
+    // si este pago ya quedó sumado como aprobado, no lo volvemos a sumar.
+    if (previous?.status === "approved" && previous.mpPaymentId === String(payment.id)) {
+      return response;
+    }
+
     if (status === "approved") {
       // Si ya había un pago aprobado este mes (a mano o por un cobro de Mercado Pago anterior),
       // este nuevo monto aprobado se suma en vez de reemplazarlo — el botón de Mercado Pago
