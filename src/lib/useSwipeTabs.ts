@@ -36,7 +36,7 @@ export function useSwipeTabs(
 
     function onTouchStart(e: TouchEvent) {
       const target = e.target as HTMLElement;
-      if (target.closest(".modal-backdrop") || isInsideHorizontalScroller(target)) {
+      if (target.closest(".modal-backdrop, .lightbox") || isInsideHorizontalScroller(target)) {
         startX.current = null;
         return;
       }

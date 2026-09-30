@@ -959,3 +959,20 @@ td.holiday{background:var(--oxide-soft);}
 .receipt-viewer.zoomed .receipt-viewer-img{width:220%; max-width:none; cursor:zoom-out;}
 .receipt-viewer-page{display:block; border-bottom:1px solid var(--line);}
 .receipt-viewer-page:last-child{border-bottom:none;}
+/* ---- Fotos a pantalla completa ---- */
+.zoomable{cursor:zoom-in;}
+.lightbox{
+  position:fixed; inset:0; z-index:100; background:rgba(12,8,18,0.94);
+  display:flex; align-items:center; justify-content:center; overflow:auto;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); -webkit-overflow-scrolling:touch;
+  animation:lightbox-in .15s ease-out;
+}
+.lightbox img{max-width:100vw; max-height:100vh; max-height:100dvh; object-fit:contain; cursor:zoom-in;}
+.lightbox.zoomed{align-items:flex-start; justify-content:flex-start;}
+.lightbox.zoomed img{max-width:none; max-height:none; width:220vw; cursor:zoom-out;}
+.lightbox-close{
+  position:fixed; top:calc(env(safe-area-inset-top) + 12px); right:12px; z-index:101;
+  width:40px; height:40px; padding:0; border-radius:50%; border:none;
+  background:rgba(255,255,255,0.16); color:#fff; font-size:1.1rem; line-height:1;
+}
+@keyframes lightbox-in{from{opacity:0} to{opacity:1}}

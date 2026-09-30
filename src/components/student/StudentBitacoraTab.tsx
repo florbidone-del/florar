@@ -15,6 +15,7 @@ import { PostImage } from "@/components/shared/PostImage";
 import { TrashIcon } from "@/components/shared/Icons";
 import { addStudentPostAction, removeStudentPostAction } from "@/lib/actions/studentPosts";
 import type { StudentPanelData } from "@/lib/views/student";
+import { ZoomableImage } from "@/components/shared/ZoomableImage";
 
 export function StudentBitacoraTab({
   myPosts,
@@ -128,7 +129,7 @@ export function StudentBitacoraTab({
                   {p.studentName} compartió: {fmtLong(p.date)}
                 </div>
                 {p.title && <h4>{p.title}</h4>}
-                {p.imageData && <img src={p.imageData} alt="" className="blog-post-image" />}
+                {p.imageData && <ZoomableImage src={p.imageData} className="blog-post-image" />}
                 {p.body && (
                   <p className="blog-post-body">
                     <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />

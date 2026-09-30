@@ -14,6 +14,7 @@ import {
   removeStudentPostAction,
 } from "@/lib/actions/studentPosts";
 import type { StudentPostDTO } from "@/lib/views/admin";
+import { ZoomableImage } from "@/components/shared/ZoomableImage";
 
 export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
   const router = useRouter();
@@ -75,7 +76,7 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
               {p.title && <h4>{p.title}</h4>}
               {p.imageData && (
                 <div className="blog-post-image-wrap">
-                  <img src={p.imageData} alt="" className="blog-post-image" />
+                  <ZoomableImage src={p.imageData} className="blog-post-image" />
                   <div className="post-menu-overlay">
                     <PostActionsMenu disabled={busy === p.id} items={menuItems} overlay />
                   </div>

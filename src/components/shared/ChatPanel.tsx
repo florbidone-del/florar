@@ -5,6 +5,7 @@ import { sendChatMessageAction } from "@/lib/actions/chat";
 import { ChatAttachMenu } from "@/components/shared/ChatAttachMenu";
 import { AutoTextarea } from "@/components/shared/AutoTextarea";
 import { resizeToDataUrl } from "@/lib/resizeImage";
+import { ZoomableImage } from "@/components/shared/ZoomableImage";
 
 type ChatMsg = {
   id: string;
@@ -132,7 +133,7 @@ export function ChatPanel({ weekday, slotId }: { weekday: number; slotId: string
                 {showDivider && <div className="chat-day-divider">{fmtDayDivider(m.createdAt)}</div>}
                 <div className={`chat-bubble ${isMine(m) ? "mine" : ""}`}>
                   <div className="chat-author">{m.authorName}</div>
-                  {m.attachmentUrl && <img src={m.attachmentUrl} alt="" className="chat-attachment" />}
+                  {m.attachmentUrl && <ZoomableImage src={m.attachmentUrl} className="chat-attachment" />}
                   {m.body && <div>{m.body}</div>}
                   <div className="chat-time">{fmtTime(m.createdAt)}</div>
                 </div>
