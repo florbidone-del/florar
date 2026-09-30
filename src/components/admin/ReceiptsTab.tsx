@@ -7,6 +7,7 @@ import type { ReceiptDTO } from "@/lib/views/admin";
 import { approvePaymentReceiptAction, rejectPaymentReceiptAction } from "@/lib/actions/receipts";
 import { Modal } from "@/components/shared/Modal";
 import { Collapsible } from "@/components/shared/Collapsible";
+import { ReceiptViewer } from "@/components/shared/ReceiptViewer";
 
 const REJECT_REASONS = [
   "No me llegó la transferencia",
@@ -105,7 +106,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
                 </span>
                 {r.rejectReason && <div className="muted receipt-reason">“{r.rejectReason}”</div>}
               </div>
-              <button className="ghost small" onClick={() => (r.isPdf ? window.open(fileUrl(r.id), "_blank") : setViewing(r))}>
+              <button className="ghost small" onClick={() => setViewing(r)}>
                 Ver
               </button>
             </div>
@@ -114,15 +115,13 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
       )}
 
       {viewing && (
-        <Modal onClose={() => setViewing(null)}>
-          <h3>{viewing.studentName}</h3>
-          <p className="muted" style={{ marginTop: 0 }}>
-            {money(viewing.amount)} · subido {when(viewing.createdAt)}
-          </p>
-          <img className="receipt-full" src={fileUrl(viewing.id)} alt={`Comprobante de ${viewing.studentName}`} />
-          <a href={fileUrl(viewing.id)} target="_blank" rel="noopener" className="hint" style={{ display: "block", marginTop: 8 }}>
-            Abrir en tamaño completo
-          </a>
+        <ReceiptViewer
+          receiptId={viewing.id}
+          isPdf={viewing.isPdf}
+          title={viewing.studentName}
+          subtitle={`${money(viewing.amount)}${viewing.isExtraClass ? " · clase extra" : ""} · subido ${when(viewing.createdAt)}`}
+          onClose={() => setViewing(null)}
+        >
           {viewing.status === "pending" ? (
             <div className="row" style={{ marginTop: 16 }}>
               <button className="danger block" onClick={() => { setRejecting(viewing); setViewing(null); }}>
@@ -137,7 +136,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
               Cerrar
             </button>
           )}
-        </Modal>
+        </ReceiptViewer>
       )}
       {approving && <ApproveModal receipt={approving} onClose={() => setApproving(null)} onDone={done} />}
       {rejecting && <RejectModal receipt={rejecting} onClose={() => setRejecting(null)} onDone={done} />}
@@ -162,9 +161,9 @@ function ReceiptCard({
   return (
     <div className="receipt-card">
       {r.isPdf ? (
-        <a className="receipt-thumb pdf" href={fileUrl(r.id)} target="_blank" rel="noopener" aria-label="Abrir PDF">
+        <button type="button" className="receipt-thumb pdf" onClick={onView} aria-label="Ver PDF">
           PDF
-        </a>
+        </button>
       ) : (
         <button type="button" className="receipt-thumb" onClick={onView} aria-label="Ver comprobante">
           <img src={fileUrl(r.id)} alt="" loading="lazy" />

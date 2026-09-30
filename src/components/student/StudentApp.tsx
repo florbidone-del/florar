@@ -13,6 +13,7 @@ import { ForcePinChangeScreen } from "@/components/student/ForcePinChangeScreen"
 import { PayButton } from "@/components/student/PayButton";
 import { ReceiptUploadModal } from "@/components/student/ReceiptUploadModal";
 import { TransferInfo } from "@/components/student/TransferInfo";
+import { ReceiptViewer } from "@/components/shared/ReceiptViewer";
 import { ChatPanel } from "@/components/shared/ChatPanel";
 import { StudentBitacoraTab } from "@/components/student/StudentBitacoraTab";
 import { TabsScroller } from "@/components/shared/TabsScroller";
@@ -155,6 +156,7 @@ type ModalState =
   | { kind: "extra" }
   | { kind: "receipt" }
   | { kind: "extraReceipt" }
+  | { kind: "viewReceipt" }
   | null;
 
 export function StudentApp({ data }: { data: StudentPanelData }) {
@@ -299,9 +301,9 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             normal al calendario.
           </p>
           <div className="banner-links">
-            <a href={`/api/comprobantes/${receipt.id}`} target="_blank" rel="noopener">
+            <button type="button" className="link-button" onClick={() => setModal({ kind: "viewReceipt" })}>
               Ver comprobante
-            </a>
+            </button>
             <button type="button" className="link-button" onClick={openReceipt}>
               Cambiarlo
             </button>
@@ -659,6 +661,15 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           transfer={data.payment.transfer}
           onClose={() => setModal(null)}
           onDone={closeAndRefresh}
+        />
+      )}
+      {modal?.kind === "viewReceipt" && receipt && (
+        <ReceiptViewer
+          receiptId={receipt.id}
+          isPdf={receipt.isPdf}
+          title="Tu comprobante"
+          subtitle={`${receipt.amount} · enviado el ${receipt.sentAt}`}
+          onClose={() => setModal(null)}
         />
       )}
       {modal?.kind === "extraReceipt" && (

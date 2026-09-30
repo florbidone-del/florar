@@ -945,7 +945,6 @@ td.holiday{background:var(--oxide-soft);}
 .receipt-note{font-size:0.85rem; color:var(--ink-soft); font-style:italic;}
 .receipt-actions{display:flex; gap:8px; justify-content:flex-end; margin-top:8px;}
 .receipt-actions button{min-width:88px;}
-.receipt-full{display:block; width:100%; max-height:65vh; object-fit:contain; border-radius:var(--radius); border:1.5px solid var(--line); background:var(--surface);}
 .receipt-reason{font-style:italic; margin-top:2px;}
 .receipt-cta-main{margin-top:12px;}
 .fee-lines{margin-top:8px; display:flex; flex-direction:column; gap:4px;}
@@ -955,3 +954,8 @@ td.holiday{background:var(--oxide-soft);}
 .fee-line.cash strong{color:var(--glaze);}
 .discount-pill{font-size:0.72rem; font-weight:600; padding:1px 8px; border-radius:20px; background:var(--ok-bg); color:var(--glaze); border:1px solid var(--glaze);}
 .receipt-kind{margin:0 6px 0 0; vertical-align:middle;}
+.receipt-viewer{max-height:62vh; overflow:auto; border:1.5px solid var(--line); border-radius:var(--radius); background:var(--surface); -webkit-overflow-scrolling:touch;}
+.receipt-viewer-img{display:block; width:100%; height:auto; cursor:zoom-in;}
+.receipt-viewer.zoomed .receipt-viewer-img{width:220%; max-width:none; cursor:zoom-out;}
+.receipt-viewer-page{display:block; border-bottom:1px solid var(--line);}
+.receipt-viewer-page:last-child{border-bottom:none;}

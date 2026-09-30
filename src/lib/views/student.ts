@@ -89,6 +89,7 @@ export type StudentPanelData = {
       amount: string;
       sentAt: string;
       rejectReason: string | null;
+      isPdf: boolean;
     } | null;
   };
   extraClass: {
@@ -256,7 +257,7 @@ export async function buildStudentPanelData(
       prisma.paymentReceipt.findFirst({
         where: { studentId, monthKey: mk, extraClassPurchaseId: null },
         orderBy: { createdAt: "desc" },
-        select: { id: true, status: true, amount: true, createdAt: true, rejectReason: true },
+        select: { id: true, status: true, amount: true, createdAt: true, rejectReason: true, fileType: true },
       }),
       prisma.paymentReceipt.findFirst({
         where: { studentId, monthKey: mk, extraClassPurchaseId: { not: null } },
@@ -398,6 +399,7 @@ export async function buildStudentPanelData(
               amount: money(latestReceipt.amount),
               sentAt: fmtLong(isoDate(latestReceipt.createdAt)),
               rejectReason: latestReceipt.rejectReason,
+              isPdf: latestReceipt.fileType === "application/pdf",
             }
           : null,
     },
