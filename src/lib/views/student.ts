@@ -12,6 +12,7 @@ import {
   isHoliday,
   isoDate,
   isUnpaid,
+  feeDueThisMonth,
   paidAmountThisMonth,
   extraClassCreditsAvailable,
   extraClassPurchasesPending,
@@ -336,7 +337,7 @@ export async function buildStudentPanelData(
     swapsLeft,
     payment: {
       unpaid: isUnpaid(snap, studentId),
-      isPartial: paidThisMonth > 0 && paidThisMonth < studentFee(snap),
+      isPartial: paidThisMonth > 0 && paidThisMonth < feeDueThisMonth(snap, studentId),
       paidAmount: money(paidThisMonth),
       cashFee: money(studentFee(snap, "cash")),
       remainingCash: money(Math.max(0, studentFee(snap, "cash") - paidThisMonth)),

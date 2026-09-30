@@ -9,6 +9,7 @@ import {
   money,
   profeForSlot,
   studentFee,
+  feeDueThisMonth,
   DIAS,
 } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
@@ -203,7 +204,7 @@ export function StudentsTab({
             const payment = snap.payments.find(
               (p) => p.studentId === s.id && p.monthKey === mk && p.status === "approved"
             );
-            const fee = studentFee(snap);
+            const fee = feeDueThisMonth(snap, s.id);
             const paid = payment?.amount || 0;
             const isPaid = paid >= fee;
             const isPartial = paid > 0 && paid < fee;

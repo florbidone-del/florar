@@ -47,6 +47,7 @@ export async function GET() {
 
   const mk = currentMonthKey();
   const isLate = new Date().getDate() > config.paymentWindowEnd;
+  const lateFactor = isLate ? 1 + config.lateFeePercent / 100 : 1;
   const currentFee = isLate
     ? Math.round(config.cashFee * (1 + config.lateFeePercent / 100))
     : config.cashFee;
@@ -56,7 +57,8 @@ export async function GET() {
   // parezca que el pago se hizo con esos datos. Un pago aprobado del mes actual por menos de la
   // cuota es un pago parcial: todavía falta el saldo, aunque la fila diga "approved" en la base.
   const rows: Row[] = payments.map((p) => {
-    const isCurrentPartial = p.status === "approved" && p.monthKey === mk && p.amount < currentFee;
+    const dueFee = p.source === "mercadopago" ? Math.round(config.mpFee * lateFactor) : currentFee;
+    const isCurrentPartial = p.status === "approved" && p.monthKey === mk && p.amount < dueFee;
     return {
       alumno: p.student.name,
       usuario: p.studentId,

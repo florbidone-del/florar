@@ -490,8 +490,17 @@ export function paidAmountThisMonth(snap: WorkshopSnapshot, studentId: string) {
   );
   return payment?.amount || 0;
 }
+/** Cuota contra la que se compara lo pagado este mes: si el pago se completó por Mercado Pago,
+ *  la cuota de MP (que puede ser distinta a la de efectivo); si no, la de efectivo. */
+export function feeDueThisMonth(snap: WorkshopSnapshot, studentId: string) {
+  const mk = currentMonthKey();
+  const payment = snap.payments.find(
+    (p) => p.studentId === studentId && p.monthKey === mk && p.status === "approved"
+  );
+  return studentFee(snap, payment?.source === "mercadopago" ? "mp" : "cash");
+}
 export function isUnpaid(snap: WorkshopSnapshot, studentId: string) {
-  return paidAmountThisMonth(snap, studentId) < studentFee(snap);
+  return paidAmountThisMonth(snap, studentId) < feeDueThisMonth(snap, studentId);
 }
 export function profeAccountsUsernames(admins: { username: string; role: string }[]) {
   return admins.filter((a) => a.role === "profe").map((a) => a.username);
