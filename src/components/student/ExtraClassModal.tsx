@@ -58,7 +58,9 @@ export function ExtraClassModal({
   return (
     <Modal onClose={onClose}>
       <h3>Agendar tu clase extra</h3>
-      <p className="muted">Elegí un día de este mes con lugar, además de tus clases normales.</p>
+      <p className="muted">
+        Elegí un día de este mes con lugar, además de tus clases normales — puede ser hoy mismo.
+      </p>
       <div className="step-label">1. Elegí el día (con lugar, dentro de este mes)</div>
       <div style={{ marginBottom: 14 }}>
         <SwapCalendar
@@ -66,6 +68,7 @@ export function ExtraClassModal({
           leadingBlanks={leadingBlanks}
           todayISO={todayISO}
           originalDate=""
+          allowToday
           selectedDate={chosenDate}
           onSelect={(d) => {
             setChosenDate(d);
@@ -81,7 +84,8 @@ export function ExtraClassModal({
           chosenDay.slots.map((slot) => {
             const full = slot.occ >= slot.capacity;
             const hrs = hoursUntil(chosenDate!, slot.start);
-            const blocked = full || hrs < 24;
+            const started = hrs <= 0;
+            const blocked = full || started;
             return (
               <div
                 key={slot.id}
@@ -92,7 +96,7 @@ export function ExtraClassModal({
                   {slot.start}–{slot.end}
                 </span>
                 <span className="muted">
-                  {slot.occ}/{slot.capacity}
+                  {started ? "ya empezó" : `${slot.occ}/${slot.capacity}`}
                 </span>
               </div>
             );

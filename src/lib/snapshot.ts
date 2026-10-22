@@ -129,6 +129,7 @@ export async function loadWorkshopSnapshot(): Promise<WorkshopSnapshot> {
       toSlotId: c.toSlotId,
       reason: c.reason,
       monthKey: c.monthKey,
+      createdAt: c.createdAt.toISOString(),
     })),
     payments: payments.map((p) => ({
       studentId: p.studentId,

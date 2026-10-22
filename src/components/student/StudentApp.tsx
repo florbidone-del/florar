@@ -152,7 +152,12 @@ function studentTourSteps(studioName: string): TourStep[] {
 type ModalState =
   | { kind: "own"; day: CalendarDay }
   | { kind: "other"; day: CalendarDay }
-  | { kind: "swap"; originalDate: string; isHolidayReschedule: boolean }
+  | {
+      kind: "swap";
+      originalDate: string;
+      isHolidayReschedule: boolean;
+      redo?: { changeId: string; currentDate: string; currentSlotId: string };
+    }
   | { kind: "pin" }
   | { kind: "extra" }
   | { kind: "receipt" }
@@ -634,6 +639,9 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           onOpenSwap={(originalDate, isHolidayReschedule) =>
             setModal({ kind: "swap", originalDate, isHolidayReschedule })
           }
+          onOpenRedo={({ originalDate, isHolidayReschedule, ...redo }) =>
+            setModal({ kind: "swap", originalDate, isHolidayReschedule, redo })
+          }
         />
       )}
       {modal?.kind === "other" && (
@@ -646,6 +654,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
           originalStart={originalDay.own.start}
           originalEnd={originalDay.own.end}
           isHolidayReschedule={modal.isHolidayReschedule}
+          redo={modal.redo}
           calendar={data.calendar}
           leadingBlanks={data.leadingBlanks}
           todayISO={data.todayISO}

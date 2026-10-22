@@ -3,7 +3,7 @@
 import { Modal } from "@/components/shared/Modal";
 import { Linkify } from "@/components/shared/Linkify";
 import { Collapsible } from "@/components/shared/Collapsible";
-import { fmtLong, parseISO } from "@/lib/domain";
+import { fmtLong, parseISO, todayISO } from "@/lib/domain";
 import type { CalendarDay } from "@/lib/views/student";
 
 function hoursUntil(date: string, start: string) {
@@ -13,16 +13,30 @@ function hoursUntil(date: string, start: string) {
   return (dt.getTime() - Date.now()) / 3600000;
 }
 
+function fmtDateTime(iso: string) {
+  const d = new Date(iso);
+  return `${d.getDate()}/${d.getMonth() + 1} a las ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}hs`;
+}
+
 export function OwnSessionModal({
   day,
   swapsLeft,
   onClose,
   onOpenSwap,
+  onOpenRedo,
 }: {
   day: CalendarDay;
   swapsLeft: number;
   onClose: () => void;
   onOpenSwap: (originalDate: string, isHolidayReschedule: boolean) => void;
+  /** Volver a cambiar un cambio hecho hace menos de 48hs. */
+  onOpenRedo: (redo: {
+    changeId: string;
+    originalDate: string;
+    currentDate: string;
+    currentSlotId: string;
+    isHolidayReschedule: boolean;
+  }) => void;
 }) {
   const own = day.own!;
   const hrs = hoursUntil(day.date, own.start);
@@ -32,6 +46,23 @@ export function OwnSessionModal({
   let actionLabel: string | null = null;
   let actionDisabled = false;
   let isHolidayReschedule = false;
+
+  // Arrepentirse de un cambio: hasta 48hs después de hecho, mientras la clase destino no empezó
+  // (el servidor vuelve a validar las dos cosas).
+  const isChangeRow =
+    own.status === "moved-swap" || own.status === "moved-holiday" || own.status === "rescheduled";
+  const redoOpen =
+    isChangeRow &&
+    !!own.changeId &&
+    !!own.redoUntil &&
+    Date.now() < new Date(own.redoUntil).getTime() &&
+    (own.status === "rescheduled" ? future : own.movedTo!.date >= todayISO());
+  const redoHint =
+    redoOpen && own.redoUntil ? (
+      <p className="hint">
+        ¿Te arrepentiste? Podés volver a cambiarla hasta el {fmtDateTime(own.redoUntil)}.
+      </p>
+    ) : null;
 
   if (own.status === "confirmed") {
     body = (
@@ -94,6 +125,7 @@ export function OwnSessionModal({
           {own.start}–{own.end}
         </p>
         <span className="tag moved">movida a {fmtLong(own.movedTo!.date)}</span>
+        {redoHint}
       </>
     );
   } else if (own.status === "rescheduled") {
@@ -103,6 +135,7 @@ export function OwnSessionModal({
           {own.start}–{own.end}
         </p>
         <span className="tag moved">reprogramada (antes {fmtLong(own.from!)})</span>
+        {redoHint}
       </>
     );
   } else if (own.status === "extra") {
@@ -142,6 +175,33 @@ export function OwnSessionModal({
           onClick={() => onOpenSwap(day.date, isHolidayReschedule)}
         >
           {actionLabel}
+        </button>
+      )}
+      {redoOpen && (
+        <button
+          className="primary block"
+          style={{ marginTop: 14 }}
+          onClick={() =>
+            onOpenRedo(
+              own.status === "rescheduled"
+                ? {
+                    changeId: own.changeId!,
+                    originalDate: own.from!,
+                    currentDate: day.date,
+                    currentSlotId: own.slotId,
+                    isHolidayReschedule: false,
+                  }
+                : {
+                    changeId: own.changeId!,
+                    originalDate: day.date,
+                    currentDate: own.movedTo!.date,
+                    currentSlotId: own.movedTo!.slotId,
+                    isHolidayReschedule: own.status === "moved-holiday",
+                  }
+            )
+          }
+        >
+          Volver a cambiar
         </button>
       )}
       <button className="ghost block" style={{ marginTop: 10 }} onClick={onClose}>

@@ -188,6 +188,8 @@ export type ScheduleChangeDTO = {
   toSlotId: string;
   reason: "cambio" | "feriado";
   monthKey: string;
+  /** ISO con hora — cuándo se hizo el cambio (abre la ventana para arrepentirse). */
+  createdAt: string;
 };
 export type PaymentDTO = {
   studentId: string;
@@ -403,6 +405,10 @@ export type SessionRow = {
     | "extra";
   movedTo?: { date: string; slotId: string };
   from?: string;
+  /** En las filas de un cambio (origen "moved-*" y destino "rescheduled"): el cambio y hasta
+   *  cuándo se puede volver a cambiar (ver canRedoScheduleChange). */
+  changeId?: string;
+  redoUntil?: string;
 };
 
 /** Todas las clases del alumno en el mes actual (fijas + reprogramadas), con su estado. */
@@ -425,6 +431,8 @@ export function studentSessionsThisMonth(
         slotId: s.defaultSlotId,
         status: change.reason === "feriado" ? "moved-holiday" : "moved-swap",
         movedTo: { date: change.toDate, slotId: change.toSlotId },
+        changeId: change.id,
+        redoUntil: redoDeadline(change),
       });
     } else if (isHoliday(snap, date)) {
       const hol = isHoliday(snap, date)!;
@@ -443,6 +451,8 @@ export function studentSessionsThisMonth(
         slotId: c.toSlotId,
         status: "rescheduled",
         from: c.fromDate,
+        changeId: c.id,
+        redoUntil: redoDeadline(c),
       });
     });
   snap.extraClassPurchases
@@ -469,6 +479,17 @@ export function extraClassPurchasesPending(snap: WorkshopSnapshot, studentId: st
   );
 }
 
+/** Si el/la estudiante se arrepiente de un cambio, lo puede volver a cambiar (o deshacer) dentro de
+ *  las 48hs de haberlo hecho, sin gastar otro cambio del mes. */
+export const REDO_WINDOW_HOURS = 48;
+export function redoDeadline(change: ScheduleChangeDTO) {
+  return new Date(new Date(change.createdAt).getTime() + REDO_WINDOW_HOURS * 3600000).toISOString();
+}
+/** Se puede volver a cambiar mientras siga la ventana de 48hs y la clase destino no haya empezado. */
+export function canRedoScheduleChange(snap: WorkshopSnapshot, change: ScheduleChangeDTO) {
+  if (Date.now() >= new Date(redoDeadline(change)).getTime()) return false;
+  return hoursUntil(snap, change.toDate, change.toSlotId) > 0;
+}
 export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {
   const mk = currentMonthKey();
   return snap.scheduleChanges.filter(

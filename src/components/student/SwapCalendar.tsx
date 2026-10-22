@@ -9,6 +9,7 @@ export function SwapCalendar({
   originalDate,
   selectedDate,
   onSelect,
+  allowToday = false,
 }: {
   calendar: CalendarDay[];
   leadingBlanks: number;
@@ -16,6 +17,8 @@ export function SwapCalendar({
   originalDate: string;
   selectedDate: string | null;
   onSelect: (date: string) => void;
+  /** La clase extra se puede agendar para hoy mismo (si queda algún turno sin empezar). */
+  allowToday?: boolean;
 }) {
   return (
     <div>
@@ -31,7 +34,7 @@ export function SwapCalendar({
           <div className="cal-cell empty" key={`b${i}`} />
         ))}
         {calendar.map((day) => {
-          const isPastForSwap = day.date <= todayISO;
+          const isPastForSwap = allowToday ? day.date < todayISO : day.date <= todayISO;
           let cls: string;
           if (day.weekday === 0) cls = "closed";
           else if (isPastForSwap) cls = "past";

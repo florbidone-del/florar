@@ -18,9 +18,9 @@ import {
 import { dateInputToUTC, loadWorkshopSnapshot } from "@/lib/snapshot";
 import type { ActionResult } from "@/lib/actions/auth";
 
-/** El/la estudiante agenda una clase extra ya pagada (ver ExtraClassPurchase) — mismas reglas que
- *  un cambio de turno (24hs de anticipación, mismo cupo del turno), pero sin liberar nada: se suma
- *  a sus clases normales de la semana. */
+/** El/la estudiante agenda una clase extra ya pagada (ver ExtraClassPurchase) — sin anticipación
+ *  mínima: alcanza con que haya cupo y que el turno todavía no haya empezado (puede ser hoy mismo).
+ *  No libera nada: se suma a sus clases normales de la semana. */
 export async function requestExtraClassBookingAction(input: {
   purchaseId: string;
   targetDate: string;
@@ -44,7 +44,7 @@ export async function requestExtraClassBookingAction(input: {
 
   const { targetDate, targetSlotId } = input;
   const today = todayISO();
-  if (targetDate <= today) return { error: "Elegí un día posterior a hoy." };
+  if (targetDate < today) return { error: "Ese día ya pasó." };
   if (dayAvailability(snap, targetDate) !== "available") {
     return { error: "Ese día no tiene lugar disponible." };
   }
@@ -58,8 +58,8 @@ export async function requestExtraClassBookingAction(input: {
   if (occ.length >= capacityForSlot(snap, parseISO(targetDate).getDay(), targetSlotId)) {
     return { error: "Ese turno ya está lleno." };
   }
-  if (hoursUntil(snap, targetDate, targetSlotId) < 24) {
-    return { error: "Elegí un turno con más de 24hs de anticipación." };
+  if (hoursUntil(snap, targetDate, targetSlotId) <= 0) {
+    return { error: "Ese turno ya empezó." };
   }
 
   await prisma.extraClassPurchase.update({

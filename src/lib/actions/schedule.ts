@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import {
+  canRedoScheduleChange,
   capacityForSlot,
   currentMonthKey,
   dayAvailability,
@@ -109,6 +110,100 @@ export async function requestScheduleChangeAction(input: {
     notifs.push({
       forProfe: toProfe,
       message: `Se te sumó ${student.name} para el turno del ${toTxt}.`,
+    });
+  }
+  await prisma.notification.createMany({ data: notifs });
+
+  return { ok: true };
+}
+
+/** El/la estudiante se arrepiente de un cambio ya hecho: dentro de las 48hs de haberlo hecho lo
+ *  puede mover a otro turno o volver a su turno original (eso deshace el cambio y le devuelve el
+ *  cambio del mes). Reusa el mismo registro, así no gasta otro cambio ni se estira la ventana. */
+export async function redoScheduleChangeAction(input: {
+  changeId: string;
+  targetDate: string;
+  targetSlotId: string;
+}): Promise<ActionResult> {
+  const session = await requireStudent();
+  if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
+  const snap = await loadWorkshopSnapshot();
+  const student = snap.students.find((s) => s.id === session.studentId);
+  if (!student) return { error: "Tenés que iniciar sesión de nuevo." };
+
+  const change = snap.scheduleChanges.find(
+    (c) => c.id === input.changeId && c.studentId === student.id
+  );
+  if (!change) return { error: "No encontramos ese cambio." };
+  if (!canRedoScheduleChange(snap, change)) {
+    return { error: "Ya no se puede: pasaron más de 48hs desde el cambio o la clase ya empezó." };
+  }
+
+  const { targetDate, targetSlotId } = input;
+  if (targetDate === change.toDate && targetSlotId === change.toSlotId) {
+    return { error: "Elegí un turno distinto del que tenés ahora." };
+  }
+  const isUndo = targetDate === change.fromDate && targetSlotId === change.fromSlotId;
+
+  const today = todayISO();
+  if (targetDate <= today) {
+    return { error: "Elegí un día posterior a hoy." };
+  }
+  // Volver al turno original no exige que el día figure "con lugar" (puede estar lleno justo
+  // por otros turnos); alcanza con que su propio turno tenga cupo.
+  if (!isUndo && dayAvailability(snap, targetDate) !== "available") {
+    return { error: "Ese día no tiene lugar disponible." };
+  }
+  if (isUndo && isHoliday(snap, targetDate)) {
+    return { error: "Ese día no hay clases." };
+  }
+  const validSlot = slotsForDate(snap, targetDate).some((s) => s.id === targetSlotId);
+  if (!validSlot) return { error: "Ese horario no es válido para ese día." };
+  const occ = slotOccupancy(snap, targetDate, targetSlotId, student.id);
+  if (occ.length >= capacityForSlot(snap, parseISO(targetDate).getDay(), targetSlotId)) {
+    return { error: "Ese turno ya está lleno." };
+  }
+  if (hoursUntil(snap, targetDate, targetSlotId) < 24) {
+    return { error: "Elegí un turno con más de 24hs de anticipación." };
+  }
+
+  if (isUndo) {
+    await prisma.scheduleChange.delete({ where: { id: change.id } });
+  } else {
+    await prisma.scheduleChange.update({
+      where: { id: change.id },
+      data: { toDate: dateInputToUTC(targetDate), toSlotId: targetSlotId },
+    });
+  }
+
+  // ---- notificaciones ----
+  const prevWeekday = parseISO(change.toDate).getDay();
+  const newWeekday = parseISO(targetDate).getDay();
+  const prevSlot = slotsForDate(snap, change.toDate).find((s) => s.id === change.toSlotId);
+  const newSlot = slotsForDate(snap, targetDate).find((s) => s.id === targetSlotId);
+  const prevTxt = `${fmtShort(change.toDate)} · ${prevSlot?.start || ""}–${prevSlot?.end || ""}`;
+  const newTxt = `${fmtShort(targetDate)} · ${newSlot?.start || ""}–${newSlot?.end || ""}`;
+  const prevProfe = profeForSlot(snap, prevWeekday, change.toSlotId);
+  const newProfe = profeForSlot(snap, newWeekday, targetSlotId);
+
+  const notifs: { forProfe: string | null; message: string }[] = [
+    {
+      forProfe: null,
+      message: isUndo
+        ? `${student.name} se arrepintió de su cambio: vuelve a su turno del ${newTxt} (deja el ${prevTxt}).`
+        : `${student.name} volvió a cambiar su clase: del ${prevTxt} al ${newTxt}.`,
+    },
+  ];
+  if (prevProfe && prevProfe !== newProfe) {
+    notifs.push({
+      forProfe: prevProfe,
+      message: `Se te quitó ${student.name} del turno del ${prevTxt} — volvió a cambiar su clase.`,
+    });
+  }
+  if (newProfe && newProfe !== prevProfe) {
+    notifs.push({
+      forProfe: newProfe,
+      message: `Se te sumó ${student.name} para el turno del ${newTxt}.`,
     });
   }
   await prisma.notification.createMany({ data: notifs });
