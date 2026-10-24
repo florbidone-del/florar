@@ -18,7 +18,7 @@ import {
 import type { AdminBundle } from "@/lib/views/admin";
 import { OccupancyModal } from "@/components/admin/OccupancyModal";
 
-export function WeekTab({ bundle }: { bundle: AdminBundle }) {
+export function WeekTab({ bundle, isMainProfe }: { bundle: AdminBundle; isMainProfe: boolean }) {
   const snap = bundle.snapshot;
   const [weekBase, setWeekBase] = useState(() => mondayOf(todayISO()));
   const [modalCell, setModalCell] = useState<{ date: string; slotId: string } | null>(null);
@@ -105,13 +105,17 @@ export function WeekTab({ bundle }: { bundle: AdminBundle }) {
             })}
           </tbody>
         </table>
-        <p className="hint">Tocá un turno con estudiantes para ver quiénes son.</p>
+        <p className="hint">
+          Tocá un turno con estudiantes para ver quiénes son
+          {isMainProfe ? " y, si hace falta, pasarlos a otro turno." : "."}
+        </p>
       </div>
       {modalCell && (
         <OccupancyModal
           date={modalCell.date}
           slotId={modalCell.slotId}
           bundle={bundle}
+          canMove={isMainProfe}
           onClose={() => setModalCell(null)}
         />
       )}

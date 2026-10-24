@@ -11,9 +11,11 @@ import {
   fmtShort,
   hoursUntil,
   isHoliday,
+  monthKeyOf,
   parseISO,
   profeForSlot,
   slotOccupancy,
+  slotRoster,
   slotsForDate,
   swapsUsedThisMonth,
   todayISO,
@@ -207,6 +209,89 @@ export async function redoScheduleChangeAction(input: {
     });
   }
   await prisma.notification.createMany({ data: notifs });
+
+  return { ok: true };
+}
+
+/** La profe principal mueve a un/a estudiante de turno (pensado para quienes no usan la app): sin
+ *  anticipación mínima ni tope de cambios del mes — solo se fija que haya cupo. Sobre su turno fijo
+ *  queda registrado como su cambio del mes, igual que si lo hubiera hecho desde la app. */
+export async function profeMoveStudentAction(input: {
+  studentId: string;
+  fromDate: string;
+  fromSlotId: string;
+  targetDate: string;
+  targetSlotId: string;
+}): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  const snap = await loadWorkshopSnapshot();
+  const student = snap.students.find((s) => s.id === input.studentId);
+  if (!student) return { error: "No encontramos a ese/a estudiante." };
+
+  const { fromDate, fromSlotId, targetDate, targetSlotId } = input;
+  if (fromDate < todayISO()) return { error: "Esa clase ya pasó." };
+  const entry = slotRoster(snap, fromDate, fromSlotId).find((r) => r.studentId === student.id);
+  if (!entry) return { error: "Ese/a estudiante ya no está en ese turno." };
+  if (targetDate === fromDate && targetSlotId === fromSlotId) {
+    return { error: "Elegí un turno distinto del que tiene ahora." };
+  }
+
+  if (targetDate < todayISO()) return { error: "Ese día ya pasó." };
+  if (isHoliday(snap, targetDate)) return { error: "Ese día es feriado." };
+  const validSlot = slotsForDate(snap, targetDate).some((s) => s.id === targetSlotId);
+  if (!validSlot) return { error: "Ese horario no es válido para ese día." };
+  if (slotRoster(snap, targetDate, targetSlotId).some((r) => r.studentId === student.id)) {
+    return { error: "Ya está anotado/a en ese turno." };
+  }
+  const occ = slotOccupancy(snap, targetDate, targetSlotId, student.id);
+  if (occ.length >= capacityForSlot(snap, parseISO(targetDate).getDay(), targetSlotId)) {
+    return { error: "Ese turno ya está lleno." };
+  }
+
+  if (entry.kind === "fijo") {
+    await prisma.scheduleChange.create({
+      data: {
+        studentId: student.id,
+        fromDate: dateInputToUTC(fromDate),
+        fromSlotId,
+        toDate: dateInputToUTC(targetDate),
+        toSlotId: targetSlotId,
+        reason: "cambio",
+        monthKey: monthKeyOf(fromDate),
+      },
+    });
+  } else if (entry.kind === "cambio") {
+    const change = snap.scheduleChanges.find((c) => c.id === entry.changeId)!;
+    // Si la devuelve a su turno original, el cambio desaparece (y recupera el cambio del mes).
+    if (targetDate === change.fromDate && targetSlotId === change.fromSlotId) {
+      await prisma.scheduleChange.delete({ where: { id: change.id } });
+    } else {
+      await prisma.scheduleChange.update({
+        where: { id: change.id },
+        data: { toDate: dateInputToUTC(targetDate), toSlotId: targetSlotId },
+      });
+    }
+  } else {
+    await prisma.extraClassPurchase.update({
+      where: { id: entry.purchaseId },
+      data: { bookedDate: dateInputToUTC(targetDate), bookedSlotId: targetSlotId },
+    });
+  }
+
+  // ---- notificaciones (a los profes de cada turno, salvo a quien hizo el movimiento) ----
+  const fromSlot = slotsForDate(snap, fromDate).find((s) => s.id === fromSlotId);
+  const toSlot = slotsForDate(snap, targetDate).find((s) => s.id === targetSlotId);
+  const fromTxt = `${fmtShort(fromDate)} · ${fromSlot?.start || ""}–${fromSlot?.end || ""}`;
+  const toTxt = `${fmtShort(targetDate)} · ${toSlot?.start || ""}–${toSlot?.end || ""}`;
+  const fromProfe = profeForSlot(snap, parseISO(fromDate).getDay(), fromSlotId);
+  const toProfe = profeForSlot(snap, parseISO(targetDate).getDay(), targetSlotId);
+
+  const message = `${session.username} pasó a ${student.name} del turno del ${fromTxt} al ${toTxt}.`;
+  const notifs = [fromProfe, toProfe]
+    .filter((p, i, all): p is string => !!p && p !== session.username && all.indexOf(p) === i)
+    .map((forProfe) => ({ forProfe, message }));
+  if (notifs.length) await prisma.notification.createMany({ data: notifs });
 
   return { ok: true };
 }

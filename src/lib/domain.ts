@@ -331,14 +331,22 @@ export function hoursUntil(
   return (dt.getTime() - Date.now()) / 3600000;
 }
 
-/** Nombres anotados en una fecha+turno: turno fijo semanal (si no está cancelado ese día) + cambios puntuales hacia ese día. */
-export function slotOccupancy(
+/** Quién está anotado en una fecha+turno y por qué: turno fijo semanal (si no está cancelado ese
+ *  día), cambio puntual hacia ese día o clase extra agendada. */
+export type RosterEntry = {
+  studentId: string;
+  name: string;
+  kind: "fijo" | "cambio" | "extra";
+  changeId?: string;
+  purchaseId?: string;
+};
+export function slotRoster(
   snap: WorkshopSnapshot,
   dateISO: string,
   slotId: string,
   excludeStudentId?: string
-) {
-  const names: string[] = [];
+): RosterEntry[] {
+  const roster: RosterEntry[] = [];
   const wd = parseISO(dateISO).getDay();
   for (const s of snap.students) {
     if (s.id === excludeStudentId) continue;
@@ -346,24 +354,33 @@ export function slotOccupancy(
       const cancelled = snap.scheduleChanges.some(
         (c) => c.studentId === s.id && c.fromDate === dateISO
       );
-      if (!cancelled) names.push(s.name);
+      if (!cancelled) roster.push({ studentId: s.id, name: s.name, kind: "fijo" });
     }
   }
   for (const c of snap.scheduleChanges) {
     if (c.studentId === excludeStudentId) continue;
     if (c.toDate === dateISO && c.toSlotId === slotId) {
       const student = snap.students.find((s) => s.id === c.studentId);
-      names.push(student?.name || "?");
+      roster.push({ studentId: c.studentId, name: student?.name || "?", kind: "cambio", changeId: c.id });
     }
   }
   for (const p of snap.extraClassPurchases) {
     if (p.studentId === excludeStudentId) continue;
     if (p.status === "approved" && p.bookedDate === dateISO && p.bookedSlotId === slotId) {
       const student = snap.students.find((s) => s.id === p.studentId);
-      names.push(student?.name || "?");
+      roster.push({ studentId: p.studentId, name: student?.name || "?", kind: "extra", purchaseId: p.id });
     }
   }
-  return names;
+  return roster;
+}
+/** Nombres anotados en una fecha+turno (ver slotRoster). */
+export function slotOccupancy(
+  snap: WorkshopSnapshot,
+  dateISO: string,
+  slotId: string,
+  excludeStudentId?: string
+) {
+  return slotRoster(snap, dateISO, slotId, excludeStudentId).map((r) => r.name);
 }
 export function weekdayOccupancyCount(
   snap: WorkshopSnapshot,

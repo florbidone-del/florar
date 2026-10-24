@@ -162,7 +162,8 @@ export async function buildStudentPanelData(
     ["confirmed", "rescheduled", "pending-holiday", "extra"].includes(r.status)
   ).length;
   const pendingHolidays = sessions.filter((r) => r.status === "pending-holiday").length;
-  const swapsLeft = snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId);
+  // La profe principal puede mover a alguien por encima del tope, así que no bajar de 0.
+  const swapsLeft = Math.max(0, snap.config.swapsPerMonth - swapsUsedThisMonth(snap, studentId));
   const defaultSlot = snap.config.slots.find((s) => s.id === student.defaultSlotId) || null;
   const profeName = capitalize(profeForSlot(snap, student.defaultWeekday, student.defaultSlotId));
   const paidThisMonth = paidAmountThisMonth(snap, studentId);

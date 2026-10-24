@@ -319,7 +319,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
       </TabsScroller>
       <div key={tab} id={tab} className={`tab-panel-enter-${slideDir}`}>
         {isOwner && tab === "profes" && <ProfesTab admins={bundle.admins} me={session.username} />}
-        {!isOwner && tab === "semana" && <WeekTab bundle={bundle} />}
+        {!isOwner && tab === "semana" && <WeekTab bundle={bundle} isMainProfe={isMainProfe} />}
         {!isOwner && tab === "alumnos" && (
           <StudentsTab bundle={bundle} me={session.username} isMainProfe={isMainProfe} />
         )}
