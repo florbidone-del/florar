@@ -22,6 +22,7 @@ export async function addHolidayAction(input: {
     create: { date: dateInputToUTC(input.date), label: input.label?.trim() || null },
     update: { label: input.label?.trim() || null },
   });
+  await applyMonthlyClassCap([Number(input.date.slice(0, 4))]);
   return { ok: true };
 }
 
@@ -66,29 +67,42 @@ export async function loadOfficialHolidaysAction(
     await prisma.holiday.create({ data: { date: dateInputToUTC(h.date), label: h.label } });
     added++;
   }
+  await applyMonthlyClassCap(years);
   return { ok: true, added };
 }
 
 const CLASS_CAP_LABEL = "Sin clases por ya haber tenido las 4 clases del mes";
 
-/** Cancela automáticamente la 5ta clase real del mes de cada día de la semana que la tenga (ej: si
- *  un mes tiene 5 martes, cancela el último) — así ningún turno da más de 4 clases por mes. Un
- *  feriado ya cargado en alguno de esos días no cuenta como clase dada, así que no cuenta para
- *  llegar al 5 — si el mes tiene 5 martes y el 2do ya es feriado, ninguno se cancela por tope (con
- *  el feriado incluido, solo hay 4 martes "reales"). Igual que los feriados oficiales, nunca pisa
- *  un día ya cargado, así que se puede apretar todos los años. */
+/** Asegura que ningún turno dé más de 4 clases por mes cuando un mes tiene 5 veces el mismo día
+ *  de la semana. Cada feriado no-tope "debe" una clase (se reprograma gratis), así que también
+ *  cuenta para el total: 4 días reales + 1 feriado reprogramado = 5 clases. Por eso, si el mes
+ *  tiene 5 lunes:
+ *  - sin feriados → se cancela el último lunes (tope nuevo);
+ *  - con un feriado → ese feriado pasa a ser "tope": sigue mostrando su nombre, pero ya no se
+ *    reprograma (con los 4 lunes reales ya están las 4 clases).
+ *  Nunca borra ni renombra días ya cargados, así que se puede apretar las veces que haga falta. */
 export async function loadExtraClassCancellationsAction(
   years: number[]
 ): Promise<ActionResult & { added?: number }> {
   const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
+  const added = await applyMonthlyClassCap(years);
+  return { ok: true, added };
+}
 
+/** Lógica del tope de 4 clases (ver loadExtraClassCancellationsAction). Corre sola cada vez que se
+ *  carga un feriado, para que nunca quede un mes con 5 clases sin que la profe tenga que acordarse.
+ *  No corre al borrar un día: si la profe borra un tope a mano es porque quiere dar esa clase. */
+async function applyMonthlyClassCap(years: number[]): Promise<number> {
   const slots = await prisma.slot.findMany();
   const weekdaysWithClass = new Set(slots.flatMap((s) => s.weekdays));
   const existingHolidays = await prisma.holiday.findMany();
-  const holidayDates = new Set(existingHolidays.map((h) => h.date.toISOString().slice(0, 10)));
+  const holidayByDate = new Map(
+    existingHolidays.map((h) => [h.date.toISOString().slice(0, 10), h])
+  );
 
   const toAdd: string[] = [];
+  const toCap: string[] = [];
   for (const year of years) {
     for (let month = 1; month <= 12; month++) {
       const daysInMonth = new Date(year, month, 0).getDate();
@@ -97,13 +111,33 @@ export async function loadExtraClassCancellationsAction(
         const weekday = new Date(year, month - 1, day).getDay();
         if (!weekdaysWithClass.has(weekday)) continue;
         const dateISO = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        if (holidayDates.has(dateISO)) continue;
         const list = datesByWeekday.get(weekday) || [];
         list.push(dateISO);
         datesByWeekday.set(weekday, list);
       }
       for (const dates of datesByWeekday.values()) {
-        if (dates.length >= 5) toAdd.push(dates[4]);
+        // Clases que el turno da ese mes: cada día que no sea tope, sea normal o un feriado que
+        // se reprograma. Lo que pase de 4 hay que recortarlo.
+        let excess = dates.filter((d) => !holidayByDate.get(d)?.capped).length - 4;
+        if (excess <= 0) continue;
+        // Primero se recortan feriados (empezando por el último): así nadie pierde un día real
+        // de clase, solo deja de tener la reprogramación gratis de ese feriado.
+        const reschedulable = dates.filter((d) => {
+          const h = holidayByDate.get(d);
+          return h && !h.capped;
+        });
+        for (const d of reschedulable.reverse()) {
+          if (excess <= 0) break;
+          toCap.push(d);
+          excess--;
+        }
+        // Si no alcanzó con los feriados, se cancelan los últimos días normales del mes.
+        const normal = dates.filter((d) => !holidayByDate.has(d));
+        for (const d of normal.reverse()) {
+          if (excess <= 0) break;
+          toAdd.push(d);
+          excess--;
+        }
       }
     }
   }
@@ -111,10 +145,9 @@ export async function loadExtraClassCancellationsAction(
   // No reescribe el pasado: una clase que ya se dio, se dio — esto es para lo que falta de acá
   // en adelante, no para "corregir" retroactivamente meses que ya pasaron.
   const today = todayISO();
-  const futureOnly = toAdd.filter((dateISO) => dateISO >= today);
 
   let added = 0;
-  for (const dateISO of futureOnly) {
+  for (const dateISO of toAdd.filter((d) => d >= today)) {
     const existing = await prisma.holiday.findUnique({ where: { date: dateInputToUTC(dateISO) } });
     if (existing) continue;
     await prisma.holiday.create({
@@ -122,7 +155,14 @@ export async function loadExtraClassCancellationsAction(
     });
     added++;
   }
-  return { ok: true, added };
+  for (const dateISO of toCap.filter((d) => d >= today)) {
+    await prisma.holiday.update({
+      where: { date: dateInputToUTC(dateISO) },
+      data: { capped: true },
+    });
+    added++;
+  }
+  return added;
 }
 
 export async function addActivityAction(input: {

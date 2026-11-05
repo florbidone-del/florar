@@ -122,7 +122,7 @@ export function ConfigTab({
   async function loadExtraClass() {
     setLoadingExtraClass(true);
     setExtraClassResult(null);
-    const res = await loadExtraClassCancellationsAction([currentYear]);
+    const res = await loadExtraClassCancellationsAction([currentYear, currentYear + 1]);
     setLoadingExtraClass(false);
     if ("error" in res) {
       setExtraClassResult(res.error!);
@@ -131,7 +131,7 @@ export function ConfigTab({
     setExtraClassResult(
       res.added === 0
         ? "No había ningún mes con una 5ta clase de más para cancelar."
-        : `Se cancelaron ${res.added} clases de más.`
+        : `Se ajustaron ${res.added} clases de más.`
     );
     router.refresh();
   }
@@ -349,12 +349,13 @@ export function ConfigTab({
 
           <label style={{ marginTop: 18 }}>Tope de 4 clases por mes</label>
           <p className="hint" style={{ marginTop: 0 }}>
-            Cuando un día de la semana tiene 5 clases en un mes de {currentYear} (ej: 5 martes), cancela
-            la última para que nadie dé más de 4 clases ese mes — igual que un feriado, la profe la puede
-            reactivar después si hace falta. No pisa los días que ya tengas cargados.
+            Cuando un día de la semana tiene 5 clases en un mes de {currentYear} o {currentYear + 1} (ej: 5 martes), cancela
+            la última para que nadie dé más de 4 clases ese mes. Si uno de esos 5 días ya es feriado, no
+            cancela otro: ese feriado deja de poder reprogramarse (con los otros 4 ya están las 4
+            clases). Se hace solo cada vez que cargás un feriado; el botón es por si querés forzarlo. No borra los días que ya tengas cargados.
           </p>
           <button className="ghost block" disabled={loadingExtraClass} onClick={loadExtraClass}>
-            {loadingExtraClass ? "Cargando…" : "Cancelar las clases de más de este año"}
+            {loadingExtraClass ? "Cargando…" : "Cancelar las clases de más (este año y el próximo)"}
           </button>
           {extraClassResult && <p className="hint">{extraClassResult}</p>}
 
