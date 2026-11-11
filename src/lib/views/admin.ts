@@ -46,7 +46,7 @@ export type BlogPostDTO = {
   id: string;
   title: string | null;
   body: string;
-  imageData: string | null;
+  images: string[];
   authorName: string | null;
   featured: boolean;
   studentAuthorName: string | null;
@@ -61,7 +61,7 @@ export type StudentPostDTO = {
   studentName: string;
   title: string | null;
   body: string;
-  imageData: string | null;
+  images: string[];
   isPublic: boolean;
   featured: boolean;
   createdAt: string;
@@ -285,7 +285,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
         id: p.id,
         title: p.title,
         body: p.body,
-        imageData: p.imageData,
+        images: p.imageUrls,
         authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
         featured: p.featured,
         studentAuthorName: p.studentAuthorName,
@@ -303,7 +303,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
         studentName: p.student.name,
         title: p.title,
         body: p.body,
-        imageData: p.imageData,
+        images: p.imageUrls,
         isPublic: p.isPublic,
         featured: featuredStudentPostIds.has(p.id),
         createdAt: isoDate(p.createdAt),

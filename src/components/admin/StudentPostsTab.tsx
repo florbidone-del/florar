@@ -14,7 +14,7 @@ import {
   removeStudentPostAction,
 } from "@/lib/actions/studentPosts";
 import type { StudentPostDTO } from "@/lib/views/admin";
-import { ZoomableImage } from "@/components/shared/ZoomableImage";
+import { PostCarousel } from "@/components/shared/PostCarousel";
 
 export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
   const router = useRouter();
@@ -71,17 +71,17 @@ export function StudentPostsTab({ posts }: { posts: StudentPostDTO[] }) {
                   <span className={`tag ${p.isPublic ? "ok" : "moved"}`}>{p.isPublic ? "pública" : "privada"}</span>
                   {p.featured && <span className="tag ok">⭐ destacada</span>}
                 </span>
-                {!p.imageData && <PostActionsMenu disabled={busy === p.id} items={menuItems} overlay />}
+                {p.images.length === 0 && <PostActionsMenu disabled={busy === p.id} items={menuItems} overlay />}
               </div>
               {p.title && <h4>{p.title}</h4>}
-              {p.imageData && (
-                <div className="blog-post-image-wrap">
-                  <ZoomableImage src={p.imageData} className="blog-post-image" />
+              <PostCarousel
+                images={p.images}
+                overlay={
                   <div className="post-menu-overlay">
                     <PostActionsMenu disabled={busy === p.id} items={menuItems} overlay />
                   </div>
-                </div>
-              )}
+                }
+              />
               {p.body && (
                 <p className="blog-post-body">
                   <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />

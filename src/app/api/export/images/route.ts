@@ -35,11 +35,11 @@ export async function GET(req: NextRequest) {
 
   const [blogPosts, studentPosts] = await Promise.all([
     prisma.blogPost.findMany({
-      where: { imageData: { not: null }, ...dateFilter },
+      where: { imageUrls: { isEmpty: false }, ...dateFilter },
       orderBy: { createdAt: "asc" },
     }),
     prisma.studentPost.findMany({
-      where: { imageData: { not: null }, ...dateFilter },
+      where: { imageUrls: { isEmpty: false }, ...dateFilter },
       include: { student: true },
       orderBy: { createdAt: "asc" },
     }),
@@ -49,17 +49,21 @@ export async function GET(req: NextRequest) {
   const ceramiFolder = zip.folder("ceramiblog");
   const bitacoraFolder = zip.folder("bitacoras");
 
+  // Un post con varias fotos lleva el número de cada una al final del nombre (_1, _2, _3).
+  const suffix = (urls: string[], i: number) => (urls.length > 1 ? `_${i + 1}` : "");
   for (const p of blogPosts) {
-    if (!p.imageData) continue;
-    const { buffer, ext } = await toImageBuffer(p.imageData);
-    const name = `${isoDate(p.createdAt)}_${slugify(p.title || "post")}_${p.id.slice(-6)}.${ext}`;
-    ceramiFolder?.file(name, buffer);
+    for (const [i, url] of p.imageUrls.entries()) {
+      const { buffer, ext } = await toImageBuffer(url);
+      const name = `${isoDate(p.createdAt)}_${slugify(p.title || "post")}_${p.id.slice(-6)}${suffix(p.imageUrls, i)}.${ext}`;
+      ceramiFolder?.file(name, buffer);
+    }
   }
   for (const p of studentPosts) {
-    if (!p.imageData) continue;
-    const { buffer, ext } = await toImageBuffer(p.imageData);
-    const name = `${isoDate(p.createdAt)}_${slugify(p.student.name)}_${slugify(p.title || "post")}_${p.id.slice(-6)}.${ext}`;
-    bitacoraFolder?.file(name, buffer);
+    for (const [i, url] of p.imageUrls.entries()) {
+      const { buffer, ext } = await toImageBuffer(url);
+      const name = `${isoDate(p.createdAt)}_${slugify(p.student.name)}_${slugify(p.title || "post")}_${p.id.slice(-6)}${suffix(p.imageUrls, i)}.${ext}`;
+      bitacoraFolder?.file(name, buffer);
+    }
   }
 
   if (blogPosts.length === 0 && studentPosts.length === 0) {

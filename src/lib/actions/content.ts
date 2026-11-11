@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { requireProfe, requireMainProfe } from "@/lib/authz";
 import { dateInputToUTC } from "@/lib/snapshot";
 import { todayISO } from "@/lib/domain";
-import { uploadImageDataUrl, deleteBlobImage } from "@/lib/blobStorage";
+import { uploadPostImages, deleteBlobImage } from "@/lib/blobStorage";
+import { MAX_POST_IMAGES } from "@/lib/postImages";
 import { deleteInteractionsFor } from "@/lib/postInteractionsData";
 import { notifyNewBlogPost } from "@/lib/push";
 import type { ActionResult } from "@/lib/actions/auth";
@@ -253,33 +254,33 @@ export async function removeAnnouncementAction(id: string): Promise<ActionResult
   return { ok: true };
 }
 
-/** Post de CeramiBlog: texto (con links) y, opcionalmente, una foto — se sube a Vercel Blob y en
- *  la base solo queda guardado el link, para no inflar la base de datos con el archivo entero. */
+/** Post de CeramiBlog: texto (con links) y, opcionalmente, hasta 3 fotos — se suben a Vercel Blob y
+ *  en la base solo quedan guardados los links, para no inflarla con los archivos enteros. */
 export async function addBlogPostAction(input: {
   title?: string;
   body: string;
-  imageData?: string | null;
+  images?: string[];
 }): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
   const body = input.body.trim();
-  if (!body && !input.imageData) return { error: "Escribí algo o subí una foto." };
+  const images = input.images ?? [];
+  if (!body && images.length === 0) return { error: "Escribí algo o subí una foto." };
+  if (images.length > MAX_POST_IMAGES) return { error: `Podés subir hasta ${MAX_POST_IMAGES} fotos.` };
 
-  let imageUrl: string | null = null;
-  if (input.imageData) {
-    try {
-      imageUrl = await uploadImageDataUrl(input.imageData, "ceramiblog");
-    } catch (err) {
-      console.error("[addBlogPostAction] Falló la subida a Blob:", err);
-      return { error: "No se pudo subir la foto. Probá de nuevo." };
-    }
+  let imageUrls: string[];
+  try {
+    imageUrls = await uploadPostImages(images, "ceramiblog");
+  } catch (err) {
+    console.error("[addBlogPostAction] Falló la subida a Blob:", err);
+    return { error: "No se pudieron subir las fotos. Probá de nuevo." };
   }
 
   await prisma.blogPost.create({
     data: {
       title: input.title?.trim() || null,
       body,
-      imageData: imageUrl,
+      imageUrls,
       authorUsername: session.username,
     },
   });
@@ -294,14 +295,14 @@ export async function addBlogPostAction(input: {
 export async function removeBlogPostAction(id: string): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
-  const post = await prisma.blogPost.findUnique({ where: { id }, select: { imageData: true } });
-  await deleteBlobImage(post?.imageData);
+  const post = await prisma.blogPost.findUnique({ where: { id }, select: { imageUrls: true } });
+  await Promise.all((post?.imageUrls ?? []).map(deleteBlobImage));
   await deleteInteractionsFor("blog", id);
   await prisma.blogPost.deleteMany({ where: { id } });
   return { ok: true };
 }
 
-/** Borra la foto (no el texto ni la fecha) de los posts de CeramiBlog y bitácoras anteriores a
+/** Borra las fotos (no el texto ni la fecha) de los posts de CeramiBlog y bitácoras anteriores a
  *  `before` — para liberar espacio después de exportarlas a un .zip. Borra también el archivo de
  *  Vercel Blob, no solo la referencia en la base. */
 export async function clearOldImagesAction(before: string): Promise<ActionResult & { cleared?: number }> {
@@ -312,26 +313,27 @@ export async function clearOldImagesAction(before: string): Promise<ActionResult
 
   const [oldBlogs, oldPosts] = await Promise.all([
     prisma.blogPost.findMany({
-      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
-      select: { id: true, imageData: true },
+      where: { imageUrls: { isEmpty: false }, createdAt: { lt: beforeDate } },
+      select: { id: true, imageUrls: true },
     }),
     prisma.studentPost.findMany({
-      where: { imageData: { not: null }, createdAt: { lt: beforeDate } },
-      select: { id: true, imageData: true },
+      where: { imageUrls: { isEmpty: false }, createdAt: { lt: beforeDate } },
+      select: { id: true, imageUrls: true },
     }),
   ]);
 
-  await Promise.all([...oldBlogs, ...oldPosts].map((p) => deleteBlobImage(p.imageData)));
+  const oldUrls = [...oldBlogs, ...oldPosts].flatMap((p) => p.imageUrls);
+  await Promise.all(oldUrls.map(deleteBlobImage));
 
-  const [blogResult, postResult] = await Promise.all([
+  await Promise.all([
     prisma.blogPost.updateMany({
       where: { id: { in: oldBlogs.map((p) => p.id) } },
-      data: { imageData: null },
+      data: { imageUrls: [] },
     }),
     prisma.studentPost.updateMany({
       where: { id: { in: oldPosts.map((p) => p.id) } },
-      data: { imageData: null },
+      data: { imageUrls: [] },
     }),
   ]);
-  return { ok: true, cleared: blogResult.count + postResult.count };
+  return { ok: true, cleared: oldUrls.length };
 }

@@ -109,7 +109,7 @@ export type StudentPanelData = {
     id: string;
     title: string | null;
     body: string;
-    imageData: string | null;
+    images: string[];
     date: string;
     authorName: string | null;
     featured: boolean;
@@ -122,7 +122,7 @@ export type StudentPanelData = {
     id: string;
     title: string | null;
     body: string;
-    imageData: string | null;
+    images: string[];
     date: string;
     isPublic: boolean;
     likedByMe: boolean;
@@ -134,7 +134,7 @@ export type StudentPanelData = {
     studentName: string;
     title: string | null;
     body: string;
-    imageData: string | null;
+    images: string[];
     date: string;
     likedByMe: boolean;
     likeCount: number | null;
@@ -310,7 +310,7 @@ export async function buildStudentPanelData(
       id: p.id,
       title: p.title,
       body: p.body,
-      imageData: p.imageData,
+      images: p.imageUrls,
       date: isoDate(p.createdAt),
       authorName: p.authorUsername ? authorNameByUsername.get(p.authorUsername) || null : null,
       featured: p.featured,
@@ -328,7 +328,7 @@ export async function buildStudentPanelData(
         id: p.id,
         title: p.title,
         body: p.body,
-        imageData: p.imageData,
+        images: p.imageUrls,
         date: isoDate(p.createdAt),
         isPublic: p.isPublic,
         likedByMe: interaction.likedByMe,
@@ -345,7 +345,7 @@ export async function buildStudentPanelData(
         studentName: snap.students.find((s) => s.id === p.studentId)?.name || "?",
         title: p.title,
         body: p.body,
-        imageData: p.imageData,
+        images: p.imageUrls,
         date: isoDate(p.createdAt),
         likedByMe: interaction.likedByMe,
         likeCount: visibleLikeCount(interaction, false, false),

@@ -35,7 +35,7 @@ import {
 } from "@/lib/actions/auth";
 import { markSeenAction } from "@/lib/actions/notifications";
 import type { CalendarDay, StudentPanelData } from "@/lib/views/student";
-import { ZoomableImage } from "@/components/shared/ZoomableImage";
+import { PostCarousel } from "@/components/shared/PostCarousel";
 
 const ALL_TABS = ["calendario", "chat", "blog", "bitacora", "info", "cuenta"] as const;
 type Tab = (typeof ALL_TABS)[number];
@@ -554,7 +554,7 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
                   </div>
                 )}
                 {p.title && <h3>{p.title}</h3>}
-                {p.imageData && <ZoomableImage src={p.imageData} className="blog-post-image" />}
+                <PostCarousel images={p.images} />
                 {p.body && (
                   <p className="blog-post-body">
                     <Linkify text={p.body} />

@@ -298,7 +298,8 @@ model BlogPost {
   id                  String   @id @default(cuid())
   title               String?
   body                String
-  imageData           String?
+  // Hasta 3 fotos (links de Vercel Blob), en el orden en que se muestran en el carrusel.
+  imageUrls           String[]
   authorUsername      String?
   featured            Boolean  @default(false)
   studentAuthorName   String?
@@ -315,7 +316,8 @@ model StudentPost {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   title     String?
   body      String
-  imageData String?
+  // Hasta 3 fotos (links de Vercel Blob), en el orden en que se muestran en el carrusel.
+  imageUrls String[]
   isPublic  Boolean  @default(false)
   createdAt DateTime @default(now())
 

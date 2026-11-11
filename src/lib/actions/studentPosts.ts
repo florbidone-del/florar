@@ -4,31 +4,32 @@ import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
 import { requireProfe } from "@/lib/authz";
-import { uploadImageDataUrl, duplicateBlobImage, deleteBlobImage } from "@/lib/blobStorage";
+import { uploadPostImages, duplicateBlobImage, deleteBlobImage } from "@/lib/blobStorage";
+import { MAX_POST_IMAGES } from "@/lib/postImages";
 import { deleteInteractionsFor } from "@/lib/postInteractionsData";
 import { notifyNewBlogPost } from "@/lib/push";
 import type { ActionResult } from "@/lib/actions/auth";
 
 /** Publica en la bitácora personal del alumno logueado — arranca privada (solo la ve él/ella y
- *  las profes). La foto se sube a Vercel Blob y en la base solo queda el link. */
+ *  las profes). Las fotos (hasta 3) se suben a Vercel Blob y en la base solo quedan los links. */
 export async function addStudentPostAction(input: {
   title?: string;
   body: string;
-  imageData?: string | null;
+  images?: string[];
 }): Promise<ActionResult> {
   const session = await requireStudent();
   if (!session) return { error: "Tenés que iniciar sesión de nuevo." };
   const body = input.body.trim();
-  if (!body && !input.imageData) return { error: "Escribí algo o subí una foto." };
+  const images = input.images ?? [];
+  if (!body && images.length === 0) return { error: "Escribí algo o subí una foto." };
+  if (images.length > MAX_POST_IMAGES) return { error: `Podés subir hasta ${MAX_POST_IMAGES} fotos.` };
 
-  let imageUrl: string | null = null;
-  if (input.imageData) {
-    try {
-      imageUrl = await uploadImageDataUrl(input.imageData, "bitacoras");
-    } catch (err) {
-      console.error("[addStudentPostAction] Falló la subida a Blob:", err);
-      return { error: "No se pudo subir la foto. Probá de nuevo." };
-    }
+  let imageUrls: string[];
+  try {
+    imageUrls = await uploadPostImages(images, "bitacoras");
+  } catch (err) {
+    console.error("[addStudentPostAction] Falló la subida a Blob:", err);
+    return { error: "No se pudieron subir las fotos. Probá de nuevo." };
   }
 
   await prisma.studentPost.create({
@@ -36,7 +37,7 @@ export async function addStudentPostAction(input: {
       studentId: session.studentId,
       title: input.title?.trim() || null,
       body,
-      imageData: imageUrl,
+      imageUrls,
     },
   });
   return { ok: true };
@@ -49,8 +50,8 @@ export async function removeStudentPostAction(id: string): Promise<ActionResult>
   if (!student && !profe) return { error: "No autorizado." };
 
   const where = student ? { id, studentId: student.studentId } : { id };
-  const post = await prisma.studentPost.findFirst({ where, select: { imageData: true } });
-  await deleteBlobImage(post?.imageData);
+  const post = await prisma.studentPost.findFirst({ where, select: { imageUrls: true } });
+  await Promise.all((post?.imageUrls ?? []).map(deleteBlobImage));
   await deleteInteractionsFor("studentpost", id);
   await prisma.studentPost.deleteMany({ where });
   return { ok: true };
@@ -79,24 +80,21 @@ export async function featureStudentPostAction(id: string): Promise<ActionResult
   const already = await prisma.blogPost.findFirst({ where: { sourceStudentPostId: id } });
   if (already) return { error: "Ya está destacada en el CeramiBlog." };
 
-  // Se copia el archivo (no se reusa el mismo link) para que después se pueda borrar la foto de
-  // uno de los dos posts (ej: al limpiar fotos viejas) sin dejar al otro con una imagen rota.
-  let imageUrl: string | null = null;
-  if (post.imageData) {
-    try {
-      imageUrl = post.imageData.startsWith("http")
-        ? await duplicateBlobImage(post.imageData, "ceramiblog")
-        : post.imageData;
-    } catch {
-      imageUrl = null;
-    }
-  }
+  // Se copian los archivos (no se reusan los mismos links) para que después se puedan borrar las
+  // fotos de uno de los dos posts (ej: al limpiar fotos viejas) sin dejar al otro con imágenes
+  // rotas. Si alguna copia falla, el destacado sale sin esa foto en vez de no salir.
+  const copies = await Promise.all(
+    post.imageUrls.map((url) =>
+      url.startsWith("http") ? duplicateBlobImage(url, "ceramiblog").catch(() => null) : url
+    )
+  );
+  const imageUrls = copies.filter((url): url is string => !!url);
 
   await prisma.blogPost.create({
     data: {
       title: post.title,
       body: post.body,
-      imageData: imageUrl,
+      imageUrls,
       authorUsername: session.username,
       featured: true,
       studentAuthorName: post.student.name,

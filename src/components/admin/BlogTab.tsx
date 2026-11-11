@@ -21,19 +21,19 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [imageData, setImageData] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   async function publish() {
     setError("");
-    if (!body.trim() && !imageData) {
+    if (!body.trim() && images.length === 0) {
       setError("Escribí algo o subí una foto.");
       return;
     }
     setPending(true);
-    const res = await addBlogPostAction({ title, body, imageData });
+    const res = await addBlogPostAction({ title, body, images });
     setPending(false);
     if ("error" in res) {
       setError(res.error!);
@@ -41,7 +41,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
     }
     setTitle("");
     setBody("");
-    setImageData(null);
+    setImages([]);
     setShowForm(false);
     router.refresh();
   }
@@ -68,7 +68,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
                   {p.authorName ? `${p.authorName} compartió: ` : ""}
                   {fmtLong(p.createdAt)}
                 </span>
-                {!p.imageData && (
+                {p.images.length === 0 && (
                   <button
                     type="button"
                     className="ghost blog-post-delete-inline post-menu-toggle"
@@ -86,7 +86,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
                 </div>
               )}
               {p.title && <h4>{p.title}</h4>}
-              {p.imageData && <PostImage src={p.imageData} onDelete={() => remove(p.id)} />}
+              <PostImage images={p.images} onDelete={() => remove(p.id)} />
               {p.body && (
                 <p className="blog-post-body">
                   <CollapsibleText text={p.body} render={(t) => <Linkify text={t} />} />
@@ -123,7 +123,7 @@ export function BlogTab({ posts }: { posts: BlogPostDTO[] }) {
               <EmojiPicker onPick={(e) => setBody((b) => b + e)} targetRef={bodyRef} />
             </div>
           </div>
-          <ImagePicker value={imageData} onChange={setImageData} />
+          <ImagePicker value={images} onChange={setImages} />
           {error && <p className="err">{error}</p>}
           <div className="row" style={{ marginTop: 16 }}>
             <button className="ghost block" onClick={() => setShowForm(false)}>

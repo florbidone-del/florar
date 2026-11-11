@@ -15,6 +15,18 @@ export async function uploadImageDataUrl(dataUrl: string, pathPrefix: string): P
   return blob.url;
 }
 
+/** Sube todas las fotos de un post y devuelve sus links en el mismo orden. Si alguna falla, borra
+ *  las que sí se habían subido (para no dejar archivos huérfanos en Blob) y relanza el error. */
+export async function uploadPostImages(dataUrls: string[], pathPrefix: string): Promise<string[]> {
+  const results = await Promise.allSettled(dataUrls.map((d) => uploadImageDataUrl(d, pathPrefix)));
+  const failed = results.find((r): r is PromiseRejectedResult => r.status === "rejected");
+  if (failed) {
+    await Promise.all(results.map((r) => (r.status === "fulfilled" ? deleteBlobImage(r.value) : null)));
+    throw failed.reason;
+  }
+  return results.map((r) => (r as PromiseFulfilledResult<string>).value);
+}
+
 /** Copia una foto ya subida a Vercel Blob bajo un archivo nuevo — se usa al "destacar" una
  *  publicación de la bitácora en el CeramiBlog, para que cada post tenga su propio archivo y
  *  borrar uno (ej: al limpiar fotos viejas) no rompa la imagen del otro. */

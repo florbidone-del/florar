@@ -668,13 +668,52 @@ td.holiday{background:var(--oxide-soft);}
 }
 .blog-post-delete:active{transform:scale(0.94);}
 .blog-post-delete-inline{flex-shrink:0;}
-.image-picker-preview{
-  display:block;
-  max-width:220px;
-  max-height:220px;
-  border-radius:var(--radius);
-  border:1.5px solid var(--line);
+.image-picker-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+.image-picker-item{position:relative; width:92px; height:92px;}
+.image-picker-item img{
+  display:block; width:100%; height:100%; object-fit:cover;
+  border-radius:var(--radius); border:1.5px solid var(--line);
 }
+.image-picker-remove{
+  position:absolute; top:4px; right:4px; width:24px; height:24px; padding:0;
+  border-radius:50%; border:none; background:rgba(20,12,30,0.6); color:#fff;
+  font-size:0.7rem; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+/* ---- Carrusel de fotos de un post (hasta 3) ---- */
+.post-carousel{margin-top:10px;}
+.post-carousel-track{
+  display:flex; overflow-x:auto; overflow-y:hidden;
+  scroll-snap-type:x mandatory; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  border-radius:var(--radius); border:1.5px solid var(--line);
+}
+.post-carousel-track::-webkit-scrollbar{display:none;}
+.post-carousel-slide{
+  flex:0 0 100%; width:100%; min-width:0;
+  aspect-ratio:1 / 1; max-height:420px; object-fit:cover;
+  scroll-snap-align:center; scroll-snap-stop:always;
+}
+.post-carousel-count{
+  position:absolute; top:8px; left:8px; padding:2px 8px; border-radius:999px;
+  background:rgba(20,12,30,0.55); color:#fff; font-size:0.72rem; pointer-events:none;
+}
+.post-carousel-dots{display:flex; justify-content:center; gap:6px; margin-top:8px;}
+.post-carousel-dot{
+  width:7px; height:7px; padding:0; border:none; border-radius:50%;
+  background:var(--ink-soft); opacity:.35; transition:opacity .15s, transform .15s;
+}
+.post-carousel-dot.active{background:var(--ink); opacity:1; transform:scale(1.25);}
+.post-carousel-arrow{
+  position:absolute; top:calc(50% - 26px); width:32px; height:32px; padding:0;
+  border-radius:50%; border:none; background:rgba(20,12,30,0.55); color:#fff;
+  font-size:1.2rem; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+.post-carousel-arrow.prev{left:8px;}
+.post-carousel-arrow.next{right:8px;}
+/* En el celu se desliza con el dedo: las flechas solo estorbarían encima de la foto. */
+@media (hover:none){.post-carousel-arrow{display:none;}}
+.post-carousel .blog-post-delete,
+.post-carousel .post-menu-overlay{top:8px;}
 .chat-card{display:flex; flex-direction:column;}
 .chat-messages{
   display:flex;
