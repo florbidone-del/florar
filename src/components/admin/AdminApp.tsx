@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { logoutAction, dismissAdminTutorialAction } from "@/lib/actions/auth";
 import { markSeenAction } from "@/lib/actions/notifications";
@@ -14,7 +14,6 @@ import { HolidaysTab } from "@/components/admin/HolidaysTab";
 import { ActivitiesTab } from "@/components/admin/ActivitiesTab";
 import { AnnouncementsTab } from "@/components/admin/AnnouncementsTab";
 import { BlogTab } from "@/components/admin/BlogTab";
-import { InfoTallerTab } from "@/components/admin/InfoTallerTab";
 import { StudentPostsTab } from "@/components/admin/StudentPostsTab";
 import { ChatTab } from "@/components/admin/ChatTab";
 import { ConfigTab } from "@/components/admin/ConfigTab";
@@ -104,7 +103,8 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "actividades",
       body: (
         <p className="muted">
-          Marcá actividades especiales en el calendario de todos los estudiantes, con fechas y material.
+          Desde la florcita de arriba (al lado del chat) entrás a Actividades, CeramiBlog y Bitácoras.
+          Acá marcás actividades especiales en el calendario de todos los estudiantes, con fechas y material.
         </p>
       ),
     },
@@ -129,15 +129,6 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       ),
     },
     {
-      title: "Info del Taller",
-      focus: "info",
-      body: (
-        <p className="muted">
-          El texto fijo que ven los/las estudiantes arriba de todo — reglas, links, medios de pago.
-        </p>
-      ),
-    },
-    {
       title: "Chat",
       focus: "chat",
       body: isMainProfe ? (
@@ -154,12 +145,12 @@ function profeTourSteps(isMainProfe: boolean): TourStep[] {
       focus: "config",
       body: isMainProfe ? (
         <p className="muted">
-          Turnos y, como sos la profe principal, también podés asignar qué profe da cada turno y ajustar
-          las reglas y la cuota del taller.
+          La Info del Taller (el texto fijo que ven los/las estudiantes), los turnos y, como sos la profe
+          principal, también podés asignar qué profe da cada turno y ajustar las reglas y la cuota del taller.
         </p>
       ) : (
         <p className="muted">
-          Acá ves los turnos. La asignación de profes por turno y las reglas/cuota las maneja la profe
+          Acá ves la Info del Taller y los turnos. La asignación de profes por turno y las reglas/cuota las maneja la profe
           principal.
         </p>
       ),
@@ -176,7 +167,6 @@ const TAB_LABELS: Record<string, string> = {
   avisos: "Avisos",
   blog: "CeramiBlog",
   bitacoras: "Bitácoras",
-  info: "Info del Taller",
   config: "Configuración",
   profes: "Profes",
 };
@@ -188,8 +178,8 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
   const tabs = isOwner
     ? ["profes"]
     : isMainProfe
-      ? ["semana", "alumnos", "comprobantes", "avisos", "actividades", "blog", "bitacoras", "info"]
-      : ["semana", "alumnos", "avisos", "actividades", "blog", "bitacoras", "info"];
+      ? ["semana", "alumnos", "comprobantes", "avisos"]
+      : ["semana", "alumnos", "avisos"];
   const pendingReceipts = bundle.receipts.filter((r) => r.status === "pending").length;
   const [tab, setTab] = useState(tabs[0]);
   const tutorialSeen = bundle.admins.find((a) => a.username === session.username)?.tutorialSeen ?? false;
@@ -279,6 +269,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
                 <ChatIcon />
                 {unread.chat && <span className="unread-dot" />}
               </button>
+              <CommunityMenu current={tab} blogUnread={unread.blog} onOpen={openTab} />
               <button
                 type="button"
                 className={`icon-button solid ${tab === "config" ? "active" : ""}`}
@@ -347,9 +338,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         )}
         {!isOwner && tab === "blog" && <BlogTab posts={bundle.blogPosts} />}
         {!isOwner && tab === "bitacoras" && <StudentPostsTab posts={bundle.studentPosts} />}
-        {!isOwner && tab === "info" && (
-          <InfoTallerTab studentInfo={bundle.snapshot.config.studentInfo} isMainProfe={isMainProfe} />
-        )}
         {!isOwner && tab === "config" && (
           <ConfigTab bundle={bundle} isMainProfe={isMainProfe} myUsername={session.username} />
         )}
@@ -365,5 +353,73 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         />
       )}
     </>
+  );
+}
+
+/** Secciones de "comunidad" que no entran como pestañas: se abren desde la florcita del header. */
+const COMMUNITY_TABS = [
+  { id: "bitacoras", label: "Bitácoras" },
+  { id: "blog", label: "CeramiBlog" },
+  { id: "actividades", label: "Actividades" },
+];
+
+function CommunityMenu({
+  current,
+  blogUnread,
+  onOpen,
+}: {
+  current: string;
+  blogUnread: boolean;
+  onOpen: (tab: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active = COMMUNITY_TABS.some((t) => t.id === current);
+
+  useEffect(() => {
+    if (!open) return;
+    function onClickOutside(e: MouseEvent | TouchEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("touchstart", onClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("touchstart", onClickOutside);
+    };
+  }, [open]);
+
+  return (
+    <div className="post-menu" ref={ref}>
+      <button
+        type="button"
+        className={`icon-button flower-button ${active ? "active" : ""} ${blogUnread ? "has-unread" : ""}`}
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Bitácoras, CeramiBlog y Actividades"
+        aria-expanded={open}
+        title="Bitácoras, CeramiBlog y Actividades"
+      >
+        <img src="/florar-mark.png" alt="" />
+        {blogUnread && <span className="unread-dot" />}
+      </button>
+      {open && (
+        <div className="post-menu-panel community-menu-panel">
+          {COMMUNITY_TABS.map((t) => (
+            <button
+              type="button"
+              key={t.id}
+              className={`post-menu-item ${t.id === current ? "selected" : ""}`}
+              onClick={() => {
+                setOpen(false);
+                onOpen(t.id);
+              }}
+            >
+              {t.label}
+              {t.id === "blog" && blogUnread && <span className="menu-unread-dot" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

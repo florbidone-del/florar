@@ -7,6 +7,7 @@ import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { NotificationsToggle } from "@/components/shared/NotificationsToggle";
+import { InfoTallerTab } from "@/components/admin/InfoTallerTab";
 import {
   saveConfigAction,
   addSlotAction,
@@ -162,6 +163,13 @@ export function ConfigTab({
 
   return (
     <>
+      <Collapsible title="Info del Taller">
+        <p className="muted" style={{ marginTop: 0 }}>
+          El texto fijo que ven los/las estudiantes arriba de todo — reglas, links, medios de pago.
+        </p>
+        <InfoTallerTab studentInfo={c.studentInfo} isMainProfe={isMainProfe} />
+      </Collapsible>
+
       <Collapsible title="Notificaciones">
         <NotificationsToggle />
       </Collapsible>
