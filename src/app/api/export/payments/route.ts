@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
 import { requireMainProfe } from "@/lib/authz";
-import { isoDate, currentMonthKey } from "@/lib/domain";
+import { isoDate, currentMonthKey, paidWithinWindow } from "@/lib/domain";
 import { loadConfig } from "@/lib/snapshot";
 
 const STATUS_ES: Record<string, string> = {
@@ -59,7 +59,7 @@ export async function GET() {
   const rows: Row[] = payments.map((p) => {
     const baseFee = p.source === "manual" ? config.cashFee : config.mpFee;
     const paidOn = isoDate(p.paidAt ?? p.updatedAt);
-    const paidOnTime = paidOn.slice(0, 7) === mk && Number(paidOn.slice(8, 10)) <= config.paymentWindowEnd;
+    const paidOnTime = paidWithinWindow(paidOn, p.monthKey, config.paymentWindowEnd);
     const dueFee = paidOnTime && p.amount >= baseFee ? baseFee : isLate ? lateFee : baseFee;
     const isCurrentPartial = p.status === "approved" && p.monthKey === mk && p.amount < dueFee;
     return {

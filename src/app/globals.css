@@ -940,6 +940,7 @@ td.holiday{background:var(--oxide-soft);}
 .receipt-thumb.pdf{background:var(--oxide-soft); color:var(--oxide); font-weight:700; font-size:0.85rem; text-decoration:none;}
 .receipt-body{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;}
 .receipt-top{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+.link-btn{background:none; border:none; padding:0; margin:0; color:var(--ink-soft); font:inherit; cursor:pointer; text-decoration:underline dotted; text-underline-offset:2px;}
 .receipt-when{font-size:0.75rem; white-space:nowrap;}
 .receipt-amount{font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;}
 .receipt-amount .tag{margin-top:0; font-weight:400;}

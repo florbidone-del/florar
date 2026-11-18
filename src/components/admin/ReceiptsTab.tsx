@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { money, MESES } from "@/lib/domain";
+import { isoDate, money, MESES, todayISO } from "@/lib/domain";
 import type { ReceiptDTO } from "@/lib/views/admin";
-import { approvePaymentReceiptAction, rejectPaymentReceiptAction } from "@/lib/actions/receipts";
+import {
+  approvePaymentReceiptAction,
+  rejectPaymentReceiptAction,
+  updateReceiptDateAction,
+} from "@/lib/actions/receipts";
 import { Modal } from "@/components/shared/Modal";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { ReceiptViewer } from "@/components/shared/ReceiptViewer";
@@ -32,6 +36,12 @@ function when(iso: string) {
   );
   if (dayDiff === 0) return `hoy ${hhmm}`;
   if (dayDiff === 1) return `ayer ${hhmm}`;
+  return `${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+
+/** "3 de octubre" — el día en que se considera hecho el pago. */
+function dayLabel(iso: string) {
+  const d = new Date(iso);
   return `${d.getDate()} de ${MESES[d.getMonth()]}`;
 }
 
@@ -64,10 +74,12 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
   const [viewing, setViewing] = useState<ReceiptDTO | null>(null);
   const [approving, setApproving] = useState<ReceiptDTO | null>(null);
   const [rejecting, setRejecting] = useState<ReceiptDTO | null>(null);
+  const [editingDate, setEditingDate] = useState<ReceiptDTO | null>(null);
 
   function done() {
     setApproving(null);
     setRejecting(null);
+    setEditingDate(null);
     setViewing(null);
     router.refresh();
   }
@@ -99,6 +111,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
             onView={() => setViewing(r)}
             onApprove={() => setApproving(r)}
             onReject={() => setRejecting(r)}
+            onEditDate={() => setEditingDate(r)}
           />
         ))}
       </div>
@@ -140,10 +153,20 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
                   {r.status === "approved" ? "aprobado" : "rechazado"}
                 </span>
                 {r.rejectReason && <div className="muted receipt-reason">“{r.rejectReason}”</div>}
+                <div className="muted" style={{ fontSize: "0.8rem" }}>
+                  pagado el {dayLabel(r.createdAt)}
+                </div>
               </div>
-              <button className="ghost small" onClick={() => setViewing(r)}>
-                Ver
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <button className="ghost small" onClick={() => setViewing(r)}>
+                  Ver
+                </button>
+                {r.status === "approved" && (
+                  <button className="ghost small" onClick={() => setEditingDate(r)}>
+                    Fecha
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </Collapsible>
@@ -154,7 +177,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
           receiptId={viewing.id}
           isPdf={viewing.isPdf}
           title={viewing.studentName}
-          subtitle={`${money(viewing.amount)}${viewing.isExtraClass ? " · clase extra" : ""} · subido ${when(viewing.createdAt)}`}
+          subtitle={`${money(viewing.amount)}${viewing.isExtraClass ? " · clase extra" : ""} · pagado el ${dayLabel(viewing.createdAt)}`}
           onClose={() => setViewing(null)}
         >
           {viewing.status === "pending" ? (
@@ -175,6 +198,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
       )}
       {approving && <ApproveModal receipt={approving} onClose={() => setApproving(null)} onDone={done} />}
       {rejecting && <RejectModal receipt={rejecting} onClose={() => setRejecting(null)} onDone={done} />}
+      {editingDate && <DateModal receipt={editingDate} onClose={() => setEditingDate(null)} onDone={done} />}
     </>
   );
 }
@@ -184,11 +208,13 @@ function ReceiptCard({
   onView,
   onApprove,
   onReject,
+  onEditDate,
 }: {
   receipt: ReceiptDTO;
   onView: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onEditDate: () => void;
 }) {
   const remaining = r.feeDue !== null && r.alreadyPaid !== null ? Math.max(0, r.feeDue - r.alreadyPaid) : null;
   const covers = remaining === null || r.amount >= remaining;
@@ -207,7 +233,9 @@ function ReceiptCard({
       <div className="receipt-body">
         <div className="receipt-top">
           <strong>{r.studentName}</strong>
-          <span className="muted receipt-when">{when(r.createdAt)}</span>
+          <button type="button" className="link-btn muted receipt-when" onClick={onEditDate} title="Cambiar la fecha de pago">
+            {when(r.createdAt)} ✎
+          </button>
         </div>
         <div className="muted">
           {r.isExtraClass && <span className="tag moved receipt-kind">clase extra</span>}
@@ -333,6 +361,52 @@ function RejectModal({
         </button>
         <button className="danger block" disabled={pending || !reason.trim()} onClick={confirm}>
           {pending ? "Guardando…" : "Rechazar"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+/** Corrige la fecha de pago de un comprobante (por si lo mandaron tarde pero transfirieron a
+ *  tiempo): con eso se decide si corresponde el recargo. */
+function DateModal({
+  receipt,
+  onClose,
+  onDone,
+}: {
+  receipt: ReceiptDTO;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [date, setDate] = useState(isoDate(new Date(receipt.createdAt)));
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+
+  async function confirm() {
+    setPending(true);
+    const res = await updateReceiptDateAction(receipt.id, date);
+    setPending(false);
+    if ("error" in res && res.error) return setError(res.error);
+    onDone();
+  }
+
+  return (
+    <Modal onClose={onClose}>
+      <h3>Fecha de pago — {receipt.studentName}</h3>
+      <label htmlFor="receipt-date">¿Qué día hizo la transferencia?</label>
+      <input id="receipt-date" type="date" max={todayISO()} value={date} onChange={(e) => setDate(e.target.value)} />
+      <p className="hint">
+        Si te mandó el comprobante tarde pero pagó dentro de la ventana, poné acá la fecha real del
+        comprobante: con esa fecha se decide si corresponde el recargo
+        {receipt.status === "approved" && !receipt.isExtraClass ? " (también se corrige en el pago ya registrado del mes)" : ""}.
+      </p>
+      {error && <p className="err">{error}</p>}
+      <div className="row" style={{ marginTop: 16 }}>
+        <button className="ghost block" onClick={onClose}>
+          Cancelar
+        </button>
+        <button className="primary block" disabled={pending || !date} onClick={confirm}>
+          {pending ? "Guardando…" : "Guardar"}
         </button>
       </div>
     </Modal>
