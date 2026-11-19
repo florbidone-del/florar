@@ -259,6 +259,7 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           {!isOwner && (
             <>
+              <CommunityMenu current={tab} blogUnread={unread.blog} onOpen={openTab} />
               <button
                 type="button"
                 className={`icon-button solid ${tab === "chat" ? "active" : ""} ${unread.chat ? "has-unread" : ""}`}
@@ -269,7 +270,6 @@ export function AdminApp({ bundle, session }: { bundle: AdminBundle; session: Ad
                 <ChatIcon />
                 {unread.chat && <span className="unread-dot" />}
               </button>
-              <CommunityMenu current={tab} blogUnread={unread.blog} onOpen={openTab} />
               <button
                 type="button"
                 className={`icon-button solid ${tab === "config" ? "active" : ""}`}
