@@ -4,7 +4,7 @@ import { after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireStudent } from "@/lib/session";
 import { requireMainProfe } from "@/lib/authz";
-import { currentMonthKey, isUnpaid, money } from "@/lib/domain";
+import { currentMonthKey, isUnpaid, money, parseISO, todayISO } from "@/lib/domain";
 import { loadWorkshopSnapshot } from "@/lib/snapshot";
 import { notifyReceiptReviewed, notifyReceiptSubmitted } from "@/lib/push";
 import type { ActionResult } from "@/lib/actions/auth";
@@ -207,6 +207,47 @@ export async function rejectPaymentReceiptAction(id: string, reason: string): Pr
         isExtraClass: !!receipt.extraClassPurchaseId,
       })
     );
+  }
+  return { ok: true };
+}
+
+/** La profe principal corrige la fecha de pago de un comprobante: a veces lo mandan tarde pero la
+ *  transferencia se hizo dentro de la ventana, y así no se le cobra el recargo (ni queda un saldo de
+ *  más). Sirve tanto para los pendientes (al aprobarlo se usa la fecha nueva) como para los ya
+ *  aprobados de la cuota: ahí también se actualiza la fecha del pago registrado del mes. */
+export async function updateReceiptDateAction(id: string, dateISO: string): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateISO) || Number.isNaN(parseISO(dateISO).getTime())) {
+    return { error: "Fecha inválida." };
+  }
+  if (dateISO > todayISO()) return { error: "La fecha no puede ser futura." };
+
+  const receipt = await prisma.paymentReceipt.findUnique({
+    where: { id },
+    select: { id: true, studentId: true, monthKey: true, createdAt: true, status: true, extraClassPurchaseId: true },
+  });
+  if (!receipt) return { error: "No se encontró el comprobante." };
+
+  // Se conserva la hora original; solo cambia el día.
+  const newDate = parseISO(dateISO);
+  newDate.setHours(receipt.createdAt.getHours(), receipt.createdAt.getMinutes(), receipt.createdAt.getSeconds());
+  await prisma.paymentReceipt.update({ where: { id }, data: { createdAt: newDate } });
+
+  if (receipt.status === "approved" && !receipt.extraClassPurchaseId) {
+    const { studentId, monthKey } = receipt;
+    const payment = await prisma.payment.findUnique({ where: { studentId_monthKey: { studentId, monthKey } } });
+    if (payment?.status === "approved" && payment.source === "transferencia") {
+      // El pago del mes se da por hecho cuando entró la última parte aprobada.
+      const latest = await prisma.paymentReceipt.findFirst({
+        where: { studentId, monthKey, status: "approved", extraClassPurchaseId: null },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      });
+      if (latest) {
+        await prisma.payment.update({ where: { id: payment.id }, data: { paidAt: latest.createdAt } });
+      }
+    }
   }
   return { ok: true };
 }

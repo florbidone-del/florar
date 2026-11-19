@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DIAS_CORTO, capitalize, sortSlots } from "@/lib/domain";
+import { DIAS_CORTO, capitalize, money, sortSlots } from "@/lib/domain";
 import type { AdminBundle } from "@/lib/views/admin";
 import { Collapsible } from "@/components/shared/Collapsible";
 import { EmojiPicker } from "@/components/shared/EmojiPicker";
 import { NotificationsToggle } from "@/components/shared/NotificationsToggle";
+import { InfoTallerTab } from "@/components/admin/InfoTallerTab";
 import {
   saveConfigAction,
   addSlotAction,
@@ -162,6 +163,13 @@ export function ConfigTab({
 
   return (
     <>
+      <Collapsible title="Info del Taller">
+        <p className="muted" style={{ marginTop: 0 }}>
+          El texto fijo que ven los/las estudiantes arriba de todo — reglas, links, medios de pago.
+        </p>
+        <InfoTallerTab studentInfo={c.studentInfo} isMainProfe={isMainProfe} />
+      </Collapsible>
+
       <Collapsible title="Notificaciones">
         <NotificationsToggle />
       </Collapsible>
@@ -324,6 +332,20 @@ export function ConfigTab({
       )}
 
       {isMainProfe && (
+        <Collapsible title="Mensaje de pago para WhatsApp">
+          <PaymentMessageShare
+            paymentWindowStart={c.paymentWindowStart}
+            paymentWindowEnd={c.paymentWindowEnd}
+            lateFeePercent={c.lateFeePercent}
+            transferAlias={c.transferAlias}
+            mpEnabled={c.mpEnabled}
+            mpFee={c.mpFee}
+            cashFee={c.cashFee}
+          />
+        </Collapsible>
+      )}
+
+      {isMainProfe && (
         <Collapsible title="Herramientas">
           <a href="/api/export/payments">
             <button className="ghost block">Exportar pagos (Excel)</button>
@@ -382,6 +404,77 @@ export function ConfigTab({
           {clearResult && <p className="hint">{clearResult}</p>}
         </Collapsible>
       )}
+    </>
+  );
+}
+
+/** Arma el mensaje con las condiciones de pago a partir de la configuración guardada, para mandarlo
+ *  al grupo o a un/a estudiante por WhatsApp. Se puede retocar antes de compartir. */
+function paymentMessage(p: {
+  paymentWindowStart: number;
+  paymentWindowEnd: number;
+  lateFeePercent: number;
+  transferAlias: string | null;
+  mpEnabled: boolean;
+  mpFee: number;
+  cashFee: number;
+}) {
+  const alias = p.transferAlias ? ` (alias: ${p.transferAlias})` : "";
+  const medios = p.mpEnabled
+    ? `transferencia bancaria${alias}, Mercado Pago y en efectivo con descuento`
+    : `transferencia bancaria${alias} y en efectivo con descuento`;
+  return [
+    `• El pago del abono se hace del ${p.paymentWindowStart} al ${p.paymentWindowEnd} de cada mes, es la única forma de conservar la vacante. Pasado ese plazo, se cobra un recargo del ${p.lateFeePercent}%.`,
+    `Los medios de pago son ${medios}.`,
+    `${money(p.mpFee)} transferencia`,
+    `${money(p.cashFee)} efectivo`,
+  ].join("\n");
+}
+
+function PaymentMessageShare(props: Parameters<typeof paymentMessage>[0]) {
+  const generated = paymentMessage(props);
+  const [text, setText] = useState(generated);
+  const [copied, setCopied] = useState(false);
+  // Si cambia la configuración guardada (montos, días, alias), se vuelve a armar el mensaje.
+  useEffect(() => setText(generated), [generated]);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* sin permiso de portapapeles: queda el botón de WhatsApp */
+    }
+  }
+
+  return (
+    <>
+      <p className="muted">
+        Se arma solo con los días, el recargo, el alias y las cuotas que tengas guardados en “Reglas y
+        cuota”. Podés retocarlo antes de mandarlo.
+      </p>
+      <textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} style={{ marginTop: 10 }} />
+      <a
+        href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ display: "block", marginTop: 10 }}
+      >
+        <button className="primary block" type="button">
+          Compartir por WhatsApp
+        </button>
+      </a>
+      <div className="row" style={{ marginTop: 8 }}>
+        <button className="ghost block" type="button" onClick={copy}>
+          {copied ? "¡Copiado!" : "Copiar texto"}
+        </button>
+        {text !== generated && (
+          <button className="ghost block" type="button" onClick={() => setText(generated)}>
+            Volver al original
+          </button>
+        )}
+      </div>
     </>
   );
 }
