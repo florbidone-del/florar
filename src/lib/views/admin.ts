@@ -6,7 +6,7 @@ import {
   capitalize,
   currentMonthKey,
   paidAmountThisMonth,
-  studentFee,
+  paidWithinWindow,
   DIAS,
   type WorkshopSnapshot,
 } from "@/lib/domain";
@@ -89,7 +89,8 @@ export type ReceiptDTO = {
   createdAt: string;
   reviewedAt: string | null;
   /** Solo para comprobantes del mes en curso: lo que corresponde pagar por transferencia (la cuota
-   *  de "otro medio", o el precio de la clase extra) y lo ya pagado antes de la cuota. */
+   *  de "otro medio" — con recargo si la fecha del comprobante quedó fuera de la ventana —, o el
+   *  precio de la clase extra) y lo ya pagado antes de la cuota. */
   feeDue: number | null;
   alreadyPaid: number | null;
 };
@@ -248,7 +249,9 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
           ? null
           : r.extraClassPurchaseId
             ? snapshot.config.extraClassFee
-            : studentFee(snapshot, "mp"),
+            : paidWithinWindow(isoDate(r.createdAt), r.monthKey, snapshot.config.paymentWindowEnd)
+              ? snapshot.config.mpFee
+              : Math.round(snapshot.config.mpFee * (1 + snapshot.config.lateFeePercent / 100)),
         alreadyPaid: !isCurrentMonth ? null : r.extraClassPurchaseId ? 0 : paidAmountThisMonth(snapshot, r.studentId),
       };
     }),

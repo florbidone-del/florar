@@ -518,6 +518,13 @@ export function swapsUsedThisMonth(snap: WorkshopSnapshot, studentId: string) {
 export function isPastPaymentWindow(snap: WorkshopSnapshot) {
   return new Date().getDate() > snap.config.paymentWindowEnd;
 }
+/** ¿Un pago hecho el día `paidOn` (YYYY-MM-DD) cuenta como en término para la cuota de `monthKey`?
+ *  Sí si fue hasta el último día de la ventana de ese mes (incluye pagos adelantados del mes
+ *  anterior). La fecha sale del comprobante, que la profe principal puede corregir si se lo
+ *  mandaron tarde pero la transferencia se hizo a tiempo. */
+export function paidWithinWindow(paidOn: string, monthKey: string, paymentWindowEnd: number) {
+  return paidOn <= `${monthKey}-${pad(paymentWindowEnd)}`;
+}
 /** "cash" es la cuota en efectivo (la que se usa para "debe"/"pagó" en general); "mp" es la de
  *  "otro medio" (transferencia o Mercado Pago) — suele ser más alta: pagar en efectivo tiene descuento.
  *  El descuento por efectivo vale solo dentro de la ventana de pago: pasada, todos pagan la cuota de
@@ -546,12 +553,7 @@ export function feeDueThisMonth(snap: WorkshopSnapshot, studentId: string) {
   );
   const method = payment && payment.source !== "manual" ? "mp" : "cash";
   const base = method === "mp" ? snap.config.mpFee : snap.config.cashFee;
-  if (
-    payment &&
-    payment.amount >= base &&
-    monthKeyOf(payment.paidOn) === mk &&
-    parseISO(payment.paidOn).getDate() <= snap.config.paymentWindowEnd
-  ) {
+  if (payment && payment.amount >= base && paidWithinWindow(payment.paidOn, mk, snap.config.paymentWindowEnd)) {
     return base;
   }
   return studentFee(snap, method);
