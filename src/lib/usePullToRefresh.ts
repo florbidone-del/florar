@@ -14,6 +14,7 @@ const MAX_VISUAL_PULL = 90;
 export function usePullToRefresh(onTrigger: () => void, disabled = false) {
   const [pullDistance, setPullDistance] = useState(0);
   const startY = useRef<number | null>(null);
+  const startX = useRef(0);
   const active = useRef(false);
   const startedInsideScrollable = useRef(false);
 
@@ -26,8 +27,10 @@ export function usePullToRefresh(onTrigger: () => void, disabled = false) {
       if (target.closest(".modal-backdrop, .lightbox")) return;
       // El chat (y cualquier otra lista con su propio scroll) tiene que poder scrollear para
       // arriba/abajo sin que el gesto de refrescar la página se lo pise en el medio.
-      startedInsideScrollable.current = !!target.closest(".chat-messages");
+      // Lo mismo con el carrusel de fotos: deslizarlo de costado no tiene que quedar trabado.
+      startedInsideScrollable.current = !!target.closest(".chat-messages, .post-carousel-track");
       startY.current = e.touches[0].clientY;
+      startX.current = e.touches[0].clientX;
       active.current = true;
     }
     function onTouchMove(e: TouchEvent) {
@@ -40,6 +43,12 @@ export function usePullToRefresh(onTrigger: () => void, disabled = false) {
       }
       const delta = e.touches[0].clientY - startY.current;
       if (delta <= 0) {
+        setPullDistance(0);
+        return;
+      }
+      // Un gesto más de costado que hacia abajo no es "actualizar": se suelta para que scrollee.
+      if (Math.abs(e.touches[0].clientX - startX.current) > delta) {
+        active.current = false;
         setPullDistance(0);
         return;
       }

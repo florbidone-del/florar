@@ -727,8 +727,6 @@ td.holiday{background:var(--oxide-soft);}
 }
 .post-carousel-arrow.prev{left:8px;}
 .post-carousel-arrow.next{right:8px;}
-/* En el celu se desliza con el dedo: las flechas solo estorbarían encima de la foto. */
-@media (hover:none){.post-carousel-arrow{display:none;}}
 .post-carousel .blog-post-delete,
 .post-carousel .post-menu-overlay{top:8px;}
 .chat-card{display:flex; flex-direction:column;}
@@ -1034,4 +1032,27 @@ td.holiday{background:var(--oxide-soft);}
   background:rgba(255,255,255,0.16); color:#fff; font-size:1.1rem; line-height:1;
 }
 @keyframes lightbox-in{from{opacity:0} to{opacity:1}}
+/* Visor con varias fotos (las de un post): se desliza de una en una, como el carrusel. */
+.lightbox-track{
+  display:flex; width:100vw; height:100vh; height:100dvh;
+  overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain; scrollbar-width:none;
+}
+.lightbox-track::-webkit-scrollbar{display:none;}
+.lightbox-slide{
+  flex:0 0 100vw; height:100%; display:flex; align-items:center; justify-content:center;
+  scroll-snap-align:center; scroll-snap-stop:always;
+}
+.lightbox-count{
+  position:fixed; top:calc(env(safe-area-inset-top) + 20px); left:16px; z-index:101;
+  padding:3px 10px; border-radius:999px; background:rgba(255,255,255,0.16); color:#fff;
+  font-size:0.8rem; pointer-events:none;
+}
+.lightbox-arrow{
+  position:fixed; top:calc(50% - 22px); z-index:101; width:44px; height:44px; padding:0;
+  border-radius:50%; border:none; background:rgba(255,255,255,0.16); color:#fff;
+  font-size:1.5rem; line-height:1; display:flex; align-items:center; justify-content:center;
+}
+.lightbox-arrow.prev{left:12px;}
+.lightbox-arrow.next{right:12px;}
 .receipts-month-summary{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 12px; margin-bottom:6px; border-radius:8px; background:var(--ok-bg); font-size:0.9rem;}
