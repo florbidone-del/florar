@@ -144,7 +144,9 @@ button.block{width:100%;}
   border:2px solid var(--surface-2);
 }
 .tab.has-unread{padding-right:15px;}
-.flower-button{padding:0; background:transparent; border:none;}
+/* display:flex (no inline-flex): dentro del div del menú, un botón "inline" deja espacio de línea
+   abajo y la florcita queda unos px más arriba que el chat y la configuración. */
+.flower-button{display:flex; padding:0; background:transparent; border:none;}
 .flower-button img{width:100%; height:100%; border-radius:50%; display:block;}
 .flower-button.active{background:transparent;}
 .community-menu-panel{width:180px;}
@@ -647,14 +649,22 @@ td.holiday{background:var(--oxide-soft);}
 .blog-post + .blog-post{margin-top:14px;}
 .blog-post h3, .blog-post h4{margin-top:6px;}
 .blog-post-image{
-  display:block;
-  width:100%;
-  max-height:420px;
-  object-fit:cover;
   border-radius:var(--radius);
   margin-top:10px;
   border:1.5px solid var(--line);
 }
+/* Foto de un post: entra entera (sin recortar) y el espacio que sobra lo llena la misma foto,
+   agrandada y desenfocada. El zoom solo la agranda. */
+.post-photo{position:relative; overflow:hidden; background:var(--surface-2);}
+.post-photo-backdrop{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  filter:blur(22px) saturate(1.1) brightness(0.92); transform:scale(1.2);
+  pointer-events:none;
+}
+.post-photo-img{
+  position:relative; display:block; width:100%; max-height:420px; object-fit:contain;
+}
+.post-carousel-slide .post-photo-img{height:100%; max-height:none;}
 .blog-post-body{font-size:0.85rem; line-height:1.35; margin-top:6px;}
 .blog-post-image-wrap{position:relative;}
 .blog-post-delete{
@@ -697,7 +707,7 @@ td.holiday{background:var(--oxide-soft);}
 .post-carousel-track::-webkit-scrollbar{display:none;}
 .post-carousel-slide{
   flex:0 0 100%; width:100%; min-width:0;
-  aspect-ratio:1 / 1; max-height:420px; object-fit:cover;
+  aspect-ratio:1 / 1; max-height:420px;
   scroll-snap-align:center; scroll-snap-stop:always;
 }
 .post-carousel-count{

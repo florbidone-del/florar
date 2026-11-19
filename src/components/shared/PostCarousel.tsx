@@ -8,6 +8,17 @@ import { ZoomableImage } from "@/components/shared/ZoomableImage";
  *  deslizado es scroll nativo con scroll-snap, así que el gesto de cambiar de pestaña lo ignora
  *  solo (useSwipeTabs no se activa adentro de algo con scroll horizontal). `overlay` es lo que va
  *  superpuesto en la esquina: el botón de borrar o el menú de acciones. */
+/** Una foto entera (sin recortar) y, detrás, la misma foto agrandada y desenfocada que rellena el
+ *  espacio sobrante, así no quedan franjas lisas a los costados (o arriba y abajo). */
+function PostPhoto({ src, className }: { src: string; className: string }) {
+  return (
+    <div className={`post-photo ${className}`}>
+      <img src={src} alt="" aria-hidden className="post-photo-backdrop" />
+      <ZoomableImage src={src} className="post-photo-img" />
+    </div>
+  );
+}
+
 export function PostCarousel({ images, overlay }: { images: string[]; overlay?: ReactNode }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -15,10 +26,10 @@ export function PostCarousel({ images, overlay }: { images: string[]; overlay?: 
   if (images.length === 0) return null;
 
   if (images.length === 1) {
-    if (!overlay) return <ZoomableImage src={images[0]} className="blog-post-image" />;
+    if (!overlay) return <PostPhoto src={images[0]} className="blog-post-image" />;
     return (
       <div className="blog-post-image-wrap">
-        <ZoomableImage src={images[0]} className="blog-post-image" />
+        <PostPhoto src={images[0]} className="blog-post-image" />
         {overlay}
       </div>
     );
@@ -41,7 +52,7 @@ export function PostCarousel({ images, overlay }: { images: string[]; overlay?: 
         }}
       >
         {images.map((src) => (
-          <ZoomableImage key={src} src={src} className="post-carousel-slide" />
+          <PostPhoto key={src} src={src} className="post-carousel-slide" />
         ))}
       </div>
       <span className="post-carousel-count">
