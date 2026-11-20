@@ -29,6 +29,7 @@ import {
   todayISO,
   isPastPaymentWindow,
   type WorkshopSnapshot,
+  pad,
   type SessionRow,
 } from "@/lib/domain";
 import { loadInteractions, visibleLikeCount, type CommentDTO } from "@/lib/postInteractionsData";
@@ -77,6 +78,10 @@ export type StudentPanelData = {
     lateFeePercent: number;
     /** Saldo por transferencia ("otro medio"), en número, para precargar el monto del comprobante. */
     remainingTransferAmount: number;
+    /** Lo que faltaría si la transferencia se hizo dentro de la ventana (sin recargo). */
+    onTimeTransferAmount: number;
+    /** Último día "en término" para la cuota de este mes (YYYY-MM-DD). */
+    paymentDeadline: string;
     /** Cuánto se ahorra pagando en efectivo en vez de por transferencia (null si no hay diferencia,
      *  o si ya pasó la ventana de pago y el descuento no corre). */
     cashDiscount: string | null;
@@ -383,6 +388,8 @@ export async function buildStudentPanelData(
       isLate: isPastPaymentWindow(snap),
       lateFeePercent: snap.config.lateFeePercent,
       remainingTransferAmount: Math.max(0, studentFee(snap, "mp") - paidThisMonth),
+      onTimeTransferAmount: Math.max(0, snap.config.mpFee - paidThisMonth),
+      paymentDeadline: `${currentMonthKey()}-${pad(snap.config.paymentWindowEnd)}`,
       cashDiscount:
         studentFee(snap, "mp") > studentFee(snap, "cash")
           ? money(studentFee(snap, "mp") - studentFee(snap, "cash"))

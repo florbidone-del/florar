@@ -39,6 +39,10 @@ function when(iso: string) {
   return `${d.getDate()} de ${MESES[d.getMonth()]}`;
 }
 
+function sameDay(a: string, b: string) {
+  return isoDate(new Date(a)) === isoDate(new Date(b));
+}
+
 /** "3 de octubre" — el día en que se considera hecho el pago. */
 function dayLabel(iso: string) {
   const d = new Date(iso);
@@ -154,7 +158,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
                 </span>
                 {r.rejectReason && <div className="muted receipt-reason">“{r.rejectReason}”</div>}
                 <div className="muted" style={{ fontSize: "0.8rem" }}>
-                  pagado el {dayLabel(r.createdAt)}
+                  pagado el {dayLabel(r.paidOn)}
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -177,7 +181,7 @@ export function ReceiptsTab({ receipts }: { receipts: ReceiptDTO[] }) {
           receiptId={viewing.id}
           isPdf={viewing.isPdf}
           title={viewing.studentName}
-          subtitle={`${money(viewing.amount)}${viewing.isExtraClass ? " · clase extra" : ""} · pagado el ${dayLabel(viewing.createdAt)}`}
+          subtitle={`${money(viewing.amount)}${viewing.isExtraClass ? " · clase extra" : ""} · pagado el ${dayLabel(viewing.paidOn)}`}
           onClose={() => setViewing(null)}
         >
           {viewing.status === "pending" ? (
@@ -233,9 +237,14 @@ function ReceiptCard({
       <div className="receipt-body">
         <div className="receipt-top">
           <strong>{r.studentName}</strong>
-          <button type="button" className="link-btn muted receipt-when" onClick={onEditDate} title="Cambiar la fecha de pago">
-            {when(r.createdAt)} ✎
+          <span className="muted receipt-when">subido {when(r.createdAt)}</span>
+        </div>
+        <div className="receipt-paid-on">
+          Transfirió el{" "}
+          <button type="button" className="link-btn" onClick={onEditDate} title="Cambiar la fecha de pago">
+            {dayLabel(r.paidOn)} ✎
           </button>
+          {sameDay(r.paidOn, r.createdAt) ? null : <span className="tag partial">chequeá la fecha</span>}
         </div>
         <div className="muted">
           {r.isExtraClass && <span className="tag moved receipt-kind">clase extra</span>}
@@ -378,7 +387,7 @@ function DateModal({
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [date, setDate] = useState(isoDate(new Date(receipt.createdAt)));
+  const [date, setDate] = useState(isoDate(new Date(receipt.paidOn)));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
@@ -396,9 +405,9 @@ function DateModal({
       <label htmlFor="receipt-date">¿Qué día hizo la transferencia?</label>
       <input id="receipt-date" type="date" max={todayISO()} value={date} onChange={(e) => setDate(e.target.value)} />
       <p className="hint">
-        Si te mandó el comprobante tarde pero pagó dentro de la ventana, poné acá la fecha real del
-        comprobante: con esa fecha se decide si corresponde el recargo
-        {receipt.status === "approved" && !receipt.isExtraClass ? " (también se corrige en el pago ya registrado del mes)" : ""}.
+        Poné la fecha que figura en el comprobante: con esa fecha se decide si corresponde el
+        recargo. Lo subió el {dayLabel(receipt.createdAt)}.
+        {receipt.status === "approved" && !receipt.isExtraClass ? " También se corrige en el pago ya registrado del mes." : ""}
       </p>
       {error && <p className="err">{error}</p>}
       <div className="row" style={{ marginTop: 16 }}>

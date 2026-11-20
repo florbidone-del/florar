@@ -86,7 +86,11 @@ export type ReceiptDTO = {
   status: "pending" | "approved" | "rejected";
   rejectReason: string | null;
   reviewedBy: string | null;
+  /** Cuándo lo subió. */
   createdAt: string;
+  /** Día de la transferencia (lo que declaró el/la estudiante o corrigió la profe; en los viejos,
+   *  igual a createdAt). Es la fecha que cuenta para el recargo. */
+  paidOn: string;
   reviewedAt: string | null;
   /** Solo para comprobantes del mes en curso: lo que corresponde pagar por transferencia (la cuota
    *  de "otro medio" — con recargo si la fecha del comprobante quedó fuera de la ventana —, o el
@@ -159,6 +163,7 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
           rejectReason: true,
           reviewedBy: true,
           createdAt: true,
+          paidOn: true,
           reviewedAt: true,
           extraClassPurchaseId: true,
           student: { select: { name: true, defaultWeekday: true, defaultSlotId: true } },
@@ -244,12 +249,13 @@ export async function loadAdminBundle(username: string): Promise<AdminBundle> {
         rejectReason: r.rejectReason,
         reviewedBy: r.reviewedBy ? authorNameByUsername.get(r.reviewedBy) || r.reviewedBy : null,
         createdAt: r.createdAt.toISOString(),
+        paidOn: (r.paidOn ?? r.createdAt).toISOString(),
         reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
         feeDue: !isCurrentMonth
           ? null
           : r.extraClassPurchaseId
             ? snapshot.config.extraClassFee
-            : paidWithinWindow(isoDate(r.createdAt), r.monthKey, snapshot.config.paymentWindowEnd)
+            : paidWithinWindow(isoDate(r.paidOn ?? r.createdAt), r.monthKey, snapshot.config.paymentWindowEnd)
               ? snapshot.config.mpFee
               : Math.round(snapshot.config.mpFee * (1 + snapshot.config.lateFeePercent / 100)),
         alreadyPaid: !isCurrentMonth ? null : r.extraClassPurchaseId ? 0 : paidAmountThisMonth(snapshot, r.studentId),

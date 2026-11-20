@@ -679,6 +679,8 @@ export function StudentApp({ data }: { data: StudentPanelData }) {
             kind: "cuota",
             remaining: data.payment.remainingMp,
             defaultAmount: data.payment.remainingTransferAmount,
+            onTimeAmount: data.payment.onTimeTransferAmount,
+            deadline: data.payment.paymentDeadline,
             replacing: receiptPending,
           }}
           transfer={data.payment.transfer}
