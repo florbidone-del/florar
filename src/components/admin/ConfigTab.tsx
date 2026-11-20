@@ -10,6 +10,7 @@ import { NotificationsToggle } from "@/components/shared/NotificationsToggle";
 import { InfoTallerTab } from "@/components/admin/InfoTallerTab";
 import {
   saveConfigAction,
+  savePaymentMessageAction,
   addSlotAction,
   updateSlotAction,
   removeSlotAction,
@@ -341,6 +342,8 @@ export function ConfigTab({
             mpEnabled={c.mpEnabled}
             mpFee={c.mpFee}
             cashFee={c.cashFee}
+            saved={c.paymentMessage}
+            onSaved={() => router.refresh()}
           />
         </Collapsible>
       )}
@@ -431,12 +434,33 @@ function paymentMessage(p: {
   ].join("\n");
 }
 
-function PaymentMessageShare(props: Parameters<typeof paymentMessage>[0]) {
+function PaymentMessageShare({
+  saved,
+  onSaved,
+  ...props
+}: Parameters<typeof paymentMessage>[0] & { saved: string | null; onSaved: () => void }) {
   const generated = paymentMessage(props);
-  const [text, setText] = useState(generated);
+  // Lo que está guardado: el mensaje editado a mano o, si no hay, el automático.
+  const current = saved ?? generated;
+  const [text, setText] = useState(current);
   const [copied, setCopied] = useState(false);
-  // Si cambia la configuración guardada (montos, días, alias), se vuelve a armar el mensaje.
-  useEffect(() => setText(generated), [generated]);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  // Si cambia lo guardado (o, con el automático, los montos/días/alias), se muestra eso.
+  useEffect(() => setText(current), [current]);
+
+  const dirty = text !== current;
+
+  async function save(value: string | null) {
+    setSaving(true);
+    setStatus(null);
+    const res = await savePaymentMessageAction(value);
+    setSaving(false);
+    if ("error" in res && res.error) return setStatus(res.error);
+    setStatus(value === null ? "Listo — volvió al mensaje automático." : "¡Guardado!");
+    setTimeout(() => setStatus(null), 2500);
+    onSaved();
+  }
 
   async function copy() {
     try {
@@ -451,17 +475,29 @@ function PaymentMessageShare(props: Parameters<typeof paymentMessage>[0]) {
   return (
     <>
       <p className="muted">
-        Se arma solo con los días, el recargo, el alias y las cuotas que tengas guardados en “Reglas y
-        cuota”. Podés retocarlo antes de mandarlo.
+        {saved === null
+          ? "Se arma solo con los días, el recargo, el alias y las cuotas que tengas guardados en “Reglas y cuota”. Si lo cambiás, tocá Guardar para que quede así."
+          : "Este es tu mensaje guardado. Ojo: si cambiás las cuotas o los días en “Reglas y cuota”, acordate de actualizarlo acá también (o volvé al automático)."}
       </p>
       <textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} style={{ marginTop: 10 }} />
+      {dirty && (
+        <div className="row" style={{ marginTop: 8 }}>
+          <button className="ghost block" type="button" disabled={saving} onClick={() => setText(current)}>
+            Descartar cambios
+          </button>
+          <button className="primary block" type="button" disabled={saving || !text.trim()} onClick={() => save(text)}>
+            {saving ? "Guardando…" : "Guardar"}
+          </button>
+        </div>
+      )}
+      {status && <p className="hint">{status}</p>}
       <a
         href={`https://wa.me/?text=${encodeURIComponent(text)}`}
         target="_blank"
         rel="noopener noreferrer"
         style={{ display: "block", marginTop: 10 }}
       >
-        <button className="primary block" type="button">
+        <button className={dirty ? "ghost block" : "primary block"} type="button">
           Compartir por WhatsApp
         </button>
       </a>
@@ -469,9 +505,9 @@ function PaymentMessageShare(props: Parameters<typeof paymentMessage>[0]) {
         <button className="ghost block" type="button" onClick={copy}>
           {copied ? "¡Copiado!" : "Copiar texto"}
         </button>
-        {text !== generated && (
-          <button className="ghost block" type="button" onClick={() => setText(generated)}>
-            Volver al original
+        {saved !== null && !dirty && (
+          <button className="ghost block" type="button" disabled={saving} onClick={() => save(null)}>
+            Volver al automático
           </button>
         )}
       </div>

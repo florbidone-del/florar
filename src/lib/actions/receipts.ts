@@ -23,11 +23,35 @@ function parseReceiptFile(fileData: string): { fileType: string } | { error: str
   return { fileType };
 }
 
-/** El/la estudiante sube el comprobante de su transferencia de la cuota del mes ("ya pagué"). Si ya
- *  tenía uno pendiente, lo reemplaza. Mientras esté pendiente tiene acceso provisorio al calendario. */
+/** Fecha en que se considera hecho el pago de un comprobante: la que declaró el/la estudiante (o
+ *  corrigió la profe) y, en los viejos que no la tienen, la de subida. */
+function receiptPaidAt(r: { paidOn: Date | null; createdAt: Date }) {
+  return r.paidOn ?? r.createdAt;
+}
+
+/** Valida un día YYYY-MM-DD para la fecha de transferencia: no futuro y no más de 60 días atrás. */
+function parsePaidOn(dateISO: string | undefined): Date | { error: string } {
+  if (!dateISO || !/^\d{4}-\d{2}-\d{2}$/.test(dateISO) || Number.isNaN(parseISO(dateISO).getTime())) {
+    return { error: "Poné el día en que hiciste la transferencia." };
+  }
+  if (dateISO > todayISO()) return { error: "La fecha de la transferencia no puede ser futura." };
+  if (parseISO(todayISO()).getTime() - parseISO(dateISO).getTime() > 60 * 86400000) {
+    return { error: "La fecha de la transferencia es muy vieja — revisala." };
+  }
+  // Mediodía, para que ningún cambio de zona horaria la corra de día.
+  const d = parseISO(dateISO);
+  d.setHours(12, 0, 0, 0);
+  return d;
+}
+
+/** El/la estudiante sube el comprobante de su transferencia de la cuota del mes ("ya pagué"), con
+ *  el día en que la hizo (es el que cuenta para el recargo; la profe lo chequea contra el comprobante
+ *  y lo puede corregir). Si ya tenía uno pendiente, lo reemplaza. Mientras esté pendiente tiene
+ *  acceso provisorio al calendario. */
 export async function submitPaymentReceiptAction(input: {
   fileData: string;
   amount: number;
+  paidOn?: string;
   note?: string;
 }): Promise<ActionResult> {
   const session = await requireStudent();
@@ -37,6 +61,8 @@ export async function submitPaymentReceiptAction(input: {
   if ("error" in file) return file;
   const amount = Math.round(Number(input.amount));
   if (!Number.isFinite(amount) || amount <= 0) return { error: "Poné el monto que transferiste." };
+  const paidOn = parsePaidOn(input.paidOn);
+  if ("error" in paidOn) return paidOn;
 
   const snap = await loadWorkshopSnapshot();
   const student = snap.students.find((s) => s.id === session.studentId);
@@ -53,6 +79,7 @@ export async function submitPaymentReceiptAction(input: {
         studentId: student.id,
         monthKey,
         amount,
+        paidOn,
         note: input.note?.trim() || null,
         fileData: input.fileData,
         fileType: file.fileType,
@@ -122,6 +149,7 @@ export async function approvePaymentReceiptAction(id: string, amount: number): P
       studentId: true,
       monthKey: true,
       createdAt: true,
+      paidOn: true,
       status: true,
       extraClassPurchaseId: true,
     },
@@ -159,9 +187,9 @@ export async function approvePaymentReceiptAction(id: string, amount: number): P
           amount: total,
           status: "approved",
           source: "transferencia",
-          paidAt: receipt.createdAt,
+          paidAt: receiptPaidAt(receipt),
         },
-        update: { amount: total, status: "approved", source: "transferencia", paidAt: receipt.createdAt },
+        update: { amount: total, status: "approved", source: "transferencia", paidAt: receiptPaidAt(receipt) },
       }),
       prisma.paymentReceipt.update({ where: { id }, data: reviewed }),
     ]);
@@ -211,10 +239,10 @@ export async function rejectPaymentReceiptAction(id: string, reason: string): Pr
   return { ok: true };
 }
 
-/** La profe principal corrige la fecha de pago de un comprobante: a veces lo mandan tarde pero la
- *  transferencia se hizo dentro de la ventana, y así no se le cobra el recargo (ni queda un saldo de
- *  más). Sirve tanto para los pendientes (al aprobarlo se usa la fecha nueva) como para los ya
- *  aprobados de la cuota: ahí también se actualiza la fecha del pago registrado del mes. */
+/** La profe principal corrige la fecha de pago de un comprobante: la que puso el/la estudiante no
+ *  coincide con el comprobante, o es uno viejo subido tarde pero transferido dentro de la ventana.
+ *  Sirve tanto para los pendientes (al aprobarlo se usa la fecha nueva) como para los ya aprobados
+ *  de la cuota: ahí también se actualiza la fecha del pago registrado del mes. */
 export async function updateReceiptDateAction(id: string, dateISO: string): Promise<ActionResult> {
   const session = await requireMainProfe();
   if (!session) return { error: "No autorizado." };
@@ -225,27 +253,26 @@ export async function updateReceiptDateAction(id: string, dateISO: string): Prom
 
   const receipt = await prisma.paymentReceipt.findUnique({
     where: { id },
-    select: { id: true, studentId: true, monthKey: true, createdAt: true, status: true, extraClassPurchaseId: true },
+    select: { id: true, studentId: true, monthKey: true, status: true, extraClassPurchaseId: true },
   });
   if (!receipt) return { error: "No se encontró el comprobante." };
 
-  // Se conserva la hora original; solo cambia el día.
-  const newDate = parseISO(dateISO);
-  newDate.setHours(receipt.createdAt.getHours(), receipt.createdAt.getMinutes(), receipt.createdAt.getSeconds());
-  await prisma.paymentReceipt.update({ where: { id }, data: { createdAt: newDate } });
+  const paidOn = parseISO(dateISO);
+  paidOn.setHours(12, 0, 0, 0);
+  await prisma.paymentReceipt.update({ where: { id }, data: { paidOn } });
 
   if (receipt.status === "approved" && !receipt.extraClassPurchaseId) {
     const { studentId, monthKey } = receipt;
     const payment = await prisma.payment.findUnique({ where: { studentId_monthKey: { studentId, monthKey } } });
     if (payment?.status === "approved" && payment.source === "transferencia") {
       // El pago del mes se da por hecho cuando entró la última parte aprobada.
-      const latest = await prisma.paymentReceipt.findFirst({
+      const approved = await prisma.paymentReceipt.findMany({
         where: { studentId, monthKey, status: "approved", extraClassPurchaseId: null },
-        orderBy: { createdAt: "desc" },
-        select: { createdAt: true },
+        select: { createdAt: true, paidOn: true },
       });
+      const latest = approved.map(receiptPaidAt).sort((a, b) => b.getTime() - a.getTime())[0];
       if (latest) {
-        await prisma.payment.update({ where: { id: payment.id }, data: { paidAt: latest.createdAt } });
+        await prisma.payment.update({ where: { id: payment.id }, data: { paidAt: latest } });
       }
     }
   }

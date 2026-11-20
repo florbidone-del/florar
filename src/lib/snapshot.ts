@@ -25,6 +25,7 @@ const DEFAULT_CONFIG = {
   profeWhatsapp: null as string | null,
   announcementVisibleDays: 7,
   studentInfo: "",
+  paymentMessage: null as string | null,
 };
 
 const DEFAULT_SLOTS: { id: string; weekdays: number[]; start: string; end: string; order: number }[] = [
@@ -74,6 +75,7 @@ export async function loadConfig(): Promise<ConfigDTO> {
     profeWhatsapp: config.profeWhatsapp,
     announcementVisibleDays: config.announcementVisibleDays,
     studentInfo: config.studentInfo,
+    paymentMessage: config.paymentMessage,
     slots: slots.map((s) => ({ id: s.id, weekdays: s.weekdays, start: s.start, end: s.end })),
   };
 }

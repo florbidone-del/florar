@@ -41,7 +41,7 @@ export async function saveConfigAction(input: {
       mpLink: input.mpLink.trim() || null,
       mpEnabled: input.mpEnabled,
       transferAlias: input.transferAlias.trim() || null,
-      transferCbu: input.transferCbu.replace(/s/g, "") || null,
+      transferCbu: input.transferCbu.replace(/\s/g, "") || null,
       transferHolder: input.transferHolder.trim() || null,
     },
   });
@@ -78,5 +78,16 @@ export async function removeSlotAction(id: string): Promise<ActionResult> {
   const session = await requireProfe();
   if (!session) return { error: "No autorizado." };
   await prisma.slot.deleteMany({ where: { id } });
+  return { ok: true };
+}
+
+/** La profe principal guarda el mensaje de pago para WhatsApp tal como lo editó. Con null (o vacío)
+ *  vuelve al mensaje automático, que se arma con la configuración. */
+export async function savePaymentMessageAction(message: string | null): Promise<ActionResult> {
+  const session = await requireMainProfe();
+  if (!session) return { error: "No autorizado." };
+  const text = message?.trim() || null;
+  if (text && text.length > 2000) return { error: "El mensaje es muy largo (máximo 2000 caracteres)." };
+  await prisma.config.update({ where: { id: 1 }, data: { paymentMessage: text } });
   return { ok: true };
 }
