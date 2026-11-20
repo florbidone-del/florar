@@ -59,6 +59,9 @@ model Config {
   profeWhatsapp          String?
   announcementVisibleDays Int     @default(7)
   studentInfo            String   @default("")
+  // Mensaje con las condiciones de pago para mandar por WhatsApp, si la profe principal lo editó y
+  // lo guardó. Null = se arma solo con los días, recargo, alias y cuotas de arriba.
+  paymentMessage         String?
   updatedAt              DateTime @updatedAt
 }
 

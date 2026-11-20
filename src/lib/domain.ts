@@ -164,6 +164,8 @@ export type ConfigDTO = {
   profeWhatsapp: string | null;
   announcementVisibleDays: number;
   studentInfo: string;
+  /** Mensaje de pago para WhatsApp guardado a mano; null = se arma solo. */
+  paymentMessage: string | null;
   slots: SlotDTO[];
 };
 export type HolidayDTO = { date: string; label: string | null; capped: boolean };
