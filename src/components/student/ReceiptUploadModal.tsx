@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/shared/Modal";
 import { TransferInfo } from "@/components/student/TransferInfo";
 import { resizeToDataUrl } from "@/lib/resizeImage";
+import { todayISO } from "@/lib/domain";
 import { submitExtraClassReceiptAction, submitPaymentReceiptAction } from "@/lib/actions/receipts";
 
 // Un comprobante tiene letra chica: se achica menos que las fotos del blog para que se siga leyendo.
@@ -22,7 +23,17 @@ function readAsDataUrl(file: File): Promise<string> {
 }
 
 type Mode =
-  | { kind: "cuota"; remaining: string; defaultAmount: number; replacing: boolean }
+  | {
+      kind: "cuota";
+      remaining: string;
+      /** Lo que falta pagar hoy (con recargo si ya pasó la ventana). */
+      defaultAmount: number;
+      /** Lo que falta si la transferencia se hizo dentro de la ventana. */
+      onTimeAmount: number;
+      /** Último día sin recargo (YYYY-MM-DD). */
+      deadline: string;
+      replacing: boolean;
+    }
   | { kind: "extra"; price: string };
 
 /** "Ya transferí": el/la estudiante sube la foto/captura (o el PDF del banco) de su transferencia,
@@ -44,6 +55,17 @@ export function ReceiptUploadModal({
   const [file, setFile] = useState<Picked | null>(null);
   const [reading, setReading] = useState(false);
   const [amount, setAmount] = useState(defaultAmount > 0 ? String(defaultAmount) : "");
+  const [amountTouched, setAmountTouched] = useState(false);
+  const [paidOn, setPaidOn] = useState(todayISO());
+
+  /** Si cambia el día de la transferencia, el monto sugerido sigue a esa fecha (con o sin recargo),
+   *  mientras no lo haya escrito a mano. */
+  function changePaidOn(value: string) {
+    setPaidOn(value);
+    if (mode.kind !== "cuota" || amountTouched || !value) return;
+    const suggested = value <= mode.deadline ? mode.onTimeAmount : mode.defaultAmount;
+    setAmount(suggested > 0 ? String(suggested) : "");
+  }
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
@@ -71,11 +93,12 @@ export function ReceiptUploadModal({
   async function send() {
     if (!file) return setError("Elegí la foto o el PDF del comprobante.");
     if (!isExtra && !(Number(amount) > 0)) return setError("Poné el monto que transferiste.");
+    if (!isExtra && !paidOn) return setError("Poné el día en que hiciste la transferencia.");
     setError("");
     setSending(true);
     const res = isExtra
       ? await submitExtraClassReceiptAction({ fileData: file.dataUrl, note })
-      : await submitPaymentReceiptAction({ fileData: file.dataUrl, amount: Number(amount), note });
+      : await submitPaymentReceiptAction({ fileData: file.dataUrl, amount: Number(amount), paidOn, note });
     setSending(false);
     if ("error" in res && res.error) return setError(res.error);
     setSent(true);
@@ -163,13 +186,25 @@ export function ReceiptUploadModal({
 
       {!isExtra && (
         <>
+          <label htmlFor="receipt-paid-on">¿Qué día hiciste la transferencia?</label>
+          <input
+            id="receipt-paid-on"
+            type="date"
+            max={todayISO()}
+            value={paidOn}
+            onChange={(e) => changePaidOn(e.target.value)}
+          />
+          <p className="hint">Poné la fecha que figura en el comprobante — la profe la chequea.</p>
           <label htmlFor="receipt-amount">Monto que transferiste</label>
           <input
             id="receipt-amount"
             type="number"
             inputMode="numeric"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmountTouched(true);
+              setAmount(e.target.value);
+            }}
           />
         </>
       )}
